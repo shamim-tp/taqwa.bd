@@ -1,0 +1,29 @@
+{
+  "name": "ims-erp-v5",
+  "version": "5.1.0",
+  "description": "IMS ERP V5 Ultra Advanced - Investment Management System",
+  "main": "script.js",
+  "type": "module",
+  "scripts": {
+    "start": "live-server --port=3000 --host=localhost",
+    "dev": "live-server --port=3000 --host=localhost --watch=.",
+    "build": "echo 'Build completed'",
+    "test": "echo 'No tests specified'",
+    "deploy": "bash deploy.sh"
+  },
+  "keywords": [
+    "erp",
+    "investment",
+    "management",
+    "firebase",
+    "mysql",
+    "postgresql",
+    "bangladesh"
+  ],
+  "author": "IMS Investment Ltd.",
+  "license": "Private",
+  "devDependencies": {
+    "live-server": "^1.2.2"
+  },
+  "dependencies": {}
+}

@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>IMS ERP V5 Ultra Advanced (Multi-Database)</title>
+  <link rel="stylesheet" href="style.css">
+  <script type="module" src="script.js"></script>
+</head>
+<body>
+  <!-- LOADING OVERLAY -->
+  <div id="loadingOverlay" class="loading-overlay">
+    <div>
+      <div class="loading-spinner"></div>
+      <p>Loading...</p>
+    </div>
+  </div>
+
+  <!-- TOAST -->
+  <div class="toastWrap" id="toastWrap"></div>
+
+  <!-- LOGIN -->
+  <div id="loginPage" class="loginWrap">
+    <div class="loginCard">
+      <div class="loginGrid">
+        <div class="loginLeft">
+          <h1>IMS ERP V5 Ultra Advanced</h1>
+          <p>
+            Professional Investment Management ERP System<br/>
+            <b>Database: <span id="databaseType">LocalStorage</span></b> | Multi Admin | Member System
+          </p>
+          <div class="hint">
+            <b>Default Admin Login:</b><br/>
+            ID: <b>ADM-001</b><br/>
+            Password: <b>admin123</b><br/><br/>
+            <b>Default Member Login:</b><br/>
+            ID: <b>FM-001</b><br/>
+            Password: <b>1234</b>
+          </div>
+          <div class="kpiBox">
+            <div class="kpi">✔ Firebase / SQL Ready</div>
+            <div class="kpi">✔ Multi Admin Role</div>
+            <div class="kpi">✔ Investment Profit System</div>
+            <div class="kpi">✔ Deposit Slip Upload</div>
+            <div class="kpi">✔ MR ID + Voucher ID</div>
+          </div>
+        </div>
+        <div class="loginRight">
+          <div class="tabs">
+            <button id="tabAdmin" class="active">Admin Login</button>
+            <button id="tabMember">Member Login</button>
+          </div>
+          <div class="row">
+            <div>
+              <label id="loginIdLabel">Admin ID</label>
+              <input id="loginId" placeholder="Enter ID" />
+            </div>
+            <div>
+              <label>Password</label>
+              <input id="loginPass" type="password" placeholder="Enter Password" />
+            </div>
+            <button class="btn primary" id="loginBtn">Login</button>
+            <div class="hint">
+              <label for="dbModeSelect">Database Mode:</label>
+              <select id="dbModeSelect">
+                <option value="local">LocalStorage</option>
+                <option value="firebase">Firebase</option>
+                <option value="mysql">MySQL</option>
+                <option value="postgresql">PostgreSQL</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- APP -->
+  <div id="appPage" class="app">
+    <button class="mobile-menu-btn" id="mobileMenuBtn">☰ Menu</button>
+    <div class="sidebar" id="sidebar">
+      <div class="brand">
+        <div>
+          <h2>IMS ERP V5</h2>
+          <div class="small">Ultra Advanced Panel</div>
+        </div>
+        <div class="badge" id="systemMode">ADMIN</div>
+      </div>
+      <div class="userBox">
+        <div class="name" id="currentUserName">-</div>
+        <div class="role" id="currentUserRole">-</div>
+        <div class="mini">
+          <span class="chip" id="chipId">ID: -</span>
+          <span class="chip" id="chipStatus">Active</span>
+        </div>
+      </div>
+      <div class="navTitle">Navigation</div>
+      <div class="nav" id="sidebarNav"></div>
+      <button class="logoutBtn" id="logoutBtn">Logout</button>
+    </div>
+    <div class="main">
+      <div class="topbar">
+        <div>
+          <h1 id="pageTitle">Dashboard</h1>
+          <p id="pageSubtitle">Welcome to IMS ERP V5 Ultra Advanced.</p>
+        </div>
+        <div class="rightTop">
+          <button class="btn hidden" id="systemToolsBtn">System Tools</button>
+          <button class="btn primary hidden" id="quickAddBtn">Quick Add</button>
+        </div>
+      </div>
+      <div id="pageContent"></div>
+    </div>
+  </div>
+
+  <!-- MODALS CONTAINER -->
+  <div id="modalsContainer"></div>
+</body>
+</html>

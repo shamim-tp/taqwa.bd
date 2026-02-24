@@ -10,9 +10,9 @@ export async function authenticateUser(type, id, password) {
     
     if (type === 'admin') {
       const admins = await db.query('admins', [
-        { field: 'id', operator: '===', value: id },
-        { field: 'pass', operator: '===', value: password },
-        { field: 'active', operator: '===', value: true }
+        { field: 'id', operator: '==', value: id },          // পরিবর্তন: === → ==
+        { field: 'pass', operator: '==', value: password },  // পরিবর্তন
+        { field: 'active', operator: '==', value: true }     // পরিবর্তন
       ]);
       if (admins.length > 0) {
         currentUser = admins[0];
@@ -22,10 +22,10 @@ export async function authenticateUser(type, id, password) {
       }
     } else if (type === 'member') {
       const members = await db.query('members', [
-        { field: 'id', operator: '===', value: id },
-        { field: 'pass', operator: '===', value: password },
-        { field: 'approved', operator: '===', value: true },
-        { field: 'status', operator: '===', value: 'ACTIVE' }
+        { field: 'id', operator: '==', value: id },          // পরিবর্তন
+        { field: 'pass', operator: '==', value: password },  // পরিবর্তন
+        { field: 'approved', operator: '==', value: true },  // পরিবর্তন
+        { field: 'status', operator: '==', value: 'ACTIVE' } // পরিবর্তন
       ]);
       if (members.length > 0) {
         currentUser = members[0];

@@ -16,7 +16,8 @@ document.addEventListener('DOMContentLoaded', async function() {
     showLoading('অ্যাপ্লিকেশন লোড হচ্ছে...');
     
     // Initialize Database
-    const dbMode = localStorage.getItem('db_mode') || 'local';
+  const dbMode = 'firebase'; // Always use Firebase
+// localStorage.removeItem('db_mode'); // optionally clear old value
     await initializeDatabase(dbMode);
     
     // Update UI with current database mode
@@ -38,19 +39,19 @@ document.addEventListener('DOMContentLoaded', async function() {
     loadModalModules();
     
     // Set up database mode selector
-    const dbModeSelect = document.getElementById('dbModeSelect');
-    if (dbModeSelect) {
-      dbModeSelect.value = dbMode;
-      dbModeSelect.addEventListener('change', async function() {
-        if (confirm('ডাটাবেস মোড পরিবর্তন করলে অ্যাপ রিস্টার্ট হবে। আপনি কি নিশ্চিত?')) {
-          localStorage.setItem('db_mode', this.value);
-          showToast('Database Mode Changed', `ডাটাবেস মোড পরিবর্তন করা হয়েছে: ${this.value}`);
-          setTimeout(() => window.location.reload(), 1000);
-        } else {
-          this.value = dbMode; // Reset to previous value
-        }
-      });
-    }
+  //  const dbModeSelect = document.getElementById('dbModeSelect');
+    //if (dbModeSelect) {
+      //dbModeSelect.value = dbMode;
+      //dbModeSelect.addEventListener('change', async function() {
+        //if (confirm('ডাটাবেস মোড পরিবর্তন করলে অ্যাপ রিস্টার্ট হবে। আপনি কি নিশ্চিত?')) {
+          //localStorage.setItem('db_mode', this.value);
+          //showToast('Database Mode Changed', `ডাটাবেস মোড পরিবর্তন করা হয়েছে: ${this.value}`);
+          //setTimeout(() => window.location.reload(), 1000);
+        //} else {
+         // this.value = dbMode; // Reset to previous value
+        //}
+     // });
+   // }
     
     // Mobile menu
     document.getElementById('mobileMenuBtn')?.addEventListener('click', function() {

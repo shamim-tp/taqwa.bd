@@ -205,7 +205,7 @@ const html = `
       <!-- Payment Method Dropdown -->
       <div>
         <label>Payment Method *</label>
-        <select id="d_method" onchange="toggleBankFields()">
+        <select id="d_method">
         <option value="Select Method">Select Method</option>
           <option value="Bank Transfer">Bank Transfer</option>
           <option value="Cash">Cash</option>
@@ -280,10 +280,9 @@ function toggleBankFields() {
 
 
 
-  openViewerModal('Add Cash MR', 'Create money receipt', html);
-  document.getElementById('saveCashMRBtn').addEventListener('click', saveCashMRWithSlip);
-}
-
+openViewerModal('Add Cash MR', 'Create money receipt', html);
+document.getElementById('saveCashMRBtn').addEventListener('click', saveCashMRWithSlip);
+document.getElementById('d_method').addEventListener('change', toggleBankFields);
 // ------------------------------------------------------------
 // Save Cash MR including uploaded slip
 // ------------------------------------------------------------

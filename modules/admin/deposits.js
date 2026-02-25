@@ -166,123 +166,114 @@ async function addCashMR() {
 
   // Build year & month dropdowns
   const currentYear = new Date().getFullYear();
-  const years = Array.from({ length: 5 }, (_, i) => `<option value="${currentYear-i}">${currentYear-i}</option>`).join('');
+  const years = Array.from({ length: 5 }, (_, i) => `<option value="${currentYear - i}">${currentYear - i}</option>`).join('');
   const months = [
-    'January','February','March','April','May','June','July','August','September','October','November','December'
-  ].map(m => `<option value="${m}" ${m == new Date().toLocaleString('default', { month: 'long' }) ? 'selected' : ''}>${m}</option>`).join('');
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'
+  ].map(m => `<option value="${m}" ${m === new Date().toLocaleString('default', { month: 'long' }) ? 'selected' : ''}>${m}</option>`).join('');
 
-  // ============================================================
-// 💵 CASH MR MODAL HTML
-// ============================================================
-const html = `
-  <div class="panel">
-    <h3>Add Cash Money Receipt</h3>
+  // HTML for Cash MR Modal (onchange attribute সরানো হয়েছে)
+  const html = `
+    <div class="panel">
+      <h3>Add Cash Money Receipt</h3>
 
-    <!-- Row 1: Member + Year -->
-    <div class="row row-3">
-      <div>
-        <label>Member *</label>
-        <select id="cash_member">${memberOptions}</select> <!-- Member dropdown -->
-      </div>
-      <div>
-        <label>Year *</label>
-        <select id="cash_year">${years}</select> <!-- Year dropdown -->
-      </div>
-    </div>
-
-    <!-- Row 2: Month + Amount + Payment Method -->
-    <div class="row row-3">
-      <div>
-        <label>Month *</label>
-        <select id="cash_month">${months}</select> <!-- Month dropdown -->
+      <!-- Row 1: Member + Year -->
+      <div class="row row-3">
+        <div>
+          <label>Member *</label>
+          <select id="cash_member">${memberOptions}</select>
+        </div>
+        <div>
+          <label>Year *</label>
+          <select id="cash_year">${years}</select>
+        </div>
       </div>
 
-      <div>
-        <label>Amount *</label>
-        <input id="cash_amount" value="10000" type="number" /> <!-- Default amount -->
+      <!-- Row 2: Month + Amount + Payment Method -->
+      <div class="row row-3">
+        <div>
+          <label>Month *</label>
+          <select id="cash_month">${months}</select>
+        </div>
+        <div>
+          <label>Amount *</label>
+          <input id="cash_amount" value="10000" type="number" />
+        </div>
+        <div>
+          <label>Payment Method *</label>
+          <select id="d_method">
+            <option value="Select Method">Select Method</option>
+            <option value="Bank Transfer">Bank Transfer</option>
+            <option value="Cash">Cash</option>
+            <option value="Cash Deposit">Cash Deposit</option>
+            <option value="Bkash">Bkash</option>
+            <option value="Rocket">Rocket</option>
+          </select>
+        </div>
       </div>
-      
-      <!-- Payment Method Dropdown -->
-      <div>
-        <label>Payment Method *</label>
-        <select id="d_method">
-        <option value="Select Method">Select Method</option>
-          <option value="Bank Transfer">Bank Transfer</option>
-          <option value="Cash">Cash</option>
-          <option value="Cash Deposit">Cash Deposit</option>
-          <option value="Bkash">Bkash</option>
-          <option value="Rocket">Rocket</option>
-        </select>
-      </div>
-    </div>
 
-    <!-- Bank Transfer Section (Toggleable) -->
-    <div id="bankFields" style="display:none;">
+      <!-- Bank Transfer Section (Toggleable) -->
+      <div id="bankFields" style="display:none;">
+        <div class="row row-2">
+          <div>
+            <label>From Bank</label>
+            <select id="d_from_bank">
+              ${BANGLADESH_BANKS.map(b => `<option>${b}</option>`).join('')}
+            </select>
+          </div>
+          <div>
+            <label>To Bank</label>
+            <select id="d_to_bank">
+              ${BANGLADESH_BANKS.map(b => `<option>${b}</option>`).join('')}
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Row 3: Transaction ID + Date + Deposit Slip + Notes -->
       <div class="row row-2">
         <div>
-          <label>From Bank</label>
-          <select id="d_from_bank">
-            ${BANGLADESH_BANKS.map(b => `<option>${b}</option>`).join('')} <!-- Bank options -->
-          </select>
+          <label>Transaction ID *</label>
+          <input id="d_trx" placeholder="Enter TRX ID" />
         </div>
         <div>
-          <label>To Bank</label>
-          <select id="d_to_bank">
-            ${BANGLADESH_BANKS.map(b => `<option>${b}</option>`).join('')} <!-- Bank options -->
-          </select>
+          <label>Date</label>
+          <input id="cash_date" type="date" value="${new Date().toISOString().split('T')[0]}" />
         </div>
-      </div>
-    </div>
-
-    <!-- Row 3: Transaction ID + Date + Deposit Slip + Notes -->
-    <div class="row row-2">
-      <div>
-        <label>Transaction ID *</label>
-        <input id="d_trx" placeholder="Enter TRX ID" /> <!-- TRX field for bank transfer -->
-      </div>
-
-      <div>
-        <label>Date</label>
-        <input id="cash_date" type="date" value="${new Date().toISOString().split('T')[0]}" /> <!-- Default today -->
-      </div>
-
-      <div class="row row-1">
+        <div class="row row-1">
+          <div>
+            <label>Deposit Slip</label>
+            <input type="file" id="cash_slip" accept="image/*" />
+          </div>
+        </div>
         <div>
-          <label>Deposit Slip</label>
-          <input type="file" id="cash_slip" accept="image/*" /> <!-- Optional slip upload -->
+          <label>Notes</label>
+          <input id="cash_note" placeholder="Optional" />
         </div>
       </div>
 
-      <div>
-        <label>Notes</label>
-        <input id="cash_note" placeholder="Optional" /> <!-- Optional note -->
-      </div>
+      <div class="hr"></div>
+
+      <!-- Action Buttons -->
+      <button class="btn success" id="saveCashMRBtn">Save & Generate MR</button>
+      <button class="btn" onclick="closeModal('modalViewer')">Cancel</button>
     </div>
+  `;
 
-    <div class="hr"></div>
+  // Toggle Bank Fields ফাংশন (লোক্যাল)
+  const toggleBankFields = () => {
+    const method = document.getElementById('d_method').value;
+    const bankFields = document.getElementById('bankFields');
+    bankFields.style.display = method === 'Bank Transfer' ? 'block' : 'none';
+  };
 
-    <!-- Action Buttons -->
-    <button class="btn success" id="saveCashMRBtn">Save & Generate MR</button>
-    <button class="btn" onclick="closeModal('modalViewer')">Cancel</button>
-  </div>
-`;
+  openViewerModal('Add Cash MR', 'Create money receipt', html);
 
-// ============================================================
-// 🏦 TOGGLE BANK FIELDS FUNCTION
-// ============================================================
-function toggleBankFields() {
-  const method = document.getElementById('d_method').value; // Get selected payment method
-  const bankFields = document.getElementById('bankFields'); // Bank section div
-
-  // Show only if method is Bank Transfer
-  bankFields.style.display = method == 'Bank Transfer' ? 'block' : 'none';
+  // ইভেন্ট লিসেনার সংযুক্ত করা হলো
+  document.getElementById('saveCashMRBtn').addEventListener('click', saveCashMRWithSlip);
+  document.getElementById('d_method').addEventListener('change', toggleBankFields);
 }
 
-
-
-openViewerModal('Add Cash MR', 'Create money receipt', html);
-document.getElementById('saveCashMRBtn').addEventListener('click', saveCashMRWithSlip);
-document.getElementById('d_method').addEventListener('change', toggleBankFields);
 // ------------------------------------------------------------
 // Save Cash MR including uploaded slip
 // ------------------------------------------------------------
@@ -310,7 +301,7 @@ async function saveCashMRWithSlip() {
   const depositData = {
     id: generateId('DP', deposits),
     memberId, year, month, amount,
-    paymentMethod: 'Cash', fromBank:'', toBank:'', trxId: 'CASH-' + Date.now(),
+    paymentMethod: 'Cash', fromBank: '', toBank: '', trxId: 'CASH-' + Date.now(),
     slip: slipData, note, status: 'APPROVED',
     mrId, depositDate: date,
     submittedAt: new Date().toISOString(),
@@ -356,28 +347,26 @@ async function approveDeposit(depositId) {
   renderAdminDeposits();
 }
 
-
 // ------------------------------------------------------------
 // View Deposit Slip (Preview uploaded slip)
 // ------------------------------------------------------------
 async function viewSlip(depositId) {
   const db = getDatabase();
-  const deposit = await db.get('deposits', depositId); // Get deposit by ID
+  const deposit = await db.get('deposits', depositId);
   if (!deposit) return;
 
-  // HTML for slip preview
   const html = `
     <div class="panel">
       <h3>Deposit Slip Preview</h3>
       <p class="small">Deposit ID: ${deposit.id} | Member: ${deposit.memberId}</p>
       <div class="hr"></div>
-      ${deposit.slip 
-        ? `<img src="${deposit.slip}" style="width:100%;max-width:700px;border-radius:18px;border:1px solid var(--line);"/>` 
+      ${deposit.slip
+        ? `<img src="${deposit.slip}" style="width:100%;max-width:700px;border-radius:18px;border:1px solid var(--line);"/>`
         : '<p>No slip uploaded</p>'}
     </div>
   `;
 
-  openViewerModal('Deposit Slip', 'Slip preview', html); // Open modal with preview
+  openViewerModal('Deposit Slip', 'Slip preview', html);
 }
 
 // ------------------------------------------------------------
@@ -388,8 +377,8 @@ async function rejectDeposit(depositId) {
   const deposit = await db.get('deposits', depositId);
   if (!deposit) return;
 
-  const note = prompt('Rejection note?'); // Ask admin for rejection reason
-  if (note == null) return; // Cancelled
+  const note = prompt('Rejection note?');
+  if (note == null) return;
 
   deposit.status = 'REJECTED';
   deposit.note = (deposit.note ? deposit.note + '\n' : '') + 'Rejected: ' + note;
@@ -397,9 +386,8 @@ async function rejectDeposit(depositId) {
   deposit.approvedBy = getCurrentUser().id;
 
   await db.update('deposits', depositId, deposit);
-  await logActivity('REJECT_DEPOSIT', `Deposit rejected: ${depositId}`); // Log action
+  await logActivity('REJECT_DEPOSIT', `Deposit rejected: ${depositId}`);
 
-  // Send notification to member
   const member = await db.get('members', deposit.memberId);
   if (member) {
     console.log(`WhatsApp to ${member.phone}: Deposit rejected. Reason: ${note}`);
@@ -418,14 +406,14 @@ async function viewMRReceipt(depositId) {
   const db = getDatabase();
   const deposit = await db.get('deposits', depositId);
   if (!deposit || !deposit.mrId) {
-    showToast('Error', 'No MR ID found'); 
+    showToast('Error', 'No MR ID found');
     return;
   }
 
   const member = await db.get('members', deposit.memberId);
   const meta = await db.get('meta', 'system') || {};
 
-  openMRReceiptModal(deposit, member, meta); // Open MR modal
+  openMRReceiptModal(deposit, member, meta);
 }
 
 // ------------------------------------------------------------
@@ -438,12 +426,12 @@ async function printMR(depositId) {
   const meta = await db.get('meta', 'system') || {};
 
   if (!deposit || !deposit.mrId) {
-    showToast('Error', 'No MR ID found'); 
+    showToast('Error', 'No MR ID found');
     return;
   }
 
-  const receiptHTML = generateMRReceipt(deposit, member, meta); // Generate HTML
-  const w = window.open('', '_blank'); // Open new window
+  const receiptHTML = generateMRReceipt(deposit, member, meta);
+  const w = window.open('', '_blank');
   w.document.write(`
     <html>
       <head><title>Money Receipt</title></head>
@@ -460,35 +448,18 @@ async function printMR(depositId) {
   `);
   w.document.close();
 
-  // Send auto WhatsApp/Email after print
   if (member) {
     console.log(`WhatsApp to ${member.phone}: Money Receipt printed. MR ID: ${deposit.mrId}`);
     console.log(`Email to ${member.email}: Money Receipt printed. MR ID: ${deposit.mrId}`);
   }
 }
 
-
-
-// ============================================================
-// 🏦 TOGGLE BANK FIELDS
-// ============================================================
-
-function toggleBankFields() {
-
-  const method = document.getElementById('d_method').value;
-  const bankFields = document.getElementById('bankFields');
-
-  bankFields.style.display =
-    method == 'Bank Transfer' ? 'block' : 'none';
-}
-
-
 // ------------------------------------------------------------
 // Generate MR Receipt HTML (with all details)
 // ------------------------------------------------------------
 function generateMRReceipt(deposit, member, meta) {
   const date = new Date(deposit.approvedAt || deposit.submittedAt);
-  const formattedDate = date.toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' });
+  const formattedDate = date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 
   return `
     <div class="receipt">
@@ -506,9 +477,9 @@ function generateMRReceipt(deposit, member, meta) {
         <div class="row"><div><strong>Father's Name:</strong> ${member?.fatherName || 'N/A'}</div><div><strong>Mother's Name:</strong> ${member?.motherName || 'N/A'}</div></div>
         <div class="row"><div><strong>Address:</strong> ${member?.address || 'N/A'}</div><div><strong>Phone:</strong> ${member?.phone || 'N/A'}</div></div>
         <div class="row"><div><strong>For the month of:</strong> ${deposit.month} ${deposit.year || ''}</div><div><strong>Payment Method:</strong> ${deposit.paymentMethod}</div></div>
-        ${deposit.fromBank ? 
-          `<div class="row"><div><strong>Bank Transfer:</strong> ${deposit.fromBank}→${deposit.toBank}</div><div><strong>Transaction ID:</strong> ${deposit.trxId}</div></div>` : 
-          `<div class="row"><div><strong>Transaction ID:</strong> ${deposit.trxId}</div><div></div></div>`}
+        ${deposit.fromBank
+          ? `<div class="row"><div><strong>Bank Transfer:</strong> ${deposit.fromBank}→${deposit.toBank}</div><div><strong>Transaction ID:</strong> ${deposit.trxId}</div></div>`
+          : `<div class="row"><div><strong>Transaction ID:</strong> ${deposit.trxId}</div><div></div></div>`}
 
         <div style="margin-top:30px;text-align:center;">
           <h3>Amount in Words:</h3>

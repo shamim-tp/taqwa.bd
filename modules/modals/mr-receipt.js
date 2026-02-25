@@ -51,7 +51,8 @@ function generateMRReceipt(deposit, member, meta) {
       <div class="details">
         <div class="row"><div><strong>MR No:</strong> ${deposit.mrId || deposit.id}</div><div><strong>Date:</strong> ${formattedDate}</div></div>
         <div class="row"><div><strong>Received from:</strong> ${member?.name || "N/A"}</div><div><strong>Member ID:</strong> ${deposit.memberId}</div></div>
-        <div class="row"><div><strong>For the month of:</strong> ${deposit.month}&{deposit.year}</div><div><strong>Payment Method + deposit.year:''</strong> ${deposit.paymentMethod}</div></div>
+        <!-- ✅ সংশোধিত অংশ: মাস ও বছর সঠিকভাবে দেখানো হয়েছে -->
+        <div class="row"><div><strong>For the month of:</strong> ${deposit.month}${deposit.year ? ' ' + deposit.year : ''}</div><div><strong>Payment Method:</strong> ${deposit.paymentMethod}</div></div>
         <div class="row"><div><strong>Transaction ID:</strong> ${deposit.trxId || "N/A"}</div><div></div></div>
         <div style="margin-top:30px;text-align:center;">
           <h3 style="font-size:24px;margin:0;">Amount in Words:</h3>

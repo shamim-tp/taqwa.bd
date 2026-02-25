@@ -462,44 +462,33 @@ function generateMRReceipt(deposit, member, meta) {
   const formattedDate = date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 
   return `
-    <div class="receipt">
+   <div class="receipt">
       <div class="header">
-        <h2>${meta.companyName || 'TAQWA PROPERTICS BD'}</h2>
-        <p>${meta.companyAddress || 'Dhaka, Bangladesh'}</p>
-        <p>Phone: ${meta.companyPhone || '+8801712263593'} | Email: ${meta.companyEmail || 'taqwapropertiesbd2026@gmail.com'}</p>
+        <h2>${meta?.companyName || "IMS Investment Ltd."}</h2>
+        <p>${meta?.companyAddress || "Dhaka, Bangladesh"}</p>
+        <p>Phone: ${meta?.companyPhone || "+8801234567890"} | Email: ${meta?.companyEmail || "info@imsinvestment.com"}</p>
       </div>
-
       <h2 style="text-align:center;margin-bottom:30px;">MONEY RECEIPT</h2>
-
       <div class="details">
-        <div class="row"><div><strong>MR No:</strong> ${deposit.mrId}</div><div><strong>Date:</strong> ${formattedDate}</div></div>
-        <div class="row"><div><strong>Received from:</strong> ${member?.name || 'N/A'}</div><div><strong>Member ID:</strong> ${deposit.memberId}</div></div>
-        <div class="row"><div><strong>Father's Name:</strong> ${member?.fatherName || 'N/A'}</div><div><strong>Mother's Name:</strong> ${member?.motherName || 'N/A'}</div></div>
-        <div class="row"><div><strong>Address:</strong> ${member?.address || 'N/A'}</div><div><strong>Phone:</strong> ${member?.phone || 'N/A'}</div></div>
-        <div class="row"><div><strong>For the month of:</strong> ${deposit.month} ${deposit.year || ''}</div><div><strong>Payment Method:</strong> ${deposit.paymentMethod}</div></div>
-        ${deposit.fromBank
-          ? `<div class="row"><div><strong>Bank Transfer:</strong> ${deposit.fromBank}→${deposit.toBank}</div><div><strong>Transaction ID:</strong> ${deposit.trxId}</div></div>`
-          : `<div class="row"><div><strong>Transaction ID:</strong> ${deposit.trxId}</div><div></div></div>`}
-
+        <div class="row"><div><strong>MR No:</strong> ${deposit.mrId || deposit.id}</div><div><strong>Date:</strong> ${formattedDate}</div></div>
+        <div class="row"><div><strong>Received from:</strong> ${member?.name || "N/A"}</div><div><strong>Member ID:</strong> ${deposit.memberId}</div></div>
+        <div class="row"><div><strong>For the month of:</strong> ${deposit.month}</div><div><strong>Payment Method:</strong> ${deposit.paymentMethod}</div></div>
+        <div class="row"><div><strong>Transaction ID:</strong> ${deposit.trxId || "N/A"}</div><div></div></div>
         <div style="margin-top:30px;text-align:center;">
-          <h3>Amount in Words:</h3>
-          <p>${numberToWords(deposit.amount)} Taka Only</p>
+          <h3 style="font-size:24px;margin:0;">Amount in Words:</h3>
+          <p style="font-size:18px;margin:10px 0 30px 0;">${numberToWords(deposit.amount)} Taka Only</p>
         </div>
         <div style="text-align:center;margin:40px 0;">
-          <h1>${formatMoney(deposit.amount)}</h1>
-          <p>(Paid in full)</p>
+          <h1 style="font-size:48px;margin:0;color:#2c3e50;">${formatMoney(deposit.amount)}</h1>
+          <p style="font-size:18px;margin-top:10px;">(Paid in full)</p>
         </div>
       </div>
-
-       <div class="signature">
+      <div class="signature">
         <div><p>_________________________</p><p>Receiver's Signature</p><p>Date: ${new Date().toLocaleDateString()}</p></div>
         <div><p>_________________________</p><p>Authorized Signature</p><p>${meta?.companyName || "IMS Investment Ltd."}</p></div>
       </div>
-
-
-
-      <div style="text-align:center;font-size:12px;color:#666;margin-top:40px;">
-        <p>*** Computer generated receipt ***</p>
+      <div style="margin-top:40px;font-size:12px;text-align:center;color:#666;">
+        <p>*** This is a computer generated receipt. No signature required. ***</p>
         <p>Generated on: ${new Date().toLocaleString()}</p>
       </div>
     </div>

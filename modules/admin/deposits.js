@@ -464,9 +464,9 @@ function generateMRReceipt(deposit, member, meta) {
   return `
     <div class="receipt">
       <div class="header">
-        <h2>${meta.companyName || 'IMS Investment Ltd.'}</h2>
+        <h2>${meta.companyName || 'TAQWA PROPERTICS BD'}</h2>
         <p>${meta.companyAddress || 'Dhaka, Bangladesh'}</p>
-        <p>Phone: ${meta.companyPhone || '+8801234567890'} | Email: ${meta.companyEmail || 'info@imsinvestment.com'}</p>
+        <p>Phone: ${meta.companyPhone || '+8801712263593'} | Email: ${meta.companyEmail || 'taqwapropertiesbd2026@gmail.com'}</p>
       </div>
 
       <h2 style="text-align:center;margin-bottom:30px;">MONEY RECEIPT</h2>
@@ -491,10 +491,12 @@ function generateMRReceipt(deposit, member, meta) {
         </div>
       </div>
 
-      <div class="signature">
-        <div><p>________________</p><p>Receiver</p><p>${new Date().toLocaleDateString()}</p></div>
-        <div><p>________________</p><p>Authorized</p><p>${meta.companyName || 'IMS Investment Ltd.'}</p></div>
+       <div class="signature">
+        <div><p>_________________________</p><p>Receiver's Signature</p><p>Date: ${new Date().toLocaleDateString()}</p></div>
+        <div><p>_________________________</p><p>Authorized Signature</p><p>${meta?.companyName || "IMS Investment Ltd."}</p></div>
       </div>
+
+
 
       <div style="text-align:center;font-size:12px;color:#666;margin-top:40px;">
         <p>*** Computer generated receipt ***</p>

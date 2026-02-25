@@ -217,7 +217,7 @@ export async function renderAdminMembers() {
    RENDER MEMBERS TABLE (static HTML)
 -------------------------------------------------------------------------- */
 function renderMembersTable(members) {
-  if (!members || members.length === 0) {
+  if (!members || members.length == 0) {
     return '<p class="small">No members found.</p>';
   }
   return `
@@ -241,7 +241,7 @@ function renderMembersTable(members) {
             <td>${m.memberType || 'N/A'}</td>
             <td>${m.phone}</td>
             <td>
-              <span class="status ${m.status === 'ACTIVE' ? 'st-approved' : m.status === 'PENDING' ? 'st-pending' : 'st-rejected'}">
+              <span class="status ${m.status == 'ACTIVE' ? 'st-approved' : m.status == 'PENDING' ? 'st-pending' : 'st-rejected'}">
                 ${m.status}
               </span>
             </td>
@@ -293,7 +293,7 @@ async function updateMemberIdPreview() {
     const typeSelect = document.getElementById('m_type');
     if (!typeSelect) return;
     const type = typeSelect.value;
-    const prefix = type === 'FOUNDER' ? 'FM' : 'RM';
+    const prefix = type == 'FOUNDER' ? 'FM' : 'RM';
 
     const db = getDatabase();
     const members = await db.getAll('members') || [];
@@ -407,7 +407,7 @@ async function adminAddMember(e) {
     const nidBack = nidBackFile ? await fileToBase64(nidBackFile) : '';
     const nomineePhoto = nomineePhotoFile ? await fileToBase64(nomineePhotoFile) : '';
 
-    const approved = status === 'ACTIVE';
+    const approved = status == 'ACTIVE';
 
     const memberData = {
       id, name, memberType, fatherName, motherName, dob,
@@ -512,8 +512,8 @@ async function viewMember(memberId) {
     }
 
     const deposits = await db.query('deposits', [
-      { field: 'memberId', operator: '===', value: memberId },
-      { field: 'status', operator: '===', value: 'APPROVED' }
+      { field: 'memberId', operator: '==', value: memberId },
+      { field: 'status', operator: '==', value: 'APPROVED' }
     ]);
     const totalDeposit = deposits.reduce((sum, d) => sum + Number(d.amount || 0), 0);
 
@@ -541,7 +541,7 @@ async function viewMember(memberId) {
           </div>
           <div>
             <label>Status</label>
-            <div><span class="status ${member.status === 'ACTIVE' ? 'st-approved' : member.status === 'PENDING' ? 'st-pending' : 'st-rejected'}">${member.status}</span></div>
+            <div><span class="status ${member.status == 'ACTIVE' ? 'st-approved' : member.status == 'PENDING' ? 'st-pending' : 'st-rejected'}">${member.status}</span></div>
             <div class="small" style="margin-top:8px;">Type: <b>${member.memberType}</b></div>
             <div class="small">Shares: <b>${member.shares}</b></div>
             <div class="small">Approved: <b>${member.approved ? 'YES' : 'NO'}</b></div>
@@ -698,7 +698,7 @@ async function openMemberForUpdate(memberId) {
             <label>Nominee Relation</label>
             <select id="upd_nom_rel">
               ${['Father','Mother','Husband','Wife','Brother','Sister','Son','Daughter','Other']
-                .map(rel => `<option value="${rel}" ${member.nomineeRelation === rel ? 'selected' : ''}>${rel}</option>`)
+                .map(rel => `<option value="${rel}" ${member.nomineeRelation == rel ? 'selected' : ''}>${rel}</option>`)
                 .join('')}
             </select>
           </div>

@@ -15,8 +15,8 @@ export async function renderAdminDeposits() {
 
   const db = getDatabase();
   const deposits = await db.getAll('deposits') || []; // Fetch all deposits
-  const pending = deposits.filter(d => d.status === 'PENDING'); // Pending deposits
-  const approved = deposits.filter(d => d.status === 'APPROVED'); // Approved deposits
+  const pending = deposits.filter(d => d.status == 'PENDING'); // Pending deposits
+  const approved = deposits.filter(d => d.status == 'APPROVED'); // Approved deposits
 
   // HTML layout for pending and approved deposits
   const html = `
@@ -61,7 +61,7 @@ async function renderDepositTable(list, isPending) {
 
   // Build table rows
   const rows = list.map(d => {
-    const member = members.find(m => m.id === d.memberId);
+    const member = members.find(m => m.id == d.memberId);
     return `
       <tr>
         <td>${d.id}</td>
@@ -69,7 +69,7 @@ async function renderDepositTable(list, isPending) {
         <td>${d.month} ${d.year || ''}</td>
         <td>${formatMoney(d.amount)}</td>
         <td>${d.paymentMethod} ${d.fromBank ? `(${d.fromBank}→${d.toBank})` : ''}</td>
-        <td><span class="status ${d.status === 'PENDING' ? 'st-pending' : d.status === 'APPROVED' ? 'st-approved' : 'st-rejected'}">${d.status}</span></td>
+        <td><span class="status ${d.status == 'PENDING' ? 'st-pending' : d.status == 'APPROVED' ? 'st-approved' : 'st-rejected'}">${d.status}</span></td>
         <td>${d.mrId || '-'}</td>
         ${isPending ? `
           <td>
@@ -157,8 +157,8 @@ function generateMRId(deposits, year) {
 async function addCashMR() {
   const db = getDatabase();
   const members = await db.query('members', [
-    { field: 'approved', operator: '===', value: true },
-    { field: 'status', operator: '===', value: 'ACTIVE' }
+    { field: 'approved', operator: '==', value: true },
+    { field: 'status', operator: '==', value: 'ACTIVE' }
   ]);
 
   // Build member options dropdown
@@ -169,7 +169,7 @@ async function addCashMR() {
   const years = Array.from({ length: 5 }, (_, i) => `<option value="${currentYear-i}">${currentYear-i}</option>`).join('');
   const months = [
     'January','February','March','April','May','June','July','August','September','October','November','December'
-  ].map(m => `<option value="${m}" ${m === new Date().toLocaleString('default', { month: 'long' }) ? 'selected' : ''}>${m}</option>`).join('');
+  ].map(m => `<option value="${m}" ${m == new Date().toLocaleString('default', { month: 'long' }) ? 'selected' : ''}>${m}</option>`).join('');
 
   // ============================================================
 // 💵 CASH MR MODAL HTML
@@ -275,7 +275,7 @@ function toggleBankFields() {
   const bankFields = document.getElementById('bankFields'); // Bank section div
 
   // Show only if method is Bank Transfer
-  bankFields.style.display = method === 'Bank Transfer' ? 'block' : 'none';
+  bankFields.style.display = method == 'Bank Transfer' ? 'block' : 'none';
 }
 
 
@@ -390,7 +390,7 @@ async function rejectDeposit(depositId) {
   if (!deposit) return;
 
   const note = prompt('Rejection note?'); // Ask admin for rejection reason
-  if (note === null) return; // Cancelled
+  if (note == null) return; // Cancelled
 
   deposit.status = 'REJECTED';
   deposit.note = (deposit.note ? deposit.note + '\n' : '') + 'Rejected: ' + note;
@@ -480,7 +480,7 @@ function toggleBankFields() {
   const bankFields = document.getElementById('bankFields');
 
   bankFields.style.display =
-    method === 'Bank Transfer' ? 'block' : 'none';
+    method == 'Bank Transfer' ? 'block' : 'none';
 }
 
 

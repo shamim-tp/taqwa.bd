@@ -8,7 +8,6 @@ export function loadLoginModule() {
   const loginIdLabel = document.getElementById('loginIdLabel');
   const loginBtn = document.getElementById('loginBtn');
 
-  // ট্যাব সুইচিং
   tabAdmin.addEventListener('click', () => {
     tabAdmin.classList.add('active');
     tabMember.classList.remove('active');
@@ -21,7 +20,6 @@ export function loadLoginModule() {
     loginIdLabel.textContent = 'Member ID';
   });
 
-  // লগইন বাটন
   loginBtn.addEventListener('click', async () => {
     const type = tabAdmin.classList.contains('active') ? 'admin' : 'member';
     const id = document.getElementById('loginId').value.trim();
@@ -41,7 +39,7 @@ export function loadLoginModule() {
         document.getElementById('loginPage').style.display = 'none';
         document.getElementById('appPage').style.display = 'grid';
 
-        // অ্যাপ্লিকেশন স্টার্ট করো (sidebar, navigation)
+        // অ্যাপ স্টার্ট করুন
         const { startApp } = await import('../app.js');
         startApp();
       } else {

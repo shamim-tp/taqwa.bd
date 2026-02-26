@@ -71,7 +71,7 @@ export async function renderMemberDeposit() {
   let yearOptions = '';
   for (let y = currentYear; y >= currentYear - 5; y--) {
     yearOptions += `
-      <option value="${y}" ${y === currentYear ? 'selected' : ''}>
+      <option value="${y}" ${y == currentYear ? 'selected' : ''}>
         ${y}
       </option>
     `;
@@ -89,7 +89,7 @@ export async function renderMemberDeposit() {
     const monthName = getMonthName(m);
 
     monthOptions += `
-      <option value="${monthKey}" ${m === currentMonthNum ? 'selected' : ''}>
+      <option value="${monthKey}" ${m == currentMonthNum ? 'selected' : ''}>
         ${monthName}
       </option>
     `;
@@ -232,7 +232,7 @@ function toggleBankFields() {
   const bankFields = document.getElementById('bankFields');
 
   bankFields.style.display =
-    method === 'Bank Transfer' ? 'block' : 'none';
+    method == 'Bank Transfer' ? 'block' : 'none';
 }
 
 
@@ -298,8 +298,8 @@ async function confirmDepositSubmit(
 
   // Prevent duplicate deposit
   const existing = await db.query('deposits', [
-    { field: 'memberId', operator: '===', value: member.id },
-    { field: 'month', operator: '===', value: month },
+    { field: 'memberId', operator: '==', value: member.id },
+    { field: 'month', operator: '==', value: month },
     { field: 'status', operator: 'in', value: ['PENDING', 'APPROVED'] }
   ]);
 

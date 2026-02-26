@@ -8,11 +8,11 @@ export async function authenticateUser(type, id, password) {
   try {
     const db = getDatabase();
     
-    if (type === 'admin') {
+    if (type == 'admin') {
       const admins = await db.query('admins', [
-        { field: 'id', operator: '===', value: id },
-        { field: 'pass', operator: '===', value: password },
-        { field: 'active', operator: '===', value: true }
+        { field: 'id', operator: '==', value: id },
+        { field: 'pass', operator: '==', value: password },
+        { field: 'active', operator: '==', value: true }
       ]);
       if (admins.length > 0) {
         currentUser = admins[0];
@@ -20,12 +20,12 @@ export async function authenticateUser(type, id, password) {
         await logActivity('ADMIN_LOGIN', `Admin logged in: ${id}`);
         return { success: true, user: currentUser };
       }
-    } else if (type === 'member') {
+    } else if (type == 'member') {
       const members = await db.query('members', [
-        { field: 'id', operator: '===', value: id },
-        { field: 'pass', operator: '===', value: password },
-        { field: 'approved', operator: '===', value: true },
-        { field: 'status', operator: '===', value: 'ACTIVE' }
+        { field: 'id', operator: '==', value: id },
+        { field: 'pass', operator: '==', value: password },
+        { field: 'approved', operator: '==', value: true },
+        { field: 'status', operator: '==', value: 'ACTIVE' }
       ]);
       if (members.length > 0) {
         currentUser = members[0];
@@ -60,17 +60,17 @@ export async function logout() {
 }
 
 export function isAdmin() {
-  return currentRole === 'admin';
+  return currentRole == 'admin';
 }
 
 export function isMember() {
-  return currentRole === 'member';
+  return currentRole == 'member';
 }
 
 export function hasPermission(requiredRole) {
   if (!currentUser) return false;
   switch(requiredRole) {
-    case 'SUPER_ADMIN': return currentUser.role === 'SUPER_ADMIN';
+    case 'SUPER_ADMIN': return currentUser.role == 'SUPER_ADMIN';
     case 'FINANCE_ADMIN': return ['SUPER_ADMIN','FINANCE_ADMIN'].includes(currentUser.role);
     case 'ACCOUNTS_ADMIN': return ['SUPER_ADMIN','ACCOUNTS_ADMIN'].includes(currentUser.role);
     case 'VIEW_ONLY': return ['SUPER_ADMIN','VIEW_ONLY'].includes(currentUser.role);

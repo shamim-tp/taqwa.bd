@@ -107,16 +107,20 @@ export function startApp() {
 
   const systemToolsBtn = document.getElementById('systemToolsBtn');
   const quickAddBtn = document.getElementById('quickAddBtn');
+  const loginBtn = document.getElementById('loginBtn');
 
   if (role === 'admin') {
     systemToolsBtn.style.display = 'inline-block';
     quickAddBtn.style.display = 'inline-block';
+    loginBtn.style.display = 'inline-block';
 
     // আগের লিসেনার সরানোর জন্য বাটন ক্লোন করা
     const newSystemToolsBtn = systemToolsBtn.cloneNode(true);
     const newQuickAddBtn = quickAddBtn.cloneNode(true);
+    const newloginBtn = loginBtn.cloneNode(true);
     systemToolsBtn.parentNode.replaceChild(newSystemToolsBtn, systemToolsBtn);
     quickAddBtn.parentNode.replaceChild(newQuickAddBtn, quickAddBtn);
+    loginBtn.parentNode.replaceChild(newloginBtn, loginBtn);
 
     // নতুন লিসেনার যোগ
     newSystemToolsBtn.addEventListener('click', () => {

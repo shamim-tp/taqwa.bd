@@ -3,9 +3,9 @@ import { showToast } from '../utils/common.js';
 
 // স্টেট ম্যানেজমেন্ট
 let currentUser = null;
-let currentRole = null; // 'admin' বা 'member'
+let currentRole = null; // 'admin' অথবা 'member'
 
-// অ্যাডমিন রোল কনস্ট্যান্ট (hasPermission-এর জন্য)
+// রোল কনস্ট্যান্ট (হ্যাশপারমিশনের জন্য)
 const ROLES = {
   SUPER_ADMIN: 'SUPER_ADMIN',
   FINANCE_ADMIN: 'FINANCE_ADMIN',
@@ -22,7 +22,7 @@ const ROLES = {
  */
 export async function authenticateUser(type, id, password) {
   // ইনপুট ভ্যালিডেশন
-  if (!id?.trim() || !password?.trim()) {
+  if (!id || !password) {
     return { success: false, message: 'ID and password are required' };
   }
 
@@ -56,17 +56,17 @@ export async function authenticateUser(type, id, password) {
       }
     }
 
-    // ভুল টাইপ বা কোনো ইউজার পাওয়া যায়নি
+    // ভুল আইডি/পাসওয়ার্ড
     return { success: false, message: 'Invalid credentials' };
   } catch (error) {
     console.error('Authentication error:', error);
+    // নেটওয়ার্ক বা ডাটাবেজ ত্রুটি
     return { success: false, message: 'Authentication failed. Please try again.' };
   }
 }
 
 /**
- * বর্তমান লগইন করা ইউজারের তথ্য রিটার্ন করে
- * @returns {object|null}
+ * বর্তমান ইউজার অবজেক্ট রিটার্ন করে
  */
 export function getCurrentUser() {
   return currentUser;
@@ -74,7 +74,6 @@ export function getCurrentUser() {
 
 /**
  * বর্তমান ইউজারের ভূমিকা (admin/member) রিটার্ন করে
- * @returns {string|null}
  */
 export function getCurrentRole() {
   return currentRole;
@@ -82,7 +81,6 @@ export function getCurrentRole() {
 
 /**
  * লগআউট প্রক্রিয়া
- * @returns {Promise<boolean>}
  */
 export async function logout() {
   if (currentUser) {
@@ -95,7 +93,6 @@ export async function logout() {
 
 /**
  * চেক করে ইউজার অ্যাডমিন কিনা
- * @returns {boolean}
  */
 export function isAdmin() {
   return currentRole === 'admin';
@@ -103,7 +100,6 @@ export function isAdmin() {
 
 /**
  * চেক করে ইউজার মেম্বার কিনা
- * @returns {boolean}
  */
 export function isMember() {
   return currentRole === 'member';
@@ -115,8 +111,9 @@ export function isMember() {
  * @returns {boolean}
  */
 export function hasPermission(requiredRole) {
-  // ইউজার না থাকলে বা অ্যাডমিন না হলে অনুমতি নেই
-  if (!currentUser || !isAdmin()) return false;
+  if (!currentUser) return false;
+  // মেম্বারদের জন্য সবসময় false (প্রয়োজনে পরিবর্তন করা যেতে পারে)
+  if (currentRole !== 'admin') return false;
 
   const userRole = currentUser.role; // অ্যাডমিন অবজেক্টে role ফিল্ড থাকতে হবে
   if (!userRole) return false;
@@ -131,15 +128,12 @@ export function hasPermission(requiredRole) {
     case ROLES.VIEW_ONLY:
       return [ROLES.SUPER_ADMIN, ROLES.VIEW_ONLY].includes(userRole);
     default:
-      // অজানা রোলের জন্য false ফেরত দিন (নিরাপত্তা)
-      return false;
+      return true; // অজানা রিকোয়েস্টের জন্য সত্য (কাস্টমাইজ করা যায়)
   }
 }
 
 /**
  * অভ্যন্তরীণ লগিং ফাংশন (শুধু auth-এর জন্য)
- * @param {string} action - লগ অ্যাকশন
- * @param {string} details - লগের বিস্তারিত
  */
 async function logActivity(action, details) {
   try {
@@ -154,10 +148,11 @@ async function logActivity(action, details) {
     });
   } catch (error) {
     console.error('Error logging activity:', error);
+    // লগ ব্যর্থ হলে ব্যবহারকারীকে বিরক্ত না করে শুধু কনসোলে রাখা হলো
   }
 }
 
-// গ্লোবাল এক্সপোজ (প্রয়োজনীয় ক্ষেত্রে)
+// গ্লোবাল এক্সপোজ (প্রয়োজন হলে)
 window.getCurrentUser = getCurrentUser;
 window.getCurrentRole = getCurrentRole;
 window.isAdmin = isAdmin;

@@ -107,20 +107,17 @@ export function startApp() {
 
   const systemToolsBtn = document.getElementById('systemToolsBtn');
   const quickAddBtn = document.getElementById('quickAddBtn');
-  const loginBtn = document.getElementById('loginBtn');
 
   if (role === 'admin') {
+    // অ্যাডমিন টুলস দেখাও
     systemToolsBtn.style.display = 'inline-block';
     quickAddBtn.style.display = 'inline-block';
-    loginBtn.style.display = 'inline-block';
 
     // আগের লিসেনার সরানোর জন্য বাটন ক্লোন করা
     const newSystemToolsBtn = systemToolsBtn.cloneNode(true);
     const newQuickAddBtn = quickAddBtn.cloneNode(true);
-    const newloginBtn = loginBtn.cloneNode(true);
     systemToolsBtn.parentNode.replaceChild(newSystemToolsBtn, systemToolsBtn);
     quickAddBtn.parentNode.replaceChild(newQuickAddBtn, quickAddBtn);
-    loginBtn.parentNode.replaceChild(newloginBtn, loginBtn);
 
     // নতুন লিসেনার যোগ
     newSystemToolsBtn.addEventListener('click', () => {
@@ -130,6 +127,7 @@ export function startApp() {
       import('../modals/quick-add.js').then(m => m.openQuickAddModal());
     });
   } else {
+    // সাধারণ মেম্বার হলে টুলস লুকাও
     systemToolsBtn.style.display = 'none';
     quickAddBtn.style.display = 'none';
   }
@@ -248,8 +246,7 @@ async function handleLogout() {
   }
 }
 
-// গ্লোবাল এক্সপোজ না করেও যদি দরকার হয়, তাহলে ইভেন্ট ডিসপ্যাচ ব্যবহার করা যেতে পারে
-// বর্তমান কোডে window তে অ্যাসাইন রাখা হচ্ছে (পেছনের compatibility-র জন্য)
+// গ্লোবাল এক্সপোজ (পেছনের compatibility-র জন্য)
 window.navigateTo = navigateTo;
 window.setPageTitle = setPageTitle;
 window.logActivity = logActivity;

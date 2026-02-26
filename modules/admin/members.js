@@ -6,7 +6,8 @@ import {
   formatDate,
   generateId,
   fileToBase64,
-  formatMoney
+  formatMoney,
+  downloadBase64Image
 } from '../utils/common.js';
 
 import { openViewerModal } from '../modals/viewer.js';
@@ -24,7 +25,7 @@ export async function renderAdminMembers() {
   try {
     setPageTitle('Member Management', 'Create, Update, Approve Member with all details.');
 
-    const db = getDatabase(); // ✅ await সরানো হয়েছে
+    const db = getDatabase();
     const members = await db.getAll('members') || [];
 
     const html = `
@@ -47,7 +48,6 @@ export async function renderAdminMembers() {
             <div>
               <label>Member ID (Auto)</label>
               <input id="m_id" placeholder="Member ID" required />
-
             </div>
             <div>
               <label>Full Name *</label>
@@ -74,8 +74,6 @@ export async function renderAdminMembers() {
               <div style="display:flex;gap:8px;">
                 <select id="m_country_code" style="width:100px;">
                   <option value="+880">+880 (BD)</option>
-                  <option value="+1">+1 (US)</option>
-                  <option value="+44">+44 (UK)</option>
                 </select>
                 <input id="m_phone" placeholder="17XXXXXXXX" style="flex:1;" />
               </div>
@@ -277,12 +275,11 @@ function attachMemberButtons() {
     btn.addEventListener('click', () => resetMemberPassword(btn.dataset.id))
   );
   document.querySelectorAll('.resetProfileBtn').forEach(btn => {
-  btn.addEventListener('click', async function () {
-    const memberId = this.dataset.id;
-    await resetProfilePermission(memberId);
+    btn.addEventListener('click', async function () {
+      const memberId = this.dataset.id;
+      await resetProfilePermission(memberId);
+    });
   });
-});
-
 }
 
 /* --------------------------------------------------------------------------
@@ -306,17 +303,12 @@ async function updateMemberIdPreview() {
       }, 0);
 
     const id = `${prefix}-${String(max + 1).padStart(3, '0')}`;
-    const preview = document.getElementById('m_id_preview');
-    const hidden = document.getElementById('m_id');
-    if (preview) preview.value = id;
-    if (hidden) hidden.value = id;
+    const m_id = document.getElementById('m_id');
+    if (m_id) m_id.value = id;
   } catch (error) {
     console.error('updateMemberIdPreview error:', error);
   }
 }
-
-
-
 
 async function resetProfilePermission(memberId) {
   try {
@@ -339,18 +331,13 @@ async function resetProfilePermission(memberId) {
     await logActivity('ADMIN_RESET_PROFILE_PERMISSION', `Admin reset profile update for ${m.id}`);
 
     showToast('Success', 'Profile update permission restored.');
-
-    // যদি list refresh করতে চাও
-    renderMembers();
+    await renderAdminMembers(); // Refresh list
 
   } catch (error) {
     console.error('resetProfilePermission error:', error);
     showToast('Error', 'Failed to reset permission.');
   }
 }
-
-
-
 
 /* --------------------------------------------------------------------------
    ADD NEW MEMBER (async)
@@ -500,7 +487,7 @@ async function resetMemberPassword(memberId) {
 }
 
 /* --------------------------------------------------------------------------
-   VIEW FULL MEMBER PROFILE (modal via viewer)
+   VIEW FULL MEMBER PROFILE (modal via viewer) – with download buttons
 -------------------------------------------------------------------------- */
 async function viewMember(memberId) {
   try {
@@ -517,6 +504,17 @@ async function viewMember(memberId) {
     ]);
     const totalDeposit = deposits.reduce((sum, d) => sum + Number(d.amount || 0), 0);
 
+    // Helper to render image with download button
+    const renderImageWithDownload = (base64, filename, label) => {
+      if (!base64) return `<div class="small">No ${label}</div>`;
+      return `
+        <div>
+          <img src="${base64}" style="width:100%;max-width:320px;border-radius:18px;border:1px solid var(--line);">
+          <button class="btn download-btn" data-base64="${base64}" data-filename="${filename}">Download ${label}</button>
+        </div>
+      `;
+    };
+
     const html = `
       <div class="panel">
         <div class="panelHeader">
@@ -529,15 +527,11 @@ async function viewMember(memberId) {
         <div class="row row-3">
           <div>
             <label>Member Photo</label>
-            ${member.photo
-              ? `<img src="${member.photo}" style="width:120px;height:120px;border-radius:18px;border:1px solid var(--line);object-fit:cover;">`
-              : '<div class="small">No Photo</div>'}
+            ${renderImageWithDownload(member.photo, `${member.id}_photo.png`, 'Photo')}
           </div>
           <div>
             <label>Nominee Photo</label>
-            ${member.nomineePhoto
-              ? `<img src="${member.nomineePhoto}" style="width:120px;height:120px;border-radius:18px;border:1px solid var(--line);object-fit:cover;">`
-              : '<div class="small">No Photo</div>'}
+            ${renderImageWithDownload(member.nomineePhoto, `${member.id}_nominee_photo.png`, 'Nominee Photo')}
           </div>
           <div>
             <label>Status</label>
@@ -587,18 +581,27 @@ async function viewMember(memberId) {
 
         <div class="hr"></div>
 
+        <!-- NID Images with Download -->
         <div class="row row-2">
           <div>
             <label>NID Front</label>
-            ${member.nidFront
-              ? `<img src="${member.nidFront}" style="width:100%;max-width:320px;border-radius:18px;border:1px solid var(--line);">`
-              : '<div class="small">No file</div>'}
+            ${renderImageWithDownload(member.nidFront, `${member.id}_nid_front.png`, 'NID Front')}
           </div>
           <div>
             <label>NID Back</label>
-            ${member.nidBack
-              ? `<img src="${member.nidBack}" style="width:100%;max-width:320px;border-radius:18px;border:1px solid var(--line);">`
-              : '<div class="small">No file</div>'}
+            ${renderImageWithDownload(member.nidBack, `${member.id}_nid_back.png`, 'NID Back')}
+          </div>
+        </div>
+
+        <!-- Nominee NID Images (if exist) -->
+        <div class="row row-2">
+          <div>
+            <label>Nominee NID Front</label>
+            ${renderImageWithDownload(member.nomineeNidFront, `${member.id}_nominee_nid_front.png`, 'Nominee NID Front')}
+          </div>
+          <div>
+            <label>Nominee NID Back</label>
+            ${renderImageWithDownload(member.nomineeNidBack, `${member.id}_nominee_nid_back.png`, 'Nominee NID Back')}
           </div>
         </div>
 
@@ -610,6 +613,17 @@ async function viewMember(memberId) {
     `;
 
     openViewerModal('Member Viewer', 'Member profile details preview', html);
+
+    // Attach download event listeners after modal is loaded
+    setTimeout(() => {
+      document.querySelectorAll('.download-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const base64 = e.target.dataset.base64;
+          const filename = e.target.dataset.filename;
+          downloadBase64Image(base64, filename);
+        });
+      });
+    }, 200);
   } catch (error) {
     console.error('viewMember error:', error);
     showToast('Error', 'মেম্বার দেখতে সমস্যা।');
@@ -644,12 +658,12 @@ async function openMemberForUpdate(memberId) {
             <input id="upd_photo" type="file" accept="image/*" />
             ${member.photo ? '<div class="small">Current photo exists</div>' : ''}
           </div>
-                    <div>
+          <div>
             <label>Member NID Front</label>
             <input id="upd_nid_front" type="file" accept="image/*" />
             ${member.nidFront ? '<div class="small">Current NID Front exists</div>' : ''}
           </div>
-                    <div>
+          <div>
             <label>Member NID Back</label>
             <input id="upd_nid_back" type="file" accept="image/*" />
             ${member.nidBack ? '<div class="small">Current NID Back exists</div>' : ''}
@@ -657,7 +671,6 @@ async function openMemberForUpdate(memberId) {
           <div><label>Phone Number</label><input id="upd_phone" value="${member.phone || ''}" /></div>
           <div><label>Email</label><input id="upd_email" value="${member.email || ''}" /></div>
           <div><label>Address</label><input id="upd_address" value="${member.address || ''}" /></div>
-
         </div>
 
         <div class="row row-3">
@@ -670,30 +683,21 @@ async function openMemberForUpdate(memberId) {
             <label>Nominee NID *</label>
             <input id="upd_nom_nid" value="${member.nomineeNid || ''}" />
           </div>
-
-                              <div>
+          <div>
             <label>Nominee photo</label>
             <input id="upd_nom_photo" type="file" accept="image/*" />
             ${member.nomineePhoto ? '<div class="small">Current Nominee Photo exists</div>' : ''}
           </div>
-
-                                        <div>
+          <div>
             <label>Nominee NID Front</label>
             <input id="upd_nom_nid_front" type="file" accept="image/*" />
             ${member.nomineeNidFront ? '<div class="small">Current Nominee NID Front exists</div>' : ''}
           </div>
-
-                                        <div>
+          <div>
             <label>Nominee NID Back</label>
             <input id="upd_nom_nid_back" type="file" accept="image/*" />
             ${member.nomineeNidBack ? '<div class="small">Current Nominee NID Back exists</div>' : ''}
           </div>
-
-
-
-
-
-
           <div>
             <label>Nominee Relation</label>
             <select id="upd_nom_rel">
@@ -730,13 +734,8 @@ async function openMemberForUpdate(memberId) {
     setTimeout(() => {
       document.getElementById('updateMemberBtn')?.addEventListener('click', () => updateMemberInfo(memberId));
       document.getElementById('cancelUpdateBtn')?.addEventListener('click', () => {
-        //document.querySelector('.modalWrap[style*="display: flex"]')?.style.display = 'none';
-
         const modal = document.querySelector('.modalWrap[style*="display: flex"]');
-if (modal) {
-  modal.style.display = 'none';
-}
-
+        if (modal) modal.style.display = 'none';
       });
     }, 100);
   } catch (error) {
@@ -784,11 +783,8 @@ async function updateMemberInfo(memberId) {
     await logActivity('UPDATE_MEMBER', `Updated member info: ${memberId}`);
     showToast('Information Updated', 'Member information updated successfully.');
 
-   // document.querySelector('.modalWrap[style*="display: flex"]')?.style.display = 'none';
-   const modal = document.querySelector('.modalWrap[style*="display: flex"]');
-if (modal) {
-  modal.style.display = 'none';
-}
+    const modal = document.querySelector('.modalWrap[style*="display: flex"]');
+    if (modal) modal.style.display = 'none';
 
     await renderAdminMembers();
   } catch (error) {

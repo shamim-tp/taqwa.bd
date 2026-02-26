@@ -339,6 +339,7 @@ async function confirmDepositSubmit(
   showToast('Success', 'Deposit submitted successfully.');
 
   showDepositReceipt(depositId);
+  window.navigateTo('member_dashboard');
 }
 
 

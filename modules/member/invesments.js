@@ -55,7 +55,7 @@ export async function renderMemberInvestments() {
             <tr>
               <td><b>${inv.name}</b></td>
               <td>${formatMoney(inv.amount)}</td>
-              <td><span class="status ${inv.status === 'ACTIVE' ? 'st-approved' : inv.status === 'COMPLETED' ? 'st-success' : 'st-pending'}">${inv.status}</span></td>
+              <td><span class="status ${inv.status == 'ACTIVE' ? 'st-approved' : inv.status == 'COMPLETED' ? 'st-success' : 'st-pending'}">${inv.status}</span></td>
               <td>${inv.startDate || 'N/A'}</td>
               <td>${inv.description || 'No description'}</td>
             </tr>

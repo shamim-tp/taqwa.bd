@@ -3,15 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>TAQWA PROPERTIES BD - ERP</title>
+  <title>IMS ERP V5 Ultra Advanced (Multi-Database)</title>
   <link rel="stylesheet" href="style.css">
-  <!-- Firebase SDK (প্রয়োজনে) -->
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
   <script type="module" src="script.js"></script>
 </head>
 <body>
-  <!-- লোডিং ওভারলে -->
+  <!-- LOADING OVERLAY -->
   <div id="loadingOverlay" class="loading-overlay">
     <div>
       <div class="loading-spinner"></div>
@@ -19,19 +16,30 @@
     </div>
   </div>
 
-  <!-- টোস্ট বার্তা -->
+  <!-- TOAST -->
   <div class="toastWrap" id="toastWrap"></div>
 
-  <!-- লগইন পৃষ্ঠা (শুধু লগইন অপশন) -->
+  <!-- LOGIN -->
   <div id="loginPage" class="loginWrap">
     <div class="loginCard">
       <div class="loginGrid">
         <div class="loginLeft">
-          <!-- লোগো যোগ করুন -->
-          <!--<img src="images/logo.png" alt="TAQWA PROPERTIES BD" class="company-logo"> -->
-          <h1>TAQWA PROPERTIES BD</h1>
-          <p>Professional Investment Management ERP System</p>
-          <p class="slogan">Trust & Excellence</p>
+          <h1>IMS ERP V5 Ultra Advanced</h1>
+          <p>
+            Professional Investment Management ERP System<br/>
+            <b>Database: <span id="databaseType">LocalStorage</span></b> | Multi Admin | Member System
+          </p>
+          <div class="hint">
+            <b>Default Admin Login:</b><br/>
+            ID: <b>ADM-001</b><br/>
+            Password: <b>admin123</b><br/><br/>
+            <b>Default Member Login:</b><br/>
+            ID: <b>FM-001</b><br/>
+            Password: <b>1234</b>
+          </div>
+          <div class="hint">
+            <p><b>Database:</b> Firebase (Cloud)</p>
+          </div>
         </div>
         <div class="loginRight">
           <div class="tabs">
@@ -48,20 +56,29 @@
               <input id="loginPass" type="password" placeholder="Enter Password" />
             </div>
             <button class="btn primary" id="loginBtn">Login</button>
+            <div class="hint">
+              <label for="dbModeSelect">Database Mode:</label>
+              <select id="dbModeSelect">
+                <option value="local">LocalStorage</option>
+                <option value="firebase">Firebase</option>
+                <option value="mysql">MySQL</option>
+                <option value="postgresql">PostgreSQL</option>
+              </select>
+            </div>
           </div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- অ্যাপ পৃষ্ঠা (আপনার আগের কাঠামো) -->
+  <!-- APP -->
   <div id="appPage" class="app">
     <button class="mobile-menu-btn" id="mobileMenuBtn">☰ Menu</button>
     <div class="sidebar" id="sidebar">
       <div class="brand">
         <div>
-          <h2>TAQWA PROPERTIES BD</h2>
-          <div class="small">ERP System</div>
+          <h2>IMS ERP V5</h2>
+          <div class="small">Ultra Advanced Panel</div>
         </div>
         <div class="badge" id="systemMode">ADMIN</div>
       </div>
@@ -81,7 +98,7 @@
       <div class="topbar">
         <div>
           <h1 id="pageTitle">Dashboard</h1>
-          <p id="pageSubtitle">Welcome to TAQWA PROPERTIES ERP</p>
+          <p id="pageSubtitle">Welcome to IMS ERP V5 Ultra Advanced.</p>
         </div>
         <div class="rightTop">
           <button class="btn hidden" id="systemToolsBtn">System Tools</button>
@@ -92,7 +109,7 @@
     </div>
   </div>
 
-  <!-- মডাল কন্টেইনার -->
+  <!-- MODALS CONTAINER -->
   <div id="modalsContainer"></div>
 </body>
 </html>

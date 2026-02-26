@@ -16,40 +16,14 @@ import {
 
 // Firestore অনুমোদিত অপারেটর
 const VALID_OPERATORS = [
-  '<', '<=', '==', '===', '!=', '>=', '>', 
+  '<', '<=', '==', '!=', '>=', '>', 
   'array-contains', 'array-contains-any', 'in', 'not-in'
 ];
 
 let db = null;
 let dbInitialized = false;
 
-/**
- * Firebase ডাটাবেস আরম্ভ করে
- * @param {string} type - (উপেক্ষিত) সর্বদা Firebase ব্যবহার হয়
- */
-export async function initializeDatabase(type = 'firebase') {
-  // যদি আগে থেকেই অ্যাপ আরম্ভ করা থাকে, তাহলে পুনরায় আরম্ভ না করে শুধু Firestore instance দিন
-  if (getApps().length === 0) {
-    initializeApp(firebaseConfig);
-  }
-  db = getFirestore();
-  dbInitialized = true;
-  console.log('Firebase Database Initialized');
-  return firebaseDb;
-}
-
-export function getDatabase() {
-  if (!dbInitialized) {
-    throw new Error('Database not initialized. Call initializeDatabase first.');
-  }
-  return firebaseDb;
-}
-
-export function getDatabaseType() {
-  return 'firebase';
-}
-
-// Firebase Database Operations
+// Firebase Database Operations (এখনই ডিফাইন করা হয়েছে, কিন্তু db পরে সেট হবে)
 const firebaseDb = {
   async save(collectionName, data, id = null) {
     try {
@@ -161,6 +135,32 @@ const firebaseDb = {
     }
   }
 };
+
+/**
+ * Firebase ডাটাবেস আরম্ভ করে
+ * @param {string} type - (উপেক্ষিত) সর্বদা Firebase ব্যবহার হয়
+ */
+export async function initializeDatabase(type = 'firebase') {
+  // যদি আগে থেকেই অ্যাপ আরম্ভ করা থাকে, তাহলে পুনরায় আরম্ভ না করে শুধু Firestore instance দিন
+  if (getApps().length === 0) {
+    initializeApp(firebaseConfig);
+  }
+  db = getFirestore();
+  dbInitialized = true;
+  console.log('Firebase Database Initialized');
+  return firebaseDb; // এখন firebaseDb আগেই ডিফাইন করা আছে
+}
+
+export function getDatabase() {
+  if (!dbInitialized) {
+    throw new Error('Database not initialized. Call initializeDatabase first.');
+  }
+  return firebaseDb;
+}
+
+export function getDatabaseType() {
+  return 'firebase';
+}
 
 // Common operations exported for convenience
 export async function saveData(collection, data, id = null) {

@@ -189,25 +189,28 @@ export async function renderMemberProfile() {
     </button>
 
     <!-- Password Update Section -->
-    <div class="hr"></div>
-    <h3>Password Update</h3>
+<div class="hr"></div>
+<h3>Password Update</h3>
 
-    <!-- 🔐 পাসওয়ার্ড ফর্ম (এখন <form> এর ভিতরে) -->
-    <form id="passwordUpdateForm" onsubmit="event.preventDefault();">
-      <div class="row row-2">
-        <div>
-          <label>New Password</label>
-          <input id="up_pass" type="password" autocomplete="new-password"/>
-        </div>
-        <div>
-          <label>Confirm Password</label>
-          <input id="up_pass2" type="password" autocomplete="new-password"/>
-        </div>
-      </div>
-      <button type="submit" class="btn success" id="updatePasswordBtn">
-        Update Password
-      </button>
-    </form>
+<!-- 🔐 পাসওয়ার্ড ফর্ম (এখন <form> এর ভিতরে) -->
+<form id="passwordUpdateForm" onsubmit="event.preventDefault();">
+  <!-- ✅ নিচের hidden ইউজারনেম ফিল্ডটি যোগ করুন -->
+  <input type="hidden" name="username" value="${m.id}" autocomplete="username">
+  
+  <div class="row row-2">
+    <div>
+      <label>New Password</label>
+      <input id="up_pass" type="password" autocomplete="new-password"/>
+    </div>
+    <div>
+      <label>Confirm Password</label>
+      <input id="up_pass2" type="password" autocomplete="new-password"/>
+    </div>
+  </div>
+  <button type="submit" class="btn success" id="updatePasswordBtn">
+    Update Password
+  </button>
+</form>
 
   </div>
   `;

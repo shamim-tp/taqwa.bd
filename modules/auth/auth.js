@@ -1,5 +1,5 @@
 import { getDatabase } from '../database/db.js';
-import { getCurrentUser, getCurrentRole, logout } from './auth.js';
+import { getCurrentUser, getCurrentRole, logout } from '../auth/auth.js';
 import { showToast } from '../utils/common.js';
 
 let currentPage = null;

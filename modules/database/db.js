@@ -1,15 +1,38 @@
 // modules/database/db.js
 import { firebaseConfig, COLLECTIONS } from '../../firebase-config.js';
-import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js';
-import { getFirestore, collection, doc, getDoc, setDoc, updateDoc, deleteDoc, getDocs, query, where } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js';
+import { initializeApp, getApps } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js';
+import { 
+  getFirestore, 
+  collection, 
+  doc, 
+  getDoc, 
+  setDoc, 
+  updateDoc, 
+  deleteDoc, 
+  getDocs, 
+  query, 
+  where 
+} from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js';
 
-let db;
+// Firestore অনুমোদিত অপারেটর
+const VALID_OPERATORS = [
+  '<', '<=', '==', '!=', '>=', '>', 
+  'array-contains', 'array-contains-any', 'in', 'not-in'
+];
+
+let db = null;
 let dbInitialized = false;
 
+/**
+ * Firebase ডাটাবেস আরম্ভ করে
+ * @param {string} type - (উপেক্ষিত) সর্বদা Firebase ব্যবহার হয়
+ */
 export async function initializeDatabase(type = 'firebase') {
-  // Always initialize Firebase regardless of type parameter
-  const app = initializeApp(firebaseConfig);
-  db = getFirestore(app);
+  // যদি আগে থেকেই অ্যাপ আরম্ভ করা থাকে, তাহলে পুনরায় আরম্ভ না করে শুধু Firestore instance দিন
+  if (getApps().length === 0) {
+    initializeApp(firebaseConfig);
+  }
+  db = getFirestore();
   dbInitialized = true;
   console.log('Firebase Database Initialized');
   return firebaseDb;
@@ -29,71 +52,113 @@ export function getDatabaseType() {
 // Firebase Database Operations
 const firebaseDb = {
   async save(collectionName, data, id = null) {
-    const colRef = collection(db, collectionName);
-    const docRef = id ? doc(db, collectionName, id) : doc(colRef);
-    const dataToSave = {
-      ...data,
-      createdAt: data.createdAt || new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    };
-    await setDoc(docRef, dataToSave);
-    return { id: docRef.id, ...dataToSave };
+    try {
+      const colRef = collection(db, collectionName);
+      const docRef = id ? doc(db, collectionName, id) : doc(colRef);
+      const dataToSave = {
+        ...data,
+        createdAt: data.createdAt || new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+      await setDoc(docRef, dataToSave);
+      return { id: docRef.id, ...dataToSave };
+    } catch (error) {
+      console.error('Firestore save error:', error);
+      throw new Error(`Failed to save to ${collectionName}: ${error.message}`);
+    }
   },
 
   async get(collectionName, id) {
-    const docRef = doc(db, collectionName, id);
-    const docSnap = await getDoc(docRef);
-    return docSnap.exists() ? { id: docSnap.id, ...docSnap.data() } : null;
+    try {
+      const docRef = doc(db, collectionName, id);
+      const docSnap = await getDoc(docRef);
+      return docSnap.exists() ? { id: docSnap.id, ...docSnap.data() } : null;
+    } catch (error) {
+      console.error('Firestore get error:', error);
+      throw new Error(`Failed to get document ${id} from ${collectionName}: ${error.message}`);
+    }
   },
 
   async getAll(collectionName) {
-    const colRef = collection(db, collectionName);
-    const snapshot = await getDocs(colRef);
-    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    try {
+      const colRef = collection(db, collectionName);
+      const snapshot = await getDocs(colRef);
+      return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    } catch (error) {
+      console.error('Firestore getAll error:', error);
+      throw new Error(`Failed to get all from ${collectionName}: ${error.message}`);
+    }
   },
 
   async update(collectionName, id, data) {
-    const docRef = doc(db, collectionName, id);
-    const updateData = {
-      ...data,
-      updatedAt: new Date().toISOString()
-    };
-    await updateDoc(docRef, updateData);
-    return { id, ...updateData };
+    try {
+      const docRef = doc(db, collectionName, id);
+      const updateData = {
+        ...data,
+        updatedAt: new Date().toISOString()
+      };
+      await updateDoc(docRef, updateData);
+      return { id, ...updateData };
+    } catch (error) {
+      console.error('Firestore update error:', error);
+      throw new Error(`Failed to update document ${id} in ${collectionName}: ${error.message}`);
+    }
   },
 
   async delete(collectionName, id) {
-    const docRef = doc(db, collectionName, id);
-    await deleteDoc(docRef);
-    return id;
+    try {
+      const docRef = doc(db, collectionName, id);
+      await deleteDoc(docRef);
+      return id;
+    } catch (error) {
+      console.error('Firestore delete error:', error);
+      throw new Error(`Failed to delete document ${id} from ${collectionName}: ${error.message}`);
+    }
   },
 
   async query(collectionName, conditions = []) {
-    let q = collection(db, collectionName);
-    conditions.forEach(cond => {
-      q = query(q, where(cond.field, cond.operator, cond.value));
-    });
-    const snapshot = await getDocs(q);
-    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    try {
+      let q = collection(db, collectionName);
+      conditions.forEach(cond => {
+        // অপারেটর বৈধতা যাচাই
+        if (!VALID_OPERATORS.includes(cond.operator)) {
+          throw new Error(`Invalid operator "${cond.operator}". Allowed operators: ${VALID_OPERATORS.join(', ')}`);
+        }
+        q = query(q, where(cond.field, cond.operator, cond.value));
+      });
+      const snapshot = await getDocs(q);
+      return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    } catch (error) {
+      console.error('Firestore query error:', error);
+      throw new Error(`Failed to query ${collectionName}: ${error.message}`);
+    }
   },
 
   async backup() {
-    // Simple backup implementation - get all collections
-    const backup = {};
-    for (const [key, colName] of Object.entries(COLLECTIONS)) {
-      backup[colName] = await this.getAll(colName);
+    try {
+      const backup = {};
+      for (const [key, colName] of Object.entries(COLLECTIONS)) {
+        backup[colName] = await this.getAll(colName);
+      }
+      return backup;
+    } catch (error) {
+      console.error('Firestore backup error:', error);
+      throw new Error(`Backup failed: ${error.message}`);
     }
-    return backup;
   },
 
   async restore(backupData) {
-    // Restore each collection
-    for (const [colName, documents] of Object.entries(backupData)) {
-      for (const doc of documents) {
-        await this.save(colName, doc, doc.id);
+    try {
+      for (const [colName, documents] of Object.entries(backupData)) {
+        for (const doc of documents) {
+          await this.save(colName, doc, doc.id);
+        }
       }
+      return true;
+    } catch (error) {
+      console.error('Firestore restore error:', error);
+      throw new Error(`Restore failed: ${error.message}`);
     }
-    return true;
   }
 };
 

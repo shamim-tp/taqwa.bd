@@ -1,54 +1,57 @@
+// modules/auth/login.js
 import { authenticateUser } from './auth.js';
-import { showToast } from '../utils/common.js';
-import { startApp } from './session.js';
+import { showToast } from '../../utils/common.js';
 
 export function loadLoginModule() {
-  document.getElementById('tabAdmin')?.addEventListener('click', () => switchLoginTab('admin'));
-  document.getElementById('tabMember')?.addEventListener('click', () => switchLoginTab('member'));
-  document.getElementById('loginBtn')?.addEventListener('click', handleLogin);
-  document.getElementById('loginPass')?.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') handleLogin();
-  });
-  switchLoginTab('admin');
-}
-
-function switchLoginTab(mode) {
   const tabAdmin = document.getElementById('tabAdmin');
   const tabMember = document.getElementById('tabMember');
   const loginIdLabel = document.getElementById('loginIdLabel');
-  if (!tabAdmin || !tabMember) return;
-  
-  tabAdmin.classList.toggle('active', mode === 'admin');
-  tabMember.classList.toggle('active', mode === 'member');
-  if (loginIdLabel) {
-    loginIdLabel.textContent = mode === 'admin' ? 'Admin ID' : 'Member ID';
-  }
-  window.SESSION.mode = mode;
-}
+  const loginBtn = document.getElementById('loginBtn');
 
-async function handleLogin() {
-  const mode = window.SESSION.mode;
-  const id = document.getElementById('loginId')?.value.trim();
-  const password = document.getElementById('loginPass')?.value.trim();
-  
-  if (!id || !password) {
-    showToast('Login Failed', 'Please enter ID and Password');
-    return;
-  }
-  
-  window.showLoading('Logging in...');
-  try {
-    const result = await authenticateUser(mode, id, password);
-    if (result.success) {
-      showToast('Login Successful', `Welcome ${result.user.name}`);
-      startApp();
-    } else {
-      showToast('Login Failed', result.message || 'Invalid credentials');
+  // ট্যাব সুইচিং
+  tabAdmin.addEventListener('click', () => {
+    tabAdmin.classList.add('active');
+    tabMember.classList.remove('active');
+    loginIdLabel.textContent = 'Admin ID';
+  });
+
+  tabMember.addEventListener('click', () => {
+    tabMember.classList.add('active');
+    tabAdmin.classList.remove('active');
+    loginIdLabel.textContent = 'Member ID';
+  });
+
+  // লগইন বাটন
+  loginBtn.addEventListener('click', async () => {
+    const type = tabAdmin.classList.contains('active') ? 'admin' : 'member';
+    const id = document.getElementById('loginId').value.trim();
+    const password = document.getElementById('loginPass').value.trim();
+
+    if (!id || !password) {
+      showToast('Error', 'আইডি ও পাসওয়ার্ড দিন');
+      return;
     }
-  } catch (error) {
-    console.error('Login error:', error);
-    showToast('Login Failed', 'An error occurred during login');
-  } finally {
-    window.hideLoading();
-  }
+
+    window.showLoading('লগইন হচ্ছে...');
+
+    try {
+      const result = await authenticateUser(type, id, password);
+      if (result.success) {
+        // লগইন সফল: লগইন পৃষ্ঠা লুকাও, অ্যাপ পৃষ্ঠা দেখাও
+        document.getElementById('loginPage').style.display = 'none';
+        document.getElementById('appPage').style.display = 'grid';
+
+        // অ্যাপ্লিকেশন স্টার্ট করো (sidebar, navigation)
+        const { startApp } = await import('../app.js');
+        startApp();
+      } else {
+        showToast('Error', result.message || 'লগইন ব্যর্থ');
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+      showToast('Error', 'লগইন প্রক্রিয়ায় সমস্যা');
+    } finally {
+      window.hideLoading();
+    }
+  });
 }

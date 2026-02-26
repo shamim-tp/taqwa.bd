@@ -9,6 +9,7 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
   <script type="module" src="script.js"></script>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏢</text></svg>">
 </head>
 <body>
   <!-- লোডিং ওভারলে -->
@@ -39,19 +40,19 @@
             <button id="tabMember">Member Login</button>
           </div>
           <!-- লগইন ফর্ম (পাসওয়ার্ড ম্যানেজারের জন্য) -->
-          <form id="loginForm" onsubmit="event.preventDefault();">
-            <div class="row">
-              <div>
-                <label id="loginIdLabel">Admin ID</label>
-                <input id="loginId" placeholder="Enter ID" />
-              </div>
-              <div>
-                <label>Password</label>
-                <input id="loginPass" type="password" placeholder="Enter Password" />
-              </div>
-              <button type="submit" class="btn primary" id="loginBtn">Login</button>
+             <form id="loginForm" onsubmit="event.preventDefault();">
+          <div class="row">
+            <div>
+              <label id="loginIdLabel">Admin ID</label>
+              <input id="loginId" placeholder="Enter ID" autocomplete="username" />
             </div>
-          </form>
+            <div>
+              <label>Password</label>
+              <input id="loginPass" type="password" placeholder="Enter Password" autocomplete="current-password" />
+            </div>
+            <button type="submit" class="btn primary" id="loginBtn">Login</button>
+          </div>
+        </form>
         </div>
       </div>
     </div>

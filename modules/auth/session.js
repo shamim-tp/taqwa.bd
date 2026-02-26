@@ -3,6 +3,66 @@ import { getCurrentUser, getCurrentRole, logout } from './auth.js';
 import { showToast } from '../utils/common.js';
 
 let currentPage = null;
+// ইভেন্ট লিসেনার যাতে একাধিকবার না লাগে, তার জন্য ফ্ল্যাগ
+let isAppInitialized = false;
+
+// পৃষ্ঠার শিরোনাম ও মডিউল ম্যাপিং কনফিগারেশন
+const PAGE_TITLES = {
+  admin_dashboard: 'Admin Dashboard',
+  admin_members: 'Member Management',
+  admin_deposits: 'Deposit Management',
+  admin_investments: 'Investments',
+  admin_expenses: 'Expenses',
+  admin_sales: 'Sales',
+  admin_profit: 'Profit Distribution',
+  admin_resign: 'Resignation & Settlement',
+  admin_notices: 'Notices',
+  admin_reports: 'Reports',
+  admin_admins: 'Admin Accounts',
+  admin_logs: 'Activity Logs',
+  member_dashboard: 'Member Dashboard',
+  member_profile: 'My Profile',
+  member_deposit: 'Submit Deposit',
+  member_deposit_history: 'Deposit History',
+  member_investments: 'Investments',
+  member_profit: 'Profit & Shares',
+  member_notices: 'Notices'
+};
+
+const MODULE_MAP = {
+  admin_dashboard: () => import('../admin/dashboard.js').then(m => m.renderAdminDashboard()),
+  admin_members: () => import('../admin/members.js').then(m => m.renderAdminMembers()),
+  admin_deposits: () => import('../admin/deposits.js').then(m => m.renderAdminDeposits()),
+  admin_investments: () => import('../admin/investments.js').then(m => m.renderAdminInvestments()),
+  admin_expenses: () => import('../admin/expenses.js').then(m => m.renderAdminExpenses()),
+  admin_sales: () => import('../admin/sales.js').then(m => m.renderAdminSales()),
+  admin_profit: () => import('../admin/profit.js').then(m => m.renderAdminProfit()),
+  admin_resign: () => import('../admin/resignations.js').then(m => m.renderAdminResign()),
+  admin_notices: () => import('../admin/notices.js').then(m => m.renderAdminNotices()),
+  admin_reports: () => import('../admin/reports.js').then(m => m.renderAdminReports()),
+  admin_admins: () => import('../admin/admins.js').then(m => m.renderAdminAdmins()),
+  admin_logs: () => import('../admin/logs.js').then(m => m.renderAdminLogs()),
+  member_dashboard: () => import('../member/dashboard.js').then(m => m.renderMemberDashboard()),
+  member_profile: () => import('../member/profile.js').then(m => m.renderMemberProfile()),
+  member_deposit: () => import('../member/deposit.js').then(m => m.renderMemberDeposit()),
+  member_deposit_history: () => import('../member/deposit-history.js').then(m => m.renderMemberDepositHistory()),
+  member_investments: () => import('../member/investments.js').then(m => m.renderMemberInvestments()),
+  member_profit: () => import('../member/profit.js').then(m => m.renderMemberProfit()),
+  member_notices: () => import('../member/notices.js').then(m => m.renderMemberNotices())
+};
+
+// লোডিং ফাংশন চেক করার ইউটিলিটি
+function safeShowLoading(message) {
+  if (typeof window.showLoading === 'function') {
+    window.showLoading(message);
+  }
+}
+
+function safeHideLoading() {
+  if (typeof window.hideLoading === 'function') {
+    window.hideLoading();
+  }
+}
 
 export async function logActivity(action, details) {
   try {
@@ -17,6 +77,8 @@ export async function logActivity(action, details) {
     });
   } catch (error) {
     console.error('Error logging activity:', error);
+    // অপশনাল: ব্যবহারকারীকে জানানো (কম গুরুত্বপূর্ণ হলে নাও দেখাতে পারেন)
+    // showToast('Warning', 'Activity log failed, but action completed.');
   }
 }
 
@@ -33,19 +95,34 @@ export function startApp() {
 
   document.getElementById('currentUserName').textContent = user.name;
   document.getElementById('currentUserRole').textContent = user.role || role;
-  document.getElementById('chipId').textContent = `ID: ${user.id}`;
-  document.getElementById('chipStatus').textContent = user.status || 'Active';
+  
+  // chip এলিমেন্ট চেক করা
+  const chipIdEl = document.getElementById('chipId');
+  if (chipIdEl) chipIdEl.textContent = `ID: ${user.id}`;
+  
+  const chipStatusEl = document.getElementById('chipStatus');
+  if (chipStatusEl) chipStatusEl.textContent = user.status || 'Active';
+  
   document.getElementById('systemMode').textContent = role.toUpperCase();
 
   const systemToolsBtn = document.getElementById('systemToolsBtn');
   const quickAddBtn = document.getElementById('quickAddBtn');
+
   if (role === 'admin') {
     systemToolsBtn.style.display = 'inline-block';
     quickAddBtn.style.display = 'inline-block';
-    systemToolsBtn.addEventListener('click', () => {
+
+    // আগের লিসেনার সরানোর জন্য বাটন ক্লোন করা
+    const newSystemToolsBtn = systemToolsBtn.cloneNode(true);
+    const newQuickAddBtn = quickAddBtn.cloneNode(true);
+    systemToolsBtn.parentNode.replaceChild(newSystemToolsBtn, systemToolsBtn);
+    quickAddBtn.parentNode.replaceChild(newQuickAddBtn, quickAddBtn);
+
+    // নতুন লিসেনার যোগ
+    newSystemToolsBtn.addEventListener('click', () => {
       import('../modals/system-tools.js').then(m => m.openSystemToolsModal());
     });
-    quickAddBtn.addEventListener('click', () => {
+    newQuickAddBtn.addEventListener('click', () => {
       import('../modals/quick-add.js').then(m => m.openQuickAddModal());
     });
   } else {
@@ -53,10 +130,15 @@ export function startApp() {
     quickAddBtn.style.display = 'none';
   }
 
-  document.getElementById('logoutBtn').addEventListener('click', handleLogout);
+  // লগআউট বাটনের জন্যও একই পদ্ধতি (নিরাপদে)
+  const logoutBtn = document.getElementById('logoutBtn');
+  const newLogoutBtn = logoutBtn.cloneNode(true);
+  logoutBtn.parentNode.replaceChild(newLogoutBtn, logoutBtn);
+  newLogoutBtn.addEventListener('click', handleLogout);
 
   buildSidebar();
   navigateTo(role === 'admin' ? 'admin_dashboard' : 'member_dashboard');
+  isAppInitialized = true;
 }
 
 export function buildSidebar() {
@@ -98,6 +180,8 @@ export function buildSidebar() {
   navItems.forEach(item => {
     const btn = document.createElement('button');
     btn.className = currentPage === item.id ? 'active' : '';
+    // অ্যাক্সেসিবিলিটির জন্য aria-label যোগ
+    btn.setAttribute('aria-label', item.name);
     btn.innerHTML = `<span>${item.icon} ${item.name}</span><span class="count">›</span>`;
     if (item.id === 'company_info') {
       btn.addEventListener('click', () => {
@@ -117,60 +201,18 @@ export function navigateTo(page) {
   const sidebar = document.getElementById('sidebar');
   if (sidebar) sidebar.classList.remove('active');
 
-  const pageTitles = {
-    'admin_dashboard': 'Admin Dashboard',
-    'admin_members': 'Member Management',
-    'admin_deposits': 'Deposit Management',
-    'admin_investments': 'Investments',
-    'admin_expenses': 'Expenses',
-    'admin_sales': 'Sales',
-    'admin_profit': 'Profit Distribution',
-    'admin_resign': 'Resignation & Settlement',
-    'admin_notices': 'Notices',
-    'admin_reports': 'Reports',
-    'admin_admins': 'Admin Accounts',
-    'admin_logs': 'Activity Logs',
-    'member_dashboard': 'Member Dashboard',
-    'member_profile': 'My Profile',
-    'member_deposit': 'Submit Deposit',
-    'member_deposit_history': 'Deposit History',
-    'member_investments': 'Investments',
-    'member_profit': 'Profit & Shares',
-    'member_notices': 'Notices'
-  };
-  setPageTitle(pageTitles[page] || page.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()));
+  const title = PAGE_TITLES[page] || page.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+  setPageTitle(title);
 
   loadPageModule(page);
 }
 
 async function loadPageModule(page) {
   try {
-    window.showLoading('Loading page...');
+    safeShowLoading('Loading page...');
 
-    const moduleMap = {
-      'admin_dashboard': () => import('../admin/dashboard.js').then(m => m.renderAdminDashboard()),
-      'admin_members': () => import('../admin/members.js').then(m => m.renderAdminMembers()),
-      'admin_deposits': () => import('../admin/deposits.js').then(m => m.renderAdminDeposits()),
-      'admin_investments': () => import('../admin/investments.js').then(m => m.renderAdminInvestments()),
-      'admin_expenses': () => import('../admin/expenses.js').then(m => m.renderAdminExpenses()),
-      'admin_sales': () => import('../admin/sales.js').then(m => m.renderAdminSales()),
-      'admin_profit': () => import('../admin/profit.js').then(m => m.renderAdminProfit()),
-      'admin_resign': () => import('../admin/resignations.js').then(m => m.renderAdminResign()),
-      'admin_notices': () => import('../admin/notices.js').then(m => m.renderAdminNotices()),
-      'admin_reports': () => import('../admin/reports.js').then(m => m.renderAdminReports()),
-      'admin_admins': () => import('../admin/admins.js').then(m => m.renderAdminAdmins()),
-      'admin_logs': () => import('../admin/logs.js').then(m => m.renderAdminLogs()),
-      'member_dashboard': () => import('../member/dashboard.js').then(m => m.renderMemberDashboard()),
-      'member_profile': () => import('../member/profile.js').then(m => m.renderMemberProfile()),
-      'member_deposit': () => import('../member/deposit.js').then(m => m.renderMemberDeposit()),
-      'member_deposit_history': () => import('../member/deposit-history.js').then(m => m.renderMemberDepositHistory()),
-      'member_investments': () => import('../member/investments.js').then(m => m.renderMemberInvestments()),
-      'member_profit': () => import('../member/profit.js').then(m => m.renderMemberProfit()),
-      'member_notices': () => import('../member/notices.js').then(m => m.renderMemberNotices())
-    };
-
-    if (moduleMap[page]) {
-      await moduleMap[page]();
+    if (MODULE_MAP[page]) {
+      await MODULE_MAP[page]();
     } else {
       document.getElementById('pageContent').innerHTML = '<div class="panel"><h2>Page Not Found</h2><p>The requested page does not exist.</p></div>';
     }
@@ -179,7 +221,7 @@ async function loadPageModule(page) {
     showToast('Error', `Failed to load ${page}`);
     document.getElementById('pageContent').innerHTML = '<div class="panel"><h2>Error Loading Page</h2><p>Please try again.</p></div>';
   } finally {
-    window.hideLoading();
+    safeHideLoading();
   }
 }
 
@@ -198,9 +240,12 @@ async function handleLogout() {
     document.getElementById('loginId').value = '';
     document.getElementById('loginPass').value = '';
     showToast('Logged Out', 'You have been logged out successfully');
+    isAppInitialized = false; // পুনরায় লগইনে ফ্ল্যাগ রিসেট
   }
 }
 
+// গ্লোবাল এক্সপোজ না করেও যদি দরকার হয়, তাহলে ইভেন্ট ডিসপ্যাচ ব্যবহার করা যেতে পারে
+// বর্তমান কোডে window তে অ্যাসাইন রাখা হচ্ছে (পেছনের compatibility-র জন্য)
 window.navigateTo = navigateTo;
 window.setPageTitle = setPageTitle;
 window.logActivity = logActivity;

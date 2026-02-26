@@ -223,7 +223,7 @@ export function numberToWords(num) {
   const tens = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty',
     'Sixty', 'Seventy', 'Eighty', 'Ninety'];
 
-  if (num === 0) return 'Zero';
+  if (num == 0) return 'Zero';
 
   let words = '';
 
@@ -290,7 +290,7 @@ export const BANGLADESH_DISTRICTS = [
 ];
 
 export const BANGLADESH_BANKS = [
-  "Sonali Bank", "Janata Bank", "Agrani Bank", "Rupali Bank",
+  "NRB Bank", "Sonali Bank", "Janata Bank", "Agrani Bank", "Rupali Bank",
   "Islami Bank Bangladesh", "Dutch-Bangla Bank",
   "BRAC Bank", "City Bank", "Eastern Bank", "Standard Bank"
 ];

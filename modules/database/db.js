@@ -16,7 +16,7 @@ import {
 
 // Firestore অনুমোদিত অপারেটর
 const VALID_OPERATORS = [
-  '<', '<=', '==', '!=', '>=', '>', 
+  '<', '<=', '==', '===', '!=', '>=', '>', 
   'array-contains', 'array-contains-any', 'in', 'not-in'
 ];
 

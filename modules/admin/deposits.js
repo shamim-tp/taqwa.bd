@@ -47,13 +47,19 @@ export async function renderAdminDeposits() {
 
   document.getElementById('pageContent').innerHTML = html;
 
-  // Event listeners
+  // ইভেন্ট লিসেনার – রিফ্রেশ ও অ্যাড ক্যাশ MR
   document.getElementById('refreshDeposits').addEventListener('click', renderAdminDeposits);
   document.getElementById('addCashMRBtn').addEventListener('click', addCashMR);
+
+  // পেন্ডিং ও অ্যাপ্রুভড টেবিলের জন্য ইভেন্ট অ্যাটাচ (DOM আপডেট হওয়ার পর)
+  setTimeout(() => {
+    attachPendingEvents();
+    attachApprovedEvents();
+  }, 0);
 }
 
 // ------------------------------------------------------------
-// Render Deposit Table (Pending/Approved)
+// Render Deposit Table (Pending/Approved) – শুধু HTML তৈরি করে
 // ------------------------------------------------------------
 async function renderDepositTable(list, isPending) {
   const db = getDatabase();
@@ -88,28 +94,6 @@ async function renderDepositTable(list, isPending) {
   const colspan = isPending ? 8 : 7;
   const tbody = rows || `<tr><td colspan="${colspan}" class="small">No records found.</td></tr>`;
 
-  // Attach row actions
-  setTimeout(() => {
-    if (isPending) {
-      document.querySelectorAll('.approve-deposit').forEach(btn =>
-        btn.addEventListener('click', () => approveDeposit(btn.dataset.id))
-      );
-      document.querySelectorAll('.reject-deposit').forEach(btn =>
-        btn.addEventListener('click', () => rejectDeposit(btn.dataset.id))
-      );
-      document.querySelectorAll('.view-slip').forEach(btn =>
-        btn.addEventListener('click', () => viewSlip(btn.dataset.id))
-      );
-    } else {
-      document.querySelectorAll('.view-mr').forEach(btn =>
-        btn.addEventListener('click', () => viewMRReceipt(btn.dataset.id))
-      );
-      document.querySelectorAll('.print-mr').forEach(btn =>
-        btn.addEventListener('click', () => printMR(btn.dataset.id))
-      );
-    }
-  }, 100);
-
   return `
     <table>
       <thead>
@@ -127,6 +111,33 @@ async function renderDepositTable(list, isPending) {
       <tbody>${tbody}</tbody>
     </table>
   `;
+}
+
+// ------------------------------------------------------------
+// পেন্ডিং ডিপোজিট বাটনগুলোর জন্য ইভেন্ট লিসেনার
+// ------------------------------------------------------------
+function attachPendingEvents() {
+  document.querySelectorAll('.approve-deposit').forEach(btn =>
+    btn.addEventListener('click', () => approveDeposit(btn.dataset.id))
+  );
+  document.querySelectorAll('.reject-deposit').forEach(btn =>
+    btn.addEventListener('click', () => rejectDeposit(btn.dataset.id))
+  );
+  document.querySelectorAll('.view-slip').forEach(btn =>
+    btn.addEventListener('click', () => viewSlip(btn.dataset.id))
+  );
+}
+
+// ------------------------------------------------------------
+// অ্যাপ্রুভড ডিপোজিট বাটনগুলোর জন্য ইভেন্ট লিসেনার
+// ------------------------------------------------------------
+function attachApprovedEvents() {
+  document.querySelectorAll('.view-mr').forEach(btn =>
+    btn.addEventListener('click', () => viewMRReceipt(btn.dataset.id))
+  );
+  document.querySelectorAll('.print-mr').forEach(btn =>
+    btn.addEventListener('click', () => printMR(btn.dataset.id))
+  );
 }
 
 // ------------------------------------------------------------
@@ -172,7 +183,7 @@ async function addCashMR() {
     'July', 'August', 'September', 'October', 'November', 'December'
   ].map(m => `<option value="${m}" ${m === new Date().toLocaleString('default', { month: 'long' }) ? 'selected' : ''}>${m}</option>`).join('');
 
-  // HTML for Cash MR Modal (onchange attribute সরানো হয়েছে)
+  // HTML for Cash MR Modal
   const html = `
     <div class="panel">
       <h3>Add Cash Money Receipt</h3>

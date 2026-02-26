@@ -192,20 +192,22 @@ export async function renderMemberProfile() {
     <div class="hr"></div>
     <h3>Password Update</h3>
 
-    <div class="row row-2">
-      <div>
-        <label>New Password</label>
-        <input id="up_pass" type="password"/>
+    <!-- 🔐 পাসওয়ার্ড ফর্ম (এখন <form> এর ভিতরে) -->
+    <form id="passwordUpdateForm" onsubmit="event.preventDefault();">
+      <div class="row row-2">
+        <div>
+          <label>New Password</label>
+          <input id="up_pass" type="password" autocomplete="new-password"/>
+        </div>
+        <div>
+          <label>Confirm Password</label>
+          <input id="up_pass2" type="password" autocomplete="new-password"/>
+        </div>
       </div>
-      <div>
-        <label>Confirm Password</label>
-        <input id="up_pass2" type="password"/>
-      </div>
-    </div>
-
-    <button class="btn success" id="updatePasswordBtn">
-      Update Password
-    </button>
+      <button type="submit" class="btn success" id="updatePasswordBtn">
+        Update Password
+      </button>
+    </form>
 
   </div>
   `;
@@ -236,8 +238,9 @@ export async function renderMemberProfile() {
   });
 
 
-  // ✅ Password Update Button (Completely Separate)
-  document.getElementById('updatePasswordBtn')?.addEventListener('click', async () => {
+  // ✅ Password Update Form (সাবমিট ইভেন্ট)
+  document.getElementById('passwordUpdateForm')?.addEventListener('submit', async (e) => {
+    e.preventDefault(); // পৃষ্ঠা রিলোড বন্ধ করতে
     await memberUpdatePassword(m);
   });
 }

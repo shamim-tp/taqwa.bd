@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>TAQWA PROPERTIES BD - ERP</title>
   <link rel="stylesheet" href="style.css">
-  <!-- Firebase SDK (প্রয়োজনে) -->
+  <!-- Firebase SDK (প্রয়োজন অনুযায়ী) -->
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
   <script type="module" src="script.js"></script>
@@ -22,16 +22,13 @@
   <!-- টোস্ট বার্তা -->
   <div class="toastWrap" id="toastWrap"></div>
 
-  <!-- লগইন পৃষ্ঠা (শুধু লগইন অপশন) -->
+  <!-- লগইন পৃষ্ঠা (প্রথমে দৃশ্যমান) -->
   <div id="loginPage" class="loginWrap">
     <div class="loginCard">
       <div class="loginGrid">
         <div class="loginLeft">
-          <!-- লোগো যোগ করুন -->
-          <img src="images/logo.png" alt="TAQWA PROPERTIES BD" class="company-logo">
           <h1>TAQWA PROPERTIES BD</h1>
-          <p>Professional Investment Management ERP System</p>
-          <p class="slogan">Trust & Excellence</p>
+          <!-- প্রতিষ্ঠানের স্লোগান/ছবি দেওয়া যেতে পারে -->
         </div>
         <div class="loginRight">
           <div class="tabs">
@@ -54,45 +51,47 @@
     </div>
   </div>
 
-  <!-- অ্যাপ পৃষ্ঠা (আপনার আগের কাঠামো) -->
-  <div id="appPage" class="app">
-    <button class="mobile-menu-btn" id="mobileMenuBtn">☰ Menu</button>
-    <div class="sidebar" id="sidebar">
-      <div class="brand">
-        <div>
-          <h2>TAQWA PROPERTIES BD</h2>
-          <div class="small">ERP System</div>
-        </div>
-        <div class="badge" id="systemMode">ADMIN</div>
+  <!-- মূল অ্যাপ পৃষ্ঠা (লগইনের পর দেখা যাবে) -->
+  <div id="appPage" style="display: none;">
+    <!-- হেডার / টুলবার -->
+    <div class="app-header">
+      <div class="user-info">
+        <span id="currentUserName"></span>
+        <span id="currentUserRole"></span>
       </div>
-      <div class="userBox">
-        <div class="name" id="currentUserName">-</div>
-        <div class="role" id="currentUserRole">-</div>
-        <div class="mini">
-          <span class="chip" id="chipId">ID: -</span>
-          <span class="chip" id="chipStatus">Active</span>
-        </div>
+      <div class="chip-info">
+        <span id="chipId"></span>
+        <span id="chipStatus"></span>
       </div>
-      <div class="navTitle">Navigation</div>
-      <div class="nav" id="sidebarNav"></div>
-      <button class="logoutBtn" id="logoutBtn">Logout</button>
+      <div class="system-mode">
+        Mode: <span id="systemMode"></span>
+      </div>
+      <div class="admin-tools">
+        <button id="systemToolsBtn" style="display: none;">System Tools</button>
+        <button id="quickAddBtn" style="display: none;">Quick Add</button>
+      </div>
+      <button id="logoutBtn">Logout</button>
     </div>
-    <div class="main">
-      <div class="topbar">
-        <div>
-          <h1 id="pageTitle">Dashboard</h1>
-          <p id="pageSubtitle">Welcome to TAQWA PROPERTIES ERP</p>
-        </div>
-        <div class="rightTop">
-          <button class="btn hidden" id="systemToolsBtn">System Tools</button>
-          <button class="btn primary hidden" id="quickAddBtn">Quick Add</button>
-        </div>
+
+    <!-- প্রধান বডি: সাইডবার + কন্টেন্ট -->
+    <div class="app-body">
+      <!-- সাইডবার -->
+      <div class="sidebar" id="sidebar">
+        <nav id="sidebarNav"></nav>
       </div>
-      <div id="pageContent"></div>
+
+      <!-- মূল কন্টেন্ট এলাকা -->
+      <div class="main-content">
+        <div class="page-header">
+          <h2 id="pageTitle"></h2>
+          <p id="pageSubtitle"></p>
+        </div>
+        <div id="pageContent"></div>
+      </div>
     </div>
   </div>
 
-  <!-- মডাল কন্টেইনার -->
+  <!-- মডাল কন্টেইনার (ডায়নামিক মডাল লোডের জন্য) -->
   <div id="modalsContainer"></div>
 </body>
 </html>

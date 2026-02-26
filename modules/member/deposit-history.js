@@ -38,7 +38,7 @@ export async function renderMemberDepositHistory() {
 
   // Fetch deposits of current member
   const deposits = await db.query('deposits', [
-    { field: 'memberId', operator: '===', value: user.id }
+    { field: 'memberId', operator: '==', value: user.id }
   ]) || [];
 
   // Sort by submitted date (latest first)
@@ -97,9 +97,9 @@ export async function renderMemberDepositHistory() {
 
                 <td>
                   <span class="status ${
-                    d.status === 'PENDING'
+                    d.status == 'PENDING'
                       ? 'st-pending'
-                      : d.status === 'APPROVED'
+                      : d.status == 'APPROVED'
                         ? 'st-approved'
                         : 'st-rejected'
                   }">
@@ -111,7 +111,7 @@ export async function renderMemberDepositHistory() {
 
                 <td>
                   ${
-                    d.status === 'APPROVED' && d.mrId
+                    d.status == 'APPROVED' && d.mrId
                       ? `<button class="btn view-mr-receipt" data-id="${d.id}">
                           View MR
                         </button>`

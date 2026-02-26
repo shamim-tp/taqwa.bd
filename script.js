@@ -104,4 +104,4 @@ window.addEventListener('error', function(event) {
 window.showLoading = showLoading;
 window.hideLoading = hideLoading;
 window.showToast = showToast;
-window.getDatabase = getDatabase;/// script.js
+window.getDatabase = getDatabase;

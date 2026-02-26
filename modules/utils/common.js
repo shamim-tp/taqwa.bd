@@ -290,7 +290,7 @@ export const BANGLADESH_DISTRICTS = [
 ];
 
 export const BANGLADESH_BANKS = [
-  "Sonali Bank", "Janata Bank", "Agrani Bank", "Rupali Bank",
+ "NRB Bank", "Sonali Bank", "Janata Bank", "Agrani Bank", "Rupali Bank",
   "Islami Bank Bangladesh", "Dutch-Bangla Bank",
   "BRAC Bank", "City Bank", "Eastern Bank", "Standard Bank"
 ];

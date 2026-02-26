@@ -304,7 +304,25 @@ export const bloodGroupList = [
   "A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"
 ];
 
+// utils/common.js
 
+/**
+ * Base64 ছবি ডাউনলোড করার ফাংশন
+ * @param {string} base64String - ছবির base64 ডাটা (যেমন "data:image/png;base64,...")
+ * @param {string} filename - ডাউনলোড ফাইলের নাম (যেমন "member_photo.png")
+ */
+export function downloadBase64Image(base64String, filename) {
+  if (!base64String) {
+    showToast('Error', 'No image data found');
+    return;
+  }
+  const link = document.createElement('a');
+  link.href = base64String;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
 
 // ============================================================
 // 🌍 GLOBAL WINDOW EXPORTS (For Inline HTML usage)

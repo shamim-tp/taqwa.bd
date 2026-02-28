@@ -10,6 +10,14 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
   <script type="module" src="script.js"></script>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏢</text></svg>">
+
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+
+<script>
+   emailjs.init("xcS33ZLabXqHGMPuw");
+</script>
+
+  
 </head>
 <body>
   <!-- লোডিং ওভারলে -->
@@ -90,6 +98,7 @@
         <div class="rightTop">
           <button class="btn hidden" id="systemToolsBtn">System Tools</button>
           <button class="btn primary hidden" id="quickAddBtn">Quick Add</button>
+          <button onclick="sendTestEmail()">Test Email</button>
           
         </div>
       </div>

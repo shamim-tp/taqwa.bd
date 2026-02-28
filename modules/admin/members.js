@@ -11,6 +11,7 @@ import {
 } from '../utils/common.js';
 
 import { openViewerModal } from '../modals/viewer.js';
+import { previewMemberBioData, downloadMemberBioData } from '../modals/member-bio.js';
 
 // Optional notification functions
 const sendWhatsAppNotification = () => {};  
@@ -726,6 +727,13 @@ async function openMemberForUpdate(memberId) {
         <div class="hr"></div>
         <button class="btn success" id="updateMemberBtn">Update Information</button>
         <button class="btn" id="cancelUpdateBtn">Cancel</button>
+
+        // Tools কলামের ভিতর
+        <td>
+          <button class="btn view-member" data-id="${m.id}">View</button>
+          <button class="btn info bio-data-btn" data-id="${m.id}" onclick="previewMemberBioData('${m.id}')">📄 Bio-data</button>
+          // ... অন্যান্য বাটন
+        </td>
       </div>
     `;
 
@@ -803,3 +811,8 @@ function filterMembers() {
     row.style.display = row.textContent.toLowerCase().includes(search) ? '' : 'none';
   });
 }
+// প্রিভিউ দেখানোর জন্য
+await previewMemberBioData('FM-001');
+
+// সরাসরি ডাউনলোডের জন্য
+await downloadMemberBioData('FM-001');

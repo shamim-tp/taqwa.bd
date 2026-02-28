@@ -59,7 +59,7 @@ export async function renderAdminDeposits() {
 }
 
 // ------------------------------------------------------------
-// Render Deposit Table (Pending/Approved)
+// Render Deposit Table (Pending/Approved) - UPDATED with Send Receipt buttons
 // ------------------------------------------------------------
 async function renderDepositTable(list, isPending) {
   const db = getDatabase();
@@ -82,10 +82,18 @@ async function renderDepositTable(list, isPending) {
             <button class="btn success approve-deposit" data-id="${d.id}">Approve</button>
             <button class="btn danger reject-deposit" data-id="${d.id}">Reject</button>
             <button class="btn view-slip" data-id="${d.id}">View Slip</button>
+            ${d.mrId ? `
+              <button class="btn info send-receipt-image" data-id="${d.id}" title="Send Receipt as Image (WhatsApp)">
+                📸 Send Image
+              </button>
+            ` : ''}
           </td>` : `
           <td>
             <button class="btn view-mr" data-id="${d.id}">View MR</button>
             <button class="btn print-mr" data-id="${d.id}">Print</button>
+            <button class="btn info send-receipt-image" data-id="${d.id}" title="Send Receipt as Image (WhatsApp)">
+              📸 Send Image
+            </button>
           </td>`}
       </tr>
     `;
@@ -105,7 +113,7 @@ async function renderDepositTable(list, isPending) {
           <th>Payment Method</th>
           <th>Status</th>
           <th>MR ID</th>
-          ${isPending ? '<th>Action</th>' : '<th>Tools</th>'}
+          ${isPending ? '<th style="min-width: 400px;">Action</th>' : '<th style="min-width: 350px;">Tools</th>'}
         </tr>
       </thead>
       <tbody>${tbody}</tbody>
@@ -114,7 +122,7 @@ async function renderDepositTable(list, isPending) {
 }
 
 // ------------------------------------------------------------
-// Pending deposit button event listeners
+// Pending deposit button event listeners - UPDATED
 // ------------------------------------------------------------
 function attachPendingEvents() {
   document.querySelectorAll('.approve-deposit').forEach(btn =>
@@ -126,10 +134,13 @@ function attachPendingEvents() {
   document.querySelectorAll('.view-slip').forEach(btn =>
     btn.addEventListener('click', () => viewSlip(btn.dataset.id))
   );
+  document.querySelectorAll('.send-receipt-image').forEach(btn =>
+    btn.addEventListener('click', () => sendMoneyReceiptAsImage(btn.dataset.id))
+  );
 }
 
 // ------------------------------------------------------------
-// Approved deposit button event listeners
+// Approved deposit button event listeners - UPDATED
 // ------------------------------------------------------------
 function attachApprovedEvents() {
   document.querySelectorAll('.view-mr').forEach(btn =>
@@ -137,6 +148,9 @@ function attachApprovedEvents() {
   );
   document.querySelectorAll('.print-mr').forEach(btn =>
     btn.addEventListener('click', () => printMR(btn.dataset.id))
+  );
+  document.querySelectorAll('.send-receipt-image').forEach(btn =>
+    btn.addEventListener('click', () => sendMoneyReceiptAsImage(btn.dataset.id))
   );
 }
 
@@ -197,6 +211,246 @@ async function sendNotificationToMember(member, deposit, type) {
   if (member.email) {
     console.log(`Email to ${member.email}: ${notification.message}`);
     console.log(`Email attachment: Money Receipt MR-${deposit.mrId} sent to ${member.email}`);
+  }
+}
+
+// ------------------------------------------------------------
+// Send Money Receipt as Image to Member - EXACT SAME AS VIEW
+// ------------------------------------------------------------
+async function sendMoneyReceiptAsImage(depositId) {
+  try {
+    const db = getDatabase();
+    const deposit = await db.get('deposits', depositId);
+    if (!deposit) {
+      showToast('Error', 'Deposit not found');
+      return;
+    }
+
+    if (!deposit.mrId) {
+      showToast('Error', 'No MR ID found for this deposit');
+      return;
+    }
+
+    const member = await db.get('members', deposit.memberId);
+    if (!member) {
+      showToast('Error', 'Member not found');
+      return;
+    }
+
+    // Check if member has phone or email
+    if (!member.phone && !member.email) {
+      showToast('Error', 'Member has no phone or email');
+      return;
+    }
+
+    const meta = await db.get('meta', 'system') || {};
+
+    const confirmSend = confirm(
+      `Send Money Receipt to ${member.name}?\n\n` +
+      `🧾 MR ID: ${deposit.mrId}\n` +
+      `💰 Amount: ${formatMoney(deposit.amount)}\n` +
+      `📆 Month: ${deposit.month} ${deposit.year}\n\n` +
+      `📱 Phone: ${member.phone || 'Not provided'}\n` +
+      `📧 Email: ${member.email || 'Not provided'}\n\n` +
+      `Press OK to send receipt as IMAGE via WhatsApp & Email.`
+    );
+    
+    if (!confirmSend) return;
+
+    showToast('Sending', 'Generating receipt image...', 'info');
+    
+    // Generate the EXACT SAME receipt HTML as view
+    const receiptHTML = generateMRReceipt(deposit, member, meta);
+    
+    // Create a temporary container for the receipt
+    const container = document.createElement('div');
+    container.style.position = 'absolute';
+    container.style.left = '-9999px';
+    container.style.top = '-9999px';
+    container.style.width = '700px';
+    container.style.background = 'white';
+    container.style.borderRadius = '18px';
+    container.style.overflow = 'hidden';
+    container.style.boxShadow = '0 10px 30px rgba(0,0,0,0.1)';
+    container.innerHTML = receiptHTML;
+    document.body.appendChild(container);
+
+    // Load html2canvas from CDN if not already loaded
+    if (!window.html2canvas) {
+      const script = document.createElement('script');
+      script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+      document.head.appendChild(script);
+      
+      // Wait for script to load
+      await new Promise((resolve, reject) => {
+        script.onload = resolve;
+        script.onerror = reject;
+      });
+    }
+
+    // Convert receipt to image
+    const canvas = await window.html2canvas(container, {
+      scale: 2,
+      backgroundColor: '#ffffff',
+      allowTaint: false,
+      useCORS: true,
+      logging: false,
+      windowWidth: 700,
+      windowHeight: container.scrollHeight
+    });
+
+    // Remove temporary container
+    document.body.removeChild(container);
+
+    // Convert canvas to blob
+    const imageBlob = await new Promise(resolve => {
+      canvas.toBlob(resolve, 'image/png', 1.0);
+    });
+
+    // Create image URL
+    const imageUrl = URL.createObjectURL(imageBlob);
+
+    // For WhatsApp - send as image with caption
+    const date = new Date(deposit.approvedAt || deposit.submittedAt || new Date());
+    const formattedDate = date.toLocaleDateString('en-US', { 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric' 
+    });
+
+    const approvedByName = deposit.approvedByName || 'Admin';
+    
+    const whatsappCaption = 
+`🏦 *${meta?.companyName || "Taqwa Properties BD"}*
+🧾 *Money Receipt - ${deposit.mrId}*
+📅 Date: ${formattedDate}
+━━━━━━━━━━━━━━━━━━━━━
+👤 Member: ${member?.name || 'N/A'} (${deposit.memberId})
+💰 Amount: ${formatMoney(deposit.amount)}
+📆 Month: ${deposit.month} ${deposit.year}
+━━━━━━━━━━━━━━━━━━━━━
+✅ Approved by: ${approvedByName}
+━━━━━━━━━━━━━━━━━━━━━
+
+Thank you for your payment!`;
+
+    // For Email - send HTML with embedded image
+    const emailMsg = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="UTF-8">
+        <title>Money Receipt - ${deposit.mrId}</title>
+        <style>
+          body { 
+            font-family: 'Segoe UI', Arial, sans-serif; 
+            margin: 0;
+            padding: 20px;
+            background: #f0f2f5;
+          }
+          .email-container {
+            max-width: 700px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 18px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+          }
+          .header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+          }
+          .content {
+            padding: 30px;
+          }
+          .footer {
+            background: #f8f9fa;
+            padding: 20px;
+            text-align: center;
+            color: #666;
+            font-size: 11px;
+            border-top: 1px solid #dee2e6;
+          }
+          .receipt-image {
+            max-width: 100%;
+            height: auto;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            margin: 20px 0;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="email-container">
+          <div class="header">
+            <h2 style="margin:0; font-size:28px;">🏦 ${meta?.companyName || "Taqwa Properties BD"}</h2>
+            <p style="margin:5px 0; opacity:0.9;">${meta?.companyAddress || "Dhaka, Bangladesh"}</p>
+            <p style="margin:5px 0; opacity:0.8;">📞 ${meta?.companyPhone || "+8801344119333"}</p>
+          </div>
+          
+          <div class="content">
+            <p>Dear ${member.name},</p>
+            <p>Your Money Receipt is attached below:</p>
+            
+            <!-- Embedded Image -->
+            <img src="cid:receipt-image" alt="Money Receipt" class="receipt-image"/>
+            
+            <p style="margin-top:20px;">Thank you for your payment!</p>
+          </div>
+          
+          <div class="footer">
+            <p style="margin:0 0 5px;">*** This is a computer generated receipt. No signature required. ***</p>
+            <p style="margin:0;">Sent on: ${new Date().toLocaleString()}</p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `;
+
+    // Send via both channels
+    let whatsappSent = false;
+    let emailSent = false;
+
+    if (member.phone) {
+      // In production, replace with actual WhatsApp API call that supports images
+      console.log(`📱 WhatsApp Image to ${member.phone}:`);
+      console.log('Image URL:', imageUrl);
+      console.log('Caption:', whatsappCaption);
+      
+      // Simulate successful send
+      whatsappSent = true;
+    }
+    
+    if (member.email) {
+      // In production, replace with actual Email API call with attachment
+      console.log(`📧 Email to ${member.email}:`);
+      console.log('Email HTML:', emailMsg);
+      console.log('Image attachment:', imageUrl);
+      
+      // Simulate successful send
+      emailSent = true;
+    }
+
+    // Clean up image URL after 5 seconds
+    setTimeout(() => URL.revokeObjectURL(imageUrl), 5000);
+
+    // Log activity
+    await logActivity('SEND_MONEY_RECEIPT_IMAGE', 
+      `Money Receipt ${deposit.mrId} sent to ${member.id} - WhatsApp: ${whatsappSent ? 'Yes' : 'No'}, Email: ${emailSent ? 'Yes' : 'No'}`
+    );
+
+    // Show success message
+    const channels = [];
+    if (whatsappSent) channels.push('WhatsApp (as Image)');
+    if (emailSent) channels.push('Email');
+    
+    showToast('✅ Success', `Money Receipt sent via ${channels.join(' & ')}`);
+    
+  } catch (error) {
+    console.error('sendMoneyReceiptAsImage error:', error);
+    showToast('❌ Error', 'Failed to send money receipt: ' + error.message);
   }
 }
 
@@ -606,7 +860,7 @@ function generateMRReceipt(deposit, member, meta) {
         </div>
       </div>
       
-      <!-- Approver Information Section (New) -->
+      <!-- Approver Information Section -->
       <div class="approver-info" style="background: #f0f7f0; padding: 15px; border-radius: 8px; margin: 20px 0; text-align: center; border: 1px dashed #27ae60;">
         <p style="margin:0 0 5px; color:#27ae60; font-weight:600;">✓ APPROVED & VERIFIED</p>
         <p style="margin:5px 0;"><strong>Approved By:</strong> ${approvedByName}</p>

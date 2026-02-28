@@ -1,7 +1,7 @@
 // ============================================================
 // 📄 MR RECEIPT MODAL MODULE
 // IMS ERP V5
-// Money Receipt Viewer Modal - UPDATED with Approver Info
+// Money Receipt Viewer Modal - FIXED VERSION
 // ============================================================
 
 import { openViewerModal } from './viewer.js';
@@ -22,17 +22,28 @@ function generateMRReceipt(deposit, member, meta) {
     day: 'numeric' 
   });
 
+  // Fix undefined values
+  const mrId = deposit.mrId || 'MR-PENDING';
+  const memberName = member?.name || 'N/A';
+  const memberId = deposit.memberId || 'N/A';
+  const month = deposit.month || 'N/A';
+  const year = deposit.year || new Date().getFullYear();
+  
+  // Format month display
+  const monthDisplay = month.includes('-') ? month.split('-')[1] : month;
+  const yearDisplay = year || new Date().getFullYear();
+
   // Approver information from deposit
-  const approvedByName = deposit.approvedByName || 'Admin';
-  const approvedByEmail = deposit.approvedByEmail || 'admin@ims.com';
-  const approvedAt = deposit.approvedAt ? new Date(deposit.approvedAt).toLocaleString() : 'N/A';
+  const approvedByName = deposit.approvedByName || 'System Admin';
+  const approvedByEmail = deposit.approvedByEmail || 'admin@taqwaproperties.com';
+  const approvedAt = deposit.approvedAt ? new Date(deposit.approvedAt).toLocaleString() : new Date().toLocaleString();
 
   return `
    <div class="receipt" style="max-width: 700px; margin: 0 auto; background: white; border-radius: 18px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
       <div class="header" style="background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); color: white; padding: 30px; text-align: center;">
         <h2 style="margin: 0 0 10px; font-size: 28px;">${meta?.companyName || "Taqwa Properties BD"}</h2>
         <p style="margin: 5px 0; opacity: 0.9;">${meta?.companyAddress || "Dhaka, Bangladesh"}</p>
-        <p style="margin: 5px 0; opacity: 0.8; font-size: 14px;">📞 ${meta?.companyPhone || "+8801344119333"} | ✉️ ${meta?.companyEmail || "shaque.shamim@gmail.com"}</p>
+        <p style="margin: 5px 0; opacity: 0.8; font-size: 14px;">📞 ${meta?.companyPhone || "+8801344119333"} | ✉️ ${meta?.companyEmail || "info@taqwaproperties.com"}</p>
       </div>
       
       <div style="padding: 30px;">
@@ -40,27 +51,27 @@ function generateMRReceipt(deposit, member, meta) {
         
         <div style="background: #f8f9fa; border-radius: 12px; padding: 20px; margin-bottom: 25px;">
           <div style="display: flex; justify-content: space-between; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px dashed #dee2e6;">
-            <div><strong style="color: #1e3c72;">MR No:</strong> <span style="font-size: 18px; font-weight: bold;">${deposit.mrId || deposit.id}</span></div>
+            <div><strong style="color: #1e3c72;">MR No:</strong> <span style="font-size: 18px; font-weight: bold;">${mrId}</span></div>
             <div><strong style="color: #1e3c72;">Date:</strong> ${formattedDate}</div>
           </div>
           
           <div style="display: flex; justify-content: space-between; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px dashed #dee2e6;">
-            <div><strong style="color: #1e3c72;">Received from:</strong> ${member?.name || "N/A"}</div>
-            <div><strong style="color: #1e3c72;">Member ID:</strong> <span style="background: #1e3c72; color: white; padding: 3px 10px; border-radius: 20px;">${deposit.memberId}</span></div>
+            <div><strong style="color: #1e3c72;">Received from:</strong> ${memberName}</div>
+            <div><strong style="color: #1e3c72;">Member ID:</strong> <span style="background: #1e3c72; color: white; padding: 3px 10px; border-radius: 20px;">${memberId}</span></div>
           </div>
           
           <div style="display: flex; justify-content: space-between; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px dashed #dee2e6;">
-            <div><strong style="color: #1e3c72;">For the month of:</strong> ${deposit.month} ${deposit.year}</div>
-            <div><strong style="color: #1e3c72;">Payment Method:</strong> ${deposit.paymentMethod}</div>
+            <div><strong style="color: #1e3c72;">For the month of:</strong> ${monthDisplay} ${yearDisplay}</div>
+            <div><strong style="color: #1e3c72;">Payment Method:</strong> ${deposit.paymentMethod || 'Cash'}</div>
           </div>
           
           <div style="display: flex; justify-content: space-between;">
-            <div><strong style="color: #1e3c72;">Transaction ID:</strong> ${deposit.trxId || "N/A"}</div>
+            <div><strong style="color: #1e3c72;">Transaction ID:</strong> ${deposit.trxId || 'N/A'}</div>
             <div></div>
           </div>
         </div>
         
-        <!-- APPROVER INFORMATION SECTION - NEW -->
+        <!-- APPROVER INFORMATION SECTION -->
         <div style="background: #f0f7f0; border-radius: 12px; padding: 15px; margin-bottom: 25px; text-align: center; border: 2px dashed #27ae60;">
           <div style="display: inline-block; background: #27ae60; color: white; padding: 5px 20px; border-radius: 30px; font-size: 14px; font-weight: 600; margin-bottom: 10px;">
             ✓ APPROVED & VERIFIED
@@ -100,15 +111,15 @@ function generateMRReceipt(deposit, member, meta) {
           <div style="text-align: center; flex: 1;">
             <div style="width: 200px; height: 1px; background: #333; margin: 0 auto 10px;"></div>
             <p style="margin: 0; font-weight: 600;">Authorized Signature</p>
-            <p style="margin: 5px 0 0; font-size: 12px; color: #666;">${approvedByName}</p>
-            <p style="margin: 2px 0 0; font-size: 10px; color: #999;">${approvedByEmail}</p>
+            <p style="margin: 5px 0 0; font-size: 12px; color: #1e3c72;">${approvedByName}</p>
+            <p style="margin: 2px 0 0; font-size: 10px; color: #666;">${approvedByEmail}</p>
           </div>
         </div>
         
         <div style="margin-top: 30px; font-size: 11px; text-align: center; color: #999; border-top: 1px solid #eee; padding-top: 20px;">
           <p style="margin: 0 0 5px;">*** This is a computer generated receipt. No signature required. ***</p>
           <p style="margin: 0;">Generated on: ${new Date().toLocaleString()}</p>
-          <p style="margin: 5px 0 0; font-size: 10px;">Document ID: ${deposit.mrId || deposit.id}</p>
+          <p style="margin: 5px 0 0; font-size: 10px;">Document ID: ${mrId}</p>
         </div>
       </div>
     </div>
@@ -126,13 +137,18 @@ export function openMRReceiptModal(deposit, member, meta) {
   
   // Get approver info for display in modal header
   const approvedByName = deposit.approvedByName || 'Admin';
+  const mrId = deposit.mrId || 'PENDING';
+  const memberName = member?.name || 'N/A';
+  
+  // Escape receiptHTML for safe string usage
+  const escapedHTML = receiptHTML.replace(/`/g, '\\`').replace(/\$/g, '\\$');
   
   const modalHTML = `
     <div class="panel" style="max-width: 750px; margin: 0 auto;">
       <div style="text-align: center; margin-bottom: 20px;">
-        <h3>🧾 Money Receipt</h3>
-        <p class="small">${deposit.mrId || deposit.id} | ${member?.name || 'N/A'}</p>
-        <p class="small" style="color: #27ae60; margin-top: 5px;">
+        <h3 style="color: #1e3c72;">🧾 Money Receipt</h3>
+        <p class="small" style="font-size: 16px; font-weight: 600;">${mrId} | ${memberName}</p>
+        <p class="small" style="color: #27ae60; margin-top: 5px; background: #f0f7f0; padding: 5px 15px; border-radius: 30px; display: inline-block;">
           ✓ Approved by: ${approvedByName}
         </p>
       </div>
@@ -142,7 +158,7 @@ export function openMRReceiptModal(deposit, member, meta) {
       </div>
       
       <div style="display: flex; gap: 10px; justify-content: center;">
-        <button class="btn success" onclick="window.open('', '_blank').document.write(\`${receiptHTML.replace(/`/g, '\\`')}\`); window.open('', '_blank').document.close();">
+        <button class="btn success" id="printReceiptBtn">
           🖨️ Print Receipt
         </button>
         <button class="btn" onclick="closeModal('modalViewer')">Close</button>
@@ -151,6 +167,13 @@ export function openMRReceiptModal(deposit, member, meta) {
   `;
   
   openViewerModal('Money Receipt', 'View receipt details', modalHTML);
+  
+  // Add print button event listener after modal is loaded
+  setTimeout(() => {
+    document.getElementById('printReceiptBtn')?.addEventListener('click', () => {
+      printMRReceipt(deposit, member, meta);
+    });
+  }, 200);
 }
 
 /**
@@ -161,14 +184,16 @@ export function openMRReceiptModal(deposit, member, meta) {
  */
 export function printMRReceipt(deposit, member, meta) {
   const receiptHTML = generateMRReceipt(deposit, member, meta);
+  const mrId = deposit.mrId || 'PENDING';
   
   const printWindow = window.open('', '_blank');
   printWindow.document.write(`
     <!DOCTYPE html>
     <html>
     <head>
-      <title>Money Receipt - ${deposit.mrId || deposit.id}</title>
+      <title>Money Receipt - ${mrId}</title>
       <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body { 
           font-family: 'Segoe UI', Arial, sans-serif; 
           padding: 20px; 
@@ -186,6 +211,7 @@ export function printMRReceipt(deposit, member, meta) {
           }
           .receipt {
             box-shadow: none;
+            border: 1px solid #ddd;
           }
         }
       </style>
@@ -198,10 +224,10 @@ export function printMRReceipt(deposit, member, meta) {
             window.print();
             setTimeout(function() {
               window.close();
-            }, 500);
-          }, 300);
+            }, 1000);
+          }, 500);
         }
-      </script>
+      <\/script>
     </body>
     </html>
   `);

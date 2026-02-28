@@ -7,7 +7,7 @@ import { loadModalModules } from './modules/modals/modals.js';
 const originalConsoleError = console.error;
 console.error = function(...args) {
   // Filter out Chrome extension errors
-  if (args[0] && typeof args[0] === 'string' && 
+  if (args[0] && typeof args[0] == 'string' && 
       (args[0].includes('runtime.lastError') || 
        args[0].includes('message port closed') ||
        args[0].includes('Extension context invalid'))) {
@@ -177,9 +177,9 @@ async function handleLogin() {
     // In production, this should validate against database
     const db = getDatabase();
     
-    if (mode === 'admin') {
+    if (mode == 'admin') {
       // Admin login validation
-      if (loginId === 'ADMIN-001' && loginPass === '123456') {
+      if (loginId == 'ADMIN-001' && loginPass == '123456') {
         window.SESSION.user = {
           id: loginId,
           name: 'Administrator',
@@ -218,7 +218,7 @@ async function handleLogin() {
       // Check if member exists in database
       const member = await db.get('members', loginId);
       
-      if (member && member.pass === loginPass) {
+      if (member && member.pass == loginPass) {
         window.SESSION.user = {
           id: loginId,
           name: member.name,
@@ -310,7 +310,7 @@ function initMobileMenu() {
   
   // Handle escape key
   document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape' && sidebar.classList.contains('show')) {
+    if (e.key == 'Escape' && sidebar.classList.contains('show')) {
       closeMenu(sidebar, overlay);
     }
   });

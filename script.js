@@ -1,152 +1,145 @@
-// ===============================
-// Main Application Entry Point
-// ===============================
-
 import { initializeDatabase, getDatabase } from './modules/database/db.js';
-import { loadLoginModule } from './modules/auth/login.js';
-import { loadModalModules } from './modules/modals/modals.js';
+
+document.addEventListener("DOMContentLoaded", async () => {
+
+  await initializeDatabase("firebase");
+
+  document.getElementById("saveDepositBtn")
+    ?.addEventListener("click", handleDeposit);
+
+});
 
 
-// ===============================
-// Global Session
-// ===============================
+// ==========================
+// MAIN DEPOSIT FUNCTION
+// ==========================
 
-window.SESSION = {
-  mode: 'admin',
-  user: null,
-  page: null
-};
+async function handleDeposit() {
+
+  const depositData = {
+    memberName: document.getElementById("memberName").value,
+    memberEmail: document.getElementById("memberEmail").value,
+    receiptNo: "MR" + Date.now(),
+    amount: document.getElementById("amount").value,
+    date: new Date().toLocaleDateString()
+  };
+
+  await saveDeposit(depositData);
+}
 
 
-// ===============================
-// App Initialize
-// ===============================
+// ==========================
+// SAVE + EMAIL
+// ==========================
 
-document.addEventListener('DOMContentLoaded', async function () {
+async function saveDeposit(depositData) {
+
   try {
-    showLoading('অ্যাপ্লিকেশন লোড হচ্ছে...');
 
-    const dbMode = 'firebase'; // Always use Firebase
-    await initializeDatabase(dbMode);
+    showLoading("Saving & Sending Receipt...");
 
-    // Show DB Mode in UI
-    const dbTypeElement = document.getElementById('databaseType');
-    if (dbTypeElement) {
-      const modeNames = {
-        local: 'LocalStorage',
-        firebase: 'Firebase',
-        mysql: 'MySQL',
-        postgresql: 'PostgreSQL'
-      };
-      dbTypeElement.textContent = modeNames[dbMode] || dbMode;
-    }
+    const db = getDatabase();
 
-    // Load Modules
-    loadLoginModule();
-    loadModalModules();
+    await db.collection("deposits").add(depositData);
 
-    // Mobile Sidebar Toggle
-    document.getElementById('mobileMenuBtn')
-      ?.addEventListener('click', function () {
-        document.getElementById('sidebar')?.classList.toggle('active');
-      });
+    await sendDepositReceiptEmail(depositData);
 
     hideLoading();
+    showToast("Success", "Deposit Saved & Receipt Sent");
 
   } catch (error) {
-    console.error('Application initialization failed:', error);
-    showToast('Error', 'অ্যাপ্লিকেশন লোড করতে সমস্যা হয়েছে');
+
+    hideLoading();
+    console.error(error);
+    showToast("Error", "Deposit saved but email failed");
+
   }
-});
 
-
-// ===============================
-// Utility Functions
-// ===============================
-
-function showLoading(message) {
-  const overlay = document.getElementById('loadingOverlay');
-  if (overlay) {
-    overlay.querySelector('p').textContent = message;
-    overlay.style.display = 'flex';
-  }
-}
-
-function hideLoading() {
-  const overlay = document.getElementById('loadingOverlay');
-  if (overlay) {
-    overlay.style.display = 'none';
-  }
-}
-
-function showToast(title, message) {
-  const wrap = document.getElementById('toastWrap');
-  if (!wrap) return;
-
-  const div = document.createElement('div');
-  div.className = 'toast';
-  div.innerHTML = `
-    <div class="t1">${title}</div>
-    <div class="t2">${message}</div>
-    <div class="t3">${new Date().toLocaleString()}</div>
-  `;
-
-  wrap.appendChild(div);
-  setTimeout(() => div.remove(), 3500);
 }
 
 
-// ===============================
-// Global Error Handler
-// ===============================
+// ==========================
+// EMAIL WITH PDF ATTACHMENT
+// ==========================
 
-window.addEventListener('error', function (event) {
-  console.error('Global Error:', event.error);
-  showToast('Error', 'একটি ত্রুটি ঘটেছে। দয়া আবার চেষ্টা করুন।');
-});
+async function sendDepositReceiptEmail(depositData) {
 
+  const pdfBase64 = await generateReceiptPDF(depositData);
 
-// ===============================
-// EmailJS Integration
-// ===============================
-
-// Make sure EmailJS CDN is loaded in HTML
-// <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
-// <script> emailjs.init("YOUR_PUBLIC_KEY"); </script>
-
-window.sendTestEmail = function () {
-
-  if (typeof emailjs === "undefined") {
-    alert("EmailJS not loaded!");
-    return;
-  }
-
-  emailjs.send(
+  return emailjs.send(
     "service_li1nizv",
     "template_eq13h6v",
     {
-      to_name: "Test User",
-      to_email: "shaque.shamim@gmail.com",
-      receipt_no: "MR001",
-      amount: "5000"
+      member_name: depositData.memberName,
+      member_email: depositData.memberEmail,
+      receipt_no: depositData.receiptNo,
+      amount: depositData.amount,
+      date: depositData.date,
+      attachment: pdfBase64
     }
-  )
-  .then(function () {
-    showToast("Success", "Email Sent Successfully");
-  })
-  .catch(function (error) {
-    console.error("Email Error:", error);
-    showToast("Error", "Email sending failed");
-  });
+  );
 
-};
+}
 
 
-// ===============================
-// Export Globals
-// ===============================
+// ==========================
+// PDF GENERATOR
+// ==========================
 
-window.showLoading = showLoading;
-window.hideLoading = hideLoading;
-window.showToast = showToast;
-window.getDatabase = getDatabase;
+async function generateReceiptPDF(depositData) {
+
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+
+  doc.setFontSize(16);
+  doc.text("TAQWA PROPERTIES BD", 20, 20);
+
+  doc.setFontSize(12);
+  doc.text("Deposit Receipt", 20, 30);
+
+  doc.line(20, 35, 190, 35);
+
+  doc.text(`Receipt No: ${depositData.receiptNo}`, 20, 50);
+  doc.text(`Member: ${depositData.memberName}`, 20, 60);
+  doc.text(`Email: ${depositData.memberEmail}`, 20, 70);
+  doc.text(`Amount: ${depositData.amount}`, 20, 80);
+  doc.text(`Date: ${depositData.date}`, 20, 90);
+
+  doc.text("Thank you for your investment.", 20, 110);
+
+  const base64 = doc.output("datauristring").split(',')[1];
+
+  return base64;
+}
+
+
+// ==========================
+// UI HELPERS
+// ==========================
+
+function showLoading(message) {
+  const overlay = document.getElementById("loadingOverlay");
+  overlay.querySelector("p").textContent = message;
+  overlay.style.display = "block";
+}
+
+function hideLoading() {
+  document.getElementById("loadingOverlay").style.display = "none";
+}
+
+function showToast(title, message) {
+
+  const wrap = document.getElementById("toastWrap");
+
+  const div = document.createElement("div");
+  div.style.background = "#333";
+  div.style.color = "#fff";
+  div.style.padding = "10px";
+  div.style.marginTop = "10px";
+
+  div.innerHTML = `<strong>${title}</strong><br>${message}`;
+
+  wrap.appendChild(div);
+
+  setTimeout(() => div.remove(), 4000);
+}

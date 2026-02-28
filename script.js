@@ -81,6 +81,21 @@ function hideLoading() {
   }
 }
 
+function sendTestEmail(){
+
+   emailjs.send("service_li1nizv","template_eq13h6v",{
+      to_name: "Test User",
+      to_email: "shaque.shamim@gmail.com",
+      receipt_no: "MR001",
+      amount: "5000"
+   }).then(function(){
+      alert("Email Sent Successfully");
+   }).catch(function(error){
+      alert("Error: " + JSON.stringify(error));
+   });
+
+}
+
 function showToast(title, message) {
   const wrap = document.getElementById('toastWrap');
   const div = document.createElement('div');

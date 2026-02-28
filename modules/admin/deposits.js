@@ -8,7 +8,7 @@ import { openMRReceiptModal } from '../modals/mr-receipt.js'; // MR receipt moda
 import { BANGLADESH_BANKS } from '../utils/common.js';
 
 // ------------------------------------------------------------
-// Main Admin Deposit Page Renderer
+// Main Admin Deposit Page Renderer - UPDATED with Summary Cards
 // ------------------------------------------------------------
 export async function renderAdminDeposits() {
   setPageTitle('Deposit Management', 'Approve/Reject deposits, generate MR ID, check slip and transaction.');
@@ -17,21 +17,89 @@ export async function renderAdminDeposits() {
   const deposits = await db.getAll('deposits') || []; // Fetch all deposits
   const pending = deposits.filter(d => d.status == 'PENDING'); // Pending deposits
   const approved = deposits.filter(d => d.status == 'APPROVED'); // Approved deposits
+  const rejected = deposits.filter(d => d.status == 'REJECTED'); // Rejected deposits
+
+  // Calculate summary statistics
+  const totalAmount = deposits.reduce((sum, d) => sum + Number(d.amount || 0), 0);
+  const pendingAmount = pending.reduce((sum, d) => sum + Number(d.amount || 0), 0);
+  const approvedAmount = approved.reduce((sum, d) => sum + Number(d.amount || 0), 0);
+
+  // Summary Cards HTML
+  const summaryHTML = `
+    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 30px;">
+      
+      <!-- Total Deposits Card -->
+      <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px; border-radius: 16px; color: white; box-shadow: 0 10px 20px rgba(0,0,0,0.1);">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <div style="font-size: 14px; opacity: 0.9; margin-bottom: 10px;">Total Deposits</div>
+            <div style="font-size: 32px; font-weight: 700;">${deposits.length}</div>
+          </div>
+          <div style="font-size: 48px; opacity: 0.3;">📊</div>
+        </div>
+        <div style="font-size: 12px; opacity: 0.8; margin-top: 10px;">All time deposits</div>
+      </div>
+      
+      <!-- Total Amount Card -->
+      <div style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); padding: 20px; border-radius: 16px; color: white; box-shadow: 0 10px 20px rgba(0,0,0,0.1);">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <div style="font-size: 14px; opacity: 0.9; margin-bottom: 10px;">Total Amount</div>
+            <div style="font-size: 32px; font-weight: 700;">${formatMoney(totalAmount)}</div>
+          </div>
+          <div style="font-size: 48px; opacity: 0.3;">💰</div>
+        </div>
+        <div style="font-size: 12px; opacity: 0.8; margin-top: 10px;">Sum of all deposits</div>
+      </div>
+      
+      <!-- Approved Card -->
+      <div style="background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); padding: 20px; border-radius: 16px; color: white; box-shadow: 0 10px 20px rgba(0,0,0,0.1);">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <div style="font-size: 14px; opacity: 0.9; margin-bottom: 10px;">Approved</div>
+            <div style="font-size: 32px; font-weight: 700;">${approved.length}</div>
+            <div style="font-size: 14px; opacity: 0.8;">${formatMoney(approvedAmount)}</div>
+          </div>
+          <div style="font-size: 48px; opacity: 0.3;">✅</div>
+        </div>
+      </div>
+      
+      <!-- Pending Card -->
+      <div style="background: linear-gradient(135deg, #f2994a 0%, #f2c94c 100%); padding: 20px; border-radius: 16px; color: white; box-shadow: 0 10px 20px rgba(0,0,0,0.1);">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <div style="font-size: 14px; opacity: 0.9; margin-bottom: 10px;">Pending</div>
+            <div style="font-size: 32px; font-weight: 700;">${pending.length}</div>
+            <div style="font-size: 14px; opacity: 0.8;">${formatMoney(pendingAmount)}</div>
+          </div>
+          <div style="font-size: 48px; opacity: 0.3;">⏳</div>
+        </div>
+      </div>
+      
+    </div>
+  `;
 
   // HTML layout for pending and approved deposits
   const html = `
+    ${summaryHTML}
+    
     <div class="panel">
       <div class="panelHeader">
         <div>
           <h3>Pending Deposits</h3>
           <p>Verify slip, approve deposit, generate MR ID and signature.</p>
         </div>
-        <div class="panelTools">
-          <button class="btn" id="refreshDeposits">Refresh</button>
-          <button class="btn primary" id="addCashMRBtn">Add Cash MR</button>
+        <div class="panelTools" style="display: flex; gap: 10px;">
+          <input type="text" id="searchPending" placeholder="🔍 Search pending deposits..." style="padding: 8px 15px; border: 1px solid var(--line); border-radius: 8px; width: 250px;" />
+          <button class="btn" id="refreshDeposits">🔄 Refresh</button>
+          <button class="btn primary" id="addCashMRBtn">➕ Add Cash MR</button>
         </div>
       </div>
       <div id="pendingDepositTable">${await renderDepositTable(pending, true)}</div>
+      <div id="pendingNoResults" style="display: none; text-align: center; padding: 40px; background: #f8f9fa; border-radius: 12px; margin-top: 20px;">
+        <div style="font-size: 48px; margin-bottom: 10px;">🔍</div>
+        <div style="font-size: 18px; color: #666;">No pending deposits match your search</div>
+      </div>
     </div>
 
     <div class="panel">
@@ -40,8 +108,15 @@ export async function renderAdminDeposits() {
           <h3>Approved Deposits</h3>
           <p>All confirmed deposits with MR ID.</p>
         </div>
+        <div class="panelTools">
+          <input type="text" id="searchApproved" placeholder="🔍 Search approved deposits..." style="padding: 8px 15px; border: 1px solid var(--line); border-radius: 8px; width: 250px;" />
+        </div>
       </div>
       <div id="approvedDepositTable">${await renderDepositTable(approved, false)}</div>
+      <div id="approvedNoResults" style="display: none; text-align: center; padding: 40px; background: #f8f9fa; border-radius: 12px; margin-top: 20px;">
+        <div style="font-size: 48px; margin-bottom: 10px;">🔍</div>
+        <div style="font-size: 18px; color: #666;">No approved deposits match your search</div>
+      </div>
     </div>
   `;
 
@@ -50,6 +125,15 @@ export async function renderAdminDeposits() {
   // Event listeners
   document.getElementById('refreshDeposits').addEventListener('click', renderAdminDeposits);
   document.getElementById('addCashMRBtn').addEventListener('click', addCashMR);
+  
+  // Search functionality
+  document.getElementById('searchPending')?.addEventListener('input', (e) => {
+    filterTable('pending', e.target.value.toLowerCase());
+  });
+  
+  document.getElementById('searchApproved')?.addEventListener('input', (e) => {
+    filterTable('approved', e.target.value.toLowerCase());
+  });
 
   // Attach events after DOM update
   setTimeout(() => {
@@ -59,65 +143,129 @@ export async function renderAdminDeposits() {
 }
 
 // ------------------------------------------------------------
-// Render Deposit Table (Pending/Approved) - UPDATED with Send Receipt buttons
+// Filter Table Function - NEW
+// ------------------------------------------------------------
+function filterTable(type, searchTerm) {
+  const table = document.getElementById(type + 'DepositTable');
+  const noResults = document.getElementById(type + 'NoResults');
+  const rows = table.querySelectorAll('tbody tr');
+  let visibleCount = 0;
+  
+  rows.forEach(row => {
+    const text = row.textContent.toLowerCase();
+    if (text.includes(searchTerm)) {
+      row.style.display = '';
+      visibleCount++;
+    } else {
+      row.style.display = 'none';
+    }
+  });
+  
+  // Show/hide no results message
+  if (visibleCount === 0) {
+    noResults.style.display = 'block';
+  } else {
+    noResults.style.display = 'none';
+  }
+}
+
+// ------------------------------------------------------------
+// Render Deposit Table (Pending/Approved) - ENHANCED STYLING
 // ------------------------------------------------------------
 async function renderDepositTable(list, isPending) {
   const db = getDatabase();
   const members = await db.getAll('members') || [];
 
-  // Build table rows
+  // Build table rows with enhanced styling
   const rows = list.map(d => {
     const member = members.find(m => m.id == d.memberId);
+    const depositDate = d.depositDate || d.submittedAt || '';
+    const formattedDate = depositDate ? new Date(depositDate).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    }) : 'N/A';
+    
+    const statusClass = d.status == 'PENDING' ? 'st-pending' : 
+                       d.status == 'APPROVED' ? 'st-approved' : 'st-rejected';
+    
     return `
-      <tr>
-        <td>${d.id}</td>
-        <td><b>${member?.name || 'Unknown'}</b><div class="small">${d.memberId}</div></td>
-        <td>${d.month} ${d.year || ''}</td>
-        <td>${formatMoney(d.amount)}</td>
-        <td>${d.paymentMethod} ${d.fromBank ? `(${d.fromBank}→${d.toBank})` : ''}</td>
-        <td><span class="status ${d.status == 'PENDING' ? 'st-pending' : d.status == 'APPROVED' ? 'st-approved' : 'st-rejected'}">${d.status}</span></td>
-        <td>${d.mrId || '-'}</td>
+      <tr style="border-bottom: 1px solid #e9ecef; transition: background 0.3s;" onmouseover="this.style.background='#f8f9fa'" onmouseout="this.style.background=''">
+        <td style="padding: 15px 10px; font-weight: 600;">${d.id}</td>
+        <td style="padding: 15px 10px;">
+          <div style="font-weight: 600;">${member?.name || 'Unknown'}</div>
+          <div style="font-size: 12px; color: #666;">${d.memberId}</div>
+        </td>
+        <td style="padding: 15px 10px;">${d.month} ${d.year || ''}</td>
+        <td style="padding: 15px 10px; font-weight: 600; color: #27ae60;">${formatMoney(d.amount)}</td>
+        <td style="padding: 15px 10px;">
+          <span style="background: #e8f0fe; padding: 4px 8px; border-radius: 6px; font-size: 12px;">
+            ${d.paymentMethod}
+          </span>
+          ${d.fromBank ? `<div style="font-size: 10px; color: #666; margin-top: 4px;">${d.fromBank} → ${d.toBank}</div>` : ''}
+        </td>
+        <td style="padding: 15px 10px; text-align: center;">
+          <span class="status ${statusClass}" style="padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;">
+            ${d.status}
+          </span>
+        </td>
+        <td style="padding: 15px 10px;">
+          ${d.mrId ? 
+            `<span style="background: #1e3c72; color: white; padding: 4px 8px; border-radius: 6px; font-family: monospace; font-size: 12px;">${d.mrId}</span>` : 
+            '<span style="color: #999;">—</span>'}
+        </td>
+        <td style="padding: 15px 10px; font-size: 12px; color: #666;">${formattedDate}</td>
         ${isPending ? `
-          <td>
-            <button class="btn success approve-deposit" data-id="${d.id}">Approve</button>
-            <button class="btn danger reject-deposit" data-id="${d.id}">Reject</button>
-            <button class="btn view-slip" data-id="${d.id}">View Slip</button>
-            ${d.mrId ? `
-              <button class="btn info send-receipt-image" data-id="${d.id}" title="Send Receipt as Image (WhatsApp)">
-                📸 Send Image
-              </button>
-            ` : ''}
+          <td style="padding: 15px 10px;">
+            <div style="display: flex; gap: 5px; flex-wrap: wrap;">
+              <button class="btn success approve-deposit" data-id="${d.id}" style="padding: 6px 12px; background: #27ae60; color: white; border: none; border-radius: 6px; cursor: pointer;">✓ Approve</button>
+              <button class="btn danger reject-deposit" data-id="${d.id}" style="padding: 6px 12px; background: #dc3545; color: white; border: none; border-radius: 6px; cursor: pointer;">✗ Reject</button>
+              <button class="btn view-slip" data-id="${d.id}" style="padding: 6px 12px; background: #6c757d; color: white; border: none; border-radius: 6px; cursor: pointer;">👁️ Slip</button>
+              ${d.mrId ? `
+                <button class="btn info send-receipt-image" data-id="${d.id}" title="Send Receipt as Image (WhatsApp)" style="padding: 6px 12px; background: #17a2b8; color: white; border: none; border-radius: 6px; cursor: pointer;">
+                  📸 Send
+                </button>
+              ` : ''}
+            </div>
           </td>` : `
-          <td>
-            <button class="btn view-mr" data-id="${d.id}">View MR</button>
-            <button class="btn print-mr" data-id="${d.id}">Print</button>
-            <button class="btn info send-receipt-image" data-id="${d.id}" title="Send Receipt as Image (WhatsApp)">
-              📸 Send Image
-            </button>
+          <td style="padding: 15px 10px;">
+            <div style="display: flex; gap: 5px; flex-wrap: wrap;">
+              <button class="btn view-mr" data-id="${d.id}" style="padding: 6px 12px; background: #1e3c72; color: white; border: none; border-radius: 6px; cursor: pointer;">👁️ View MR</button>
+              <button class="btn print-mr" data-id="${d.id}" style="padding: 6px 12px; background: #6c757d; color: white; border: none; border-radius: 6px; cursor: pointer;">🖨️ Print</button>
+              <button class="btn info send-receipt-image" data-id="${d.id}" title="Send Receipt as Image (WhatsApp)" style="padding: 6px 12px; background: #17a2b8; color: white; border: none; border-radius: 6px; cursor: pointer;">
+                📸 Send
+              </button>
+            </div>
           </td>`}
       </tr>
     `;
   }).join('');
 
-  const colspan = isPending ? 8 : 7;
-  const tbody = rows || `<tr><td colspan="${colspan}" class="small">No records found.</td></tr>`;
+  const colspan = isPending ? 9 : 8;
+  const tbody = rows || `<tr><td colspan="${colspan}" style="padding: 40px; text-align: center; color: #999;">
+    <div style="font-size: 48px; margin-bottom: 10px;">📭</div>
+    <div style="font-size: 16px;">No ${isPending ? 'pending' : 'approved'} deposits found.</div>
+  </td></tr>`;
 
   return `
-    <table>
-      <thead>
-        <tr>
-          <th>Deposit ID</th>
-          <th>Member</th>
-          <th>Month</th>
-          <th>Amount</th>
-          <th>Payment Method</th>
-          <th>Status</th>
-          <th>MR ID</th>
-          ${isPending ? '<th style="min-width: 400px;">Action</th>' : '<th style="min-width: 350px;">Tools</th>'}
-        </tr>
-      </thead>
-      <tbody>${tbody}</tbody>
-    </table>
+    <div style="overflow-x: auto;">
+      <table style="width:100%; border-collapse: collapse;">
+        <thead>
+          <tr style="background: #f8f9fa;">
+            <th style="padding: 15px 10px; text-align: left;">Deposit ID</th>
+            <th style="padding: 15px 10px; text-align: left;">Member</th>
+            <th style="padding: 15px 10px; text-align: left;">Month</th>
+            <th style="padding: 15px 10px; text-align: right;">Amount</th>
+            <th style="padding: 15px 10px; text-align: left;">Payment Method</th>
+            <th style="padding: 15px 10px; text-align: center;">Status</th>
+            <th style="padding: 15px 10px; text-align: left;">MR ID</th>
+            <th style="padding: 15px 10px; text-align: left;">Date</th>
+            ${isPending ? '<th style="padding: 15px 10px; text-align: center;">Actions</th>' : '<th style="padding: 15px 10px; text-align: center;">Tools</th>'}
+          </tr>
+        </thead>
+        <tbody>${tbody}</tbody>
+      </table>
+    </div>
   `;
 }
 
@@ -678,13 +826,25 @@ async function viewSlip(depositId) {
   if (!deposit) return;
 
   const html = `
-    <div class="panel">
-      <h3>Deposit Slip Preview</h3>
-      <p class="small">Deposit ID: ${deposit.id} | Member: ${deposit.memberId}</p>
+    <div class="panel" style="max-width: 800px; margin: 0 auto;">
+      <div style="text-align: center; margin-bottom: 20px;">
+        <h3 style="color: #1e3c72;">📎 Deposit Slip Preview</h3>
+        <p class="small" style="color: #666;">
+          Deposit ID: ${deposit.id} | Member: ${deposit.memberId}
+        </p>
+      </div>
       <div class="hr"></div>
-      ${deposit.slip
-        ? `<img src="${deposit.slip}" style="width:100%;max-width:700px;border-radius:18px;border:1px solid var(--line);"/>`
-        : '<p>No slip uploaded</p>'}
+      <div style="text-align: center; padding: 20px;">
+        ${deposit.slip
+          ? `<img src="${deposit.slip}" style="width:100%;max-width:700px;border-radius:18px;border:2px solid var(--line);box-shadow: 0 10px 30px rgba(0,0,0,0.1);"/>`
+          : `<div style="padding: 60px; text-align: center; background: #f8f9fa; border-radius: 12px;">
+              <div style="font-size: 64px; margin-bottom: 20px;">📭</div>
+              <div style="font-size: 18px; color: #666;">No slip uploaded for this deposit</div>
+            </div>`}
+      </div>
+      <div style="display: flex; gap: 10px; justify-content: center; margin-top: 20px;">
+        <button class="btn" onclick="closeModal('modalViewer')">Close</button>
+      </div>
     </div>
   `;
 

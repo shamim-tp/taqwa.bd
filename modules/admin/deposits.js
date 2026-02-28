@@ -47,11 +47,11 @@ export async function renderAdminDeposits() {
 
   document.getElementById('pageContent').innerHTML = html;
 
-  // ইভেন্ট লিসেনার – রিফ্রেশ ও অ্যাড ক্যাশ MR
+  // Event listeners
   document.getElementById('refreshDeposits').addEventListener('click', renderAdminDeposits);
   document.getElementById('addCashMRBtn').addEventListener('click', addCashMR);
 
-  // পেন্ডিং ও অ্যাপ্রুভড টেবিলের জন্য ইভেন্ট অ্যাটাচ (DOM আপডেট হওয়ার পর)
+  // Attach events after DOM update
   setTimeout(() => {
     attachPendingEvents();
     attachApprovedEvents();
@@ -59,7 +59,7 @@ export async function renderAdminDeposits() {
 }
 
 // ------------------------------------------------------------
-// Render Deposit Table (Pending/Approved) – শুধু HTML তৈরি করে
+// Render Deposit Table (Pending/Approved)
 // ------------------------------------------------------------
 async function renderDepositTable(list, isPending) {
   const db = getDatabase();
@@ -114,7 +114,7 @@ async function renderDepositTable(list, isPending) {
 }
 
 // ------------------------------------------------------------
-// পেন্ডিং ডিপোজিট বাটনগুলোর জন্য ইভেন্ট লিসেনার
+// Pending deposit button event listeners
 // ------------------------------------------------------------
 function attachPendingEvents() {
   document.querySelectorAll('.approve-deposit').forEach(btn =>
@@ -129,7 +129,7 @@ function attachPendingEvents() {
 }
 
 // ------------------------------------------------------------
-// অ্যাপ্রুভড ডিপোজিট বাটনগুলোর জন্য ইভেন্ট লিসেনার
+// Approved deposit button event listeners
 // ------------------------------------------------------------
 function attachApprovedEvents() {
   document.querySelectorAll('.view-mr').forEach(btn =>
@@ -144,10 +144,13 @@ function attachApprovedEvents() {
 // Generate new MR ID in format MR-YYYY-000001
 // ------------------------------------------------------------
 function generateMRId(deposits, year) {
+  // If year is undefined or null, use current year
+  const targetYear = year || new Date().getFullYear().toString();
+  
   // Filter existing MR IDs for the same year
   const yearMRs = deposits
     .map(d => d.mrId)
-    .filter(mr => mr && mr.startsWith(`MR-${year}-`));
+    .filter(mr => mr && mr.startsWith(`MR-${targetYear}-`));
 
   // Find max number used
   let max = 0;
@@ -159,7 +162,42 @@ function generateMRId(deposits, year) {
 
   // Increment by 1 and pad with zeros
   const nextNum = String(max + 1).padStart(6, '0');
-  return `MR-${year}-${nextNum}`;
+  return `MR-${targetYear}-${nextNum}`;
+}
+
+// ------------------------------------------------------------
+// Send notification to member
+// ------------------------------------------------------------
+async function sendNotificationToMember(member, deposit, type) {
+  if (!member) return;
+  
+  const db = getDatabase();
+  
+  // Create notification in member's panel
+  const notification = {
+    id: generateId('NOTIF', []),
+    memberId: member.id,
+    title: type == 'APPROVED' ? 'Deposit Approved' : 'Money Receipt Generated',
+    message: type == 'APPROVED' 
+      ? `Your deposit of ${formatMoney(deposit.amount)} for ${deposit.month} ${deposit.year} has been approved. MR ID: ${deposit.mrId}`
+      : `Money Receipt (MR ID: ${deposit.mrId}) has been generated for your deposit of ${formatMoney(deposit.amount)} for ${deposit.month} ${deposit.year}.`,
+    type: 'deposit',
+    depositId: deposit.id,
+    mrId: deposit.mrId,
+    isRead: false,
+    createdAt: new Date().toISOString()
+  };
+  
+  await db.save('notifications', notification, notification.id);
+  
+  // Log WhatsApp and email (these would be implemented with actual APIs)
+  if (member.phone) {
+    console.log(`WhatsApp to ${member.phone}: ${notification.message}`);
+  }
+  if (member.email) {
+    console.log(`Email to ${member.email}: ${notification.message}`);
+    console.log(`Email attachment: Money Receipt MR-${deposit.mrId} sent to ${member.email}`);
+  }
 }
 
 // ------------------------------------------------------------
@@ -181,7 +219,7 @@ async function addCashMR() {
   const months = [
     'January', 'February', 'March', 'April', 'May', 'June',
     'July', 'August', 'September', 'October', 'November', 'December'
-  ].map(m => `<option value="${m}" ${m === new Date().toLocaleString('default', { month: 'long' }) ? 'selected' : ''}>${m}</option>`).join('');
+  ].map(m => `<option value="${m}" ${m == new Date().toLocaleString('default', { month: 'long' }) ? 'selected' : ''}>${m}</option>`).join('');
 
   // HTML for Cash MR Modal
   const html = `
@@ -271,7 +309,7 @@ async function addCashMR() {
     </div>
   `;
 
-  // Toggle Bank Fields ফাংশন (লোক্যাল)
+  // Toggle Bank Fields function
   const toggleBankFields = () => {
     const method = document.getElementById('d_method').value;
     const bankFields = document.getElementById('bankFields');
@@ -280,7 +318,7 @@ async function addCashMR() {
 
   openViewerModal('Add Cash MR', 'Create money receipt', html);
 
-  // ইভেন্ট লিসেনার সংযুক্ত করা হলো
+  // Attach event listeners
   document.getElementById('saveCashMRBtn').addEventListener('click', saveCashMRWithSlip);
   document.getElementById('d_method').addEventListener('change', toggleBankFields);
 }
@@ -323,8 +361,11 @@ async function saveCashMRWithSlip() {
   await db.save('deposits', depositData, depositData.id);
   await logActivity('ADD_CASH_MR', `Cash MR added: ${mrId} for ${memberId}`);
 
+  // Send notification to member
   const member = await db.get('members', memberId);
-  if (member) console.log(`WhatsApp to ${member.phone}: Cash deposit approved. MR ID: ${mrId}`);
+  if (member) {
+    await sendNotificationToMember(member, depositData, 'APPROVED');
+  }
 
   showToast('Cash MR Created', `MR ${mrId} generated successfully.`);
   closeModal('modalViewer');
@@ -341,8 +382,11 @@ async function approveDeposit(depositId) {
 
   const deposits = await db.getAll('deposits') || [];
 
+  // Ensure year is defined (use current year if not set)
+  const year = deposit.year || new Date().getFullYear().toString();
+
   // Auto-generate MR ID for approved deposit
-  deposit.mrId = generateMRId(deposits, deposit.year);
+  deposit.mrId = generateMRId(deposits, year);
   deposit.status = 'APPROVED';
   deposit.approvedAt = new Date().toISOString();
   deposit.approvedBy = getCurrentUser().id;
@@ -350,8 +394,11 @@ async function approveDeposit(depositId) {
   await db.update('deposits', depositId, deposit);
   await logActivity('APPROVE_DEPOSIT', `Deposit approved: ${depositId} MR: ${deposit.mrId}`);
 
+  // Send notification to member
   const member = await db.get('members', deposit.memberId);
-  if (member) console.log(`WhatsApp to ${member.phone}: Deposit approved. MR ID: ${deposit.mrId}`);
+  if (member) {
+    await sendNotificationToMember(member, deposit, 'APPROVED');
+  }
 
   showToast('Deposit Approved', `MR ID generated: ${deposit.mrId}`);
   buildSidebar();
@@ -399,8 +446,22 @@ async function rejectDeposit(depositId) {
   await db.update('deposits', depositId, deposit);
   await logActivity('REJECT_DEPOSIT', `Deposit rejected: ${depositId}`);
 
+  // Send notification to member
   const member = await db.get('members', deposit.memberId);
   if (member) {
+    const notification = {
+      id: generateId('NOTIF', []),
+      memberId: member.id,
+      title: 'Deposit Rejected',
+      message: `Your deposit of ${formatMoney(deposit.amount)} for ${deposit.month} ${deposit.year} has been rejected. Reason: ${note}`,
+      type: 'deposit',
+      depositId: deposit.id,
+      isRead: false,
+      createdAt: new Date().toISOString()
+    };
+    
+    await db.save('notifications', notification, notification.id);
+    
     console.log(`WhatsApp to ${member.phone}: Deposit rejected. Reason: ${note}`);
     console.log(`Email to ${member.email}: Deposit rejected. Reason: ${note}`);
   }
@@ -424,6 +485,9 @@ async function viewMRReceipt(depositId) {
   const member = await db.get('members', deposit.memberId);
   const meta = await db.get('meta', 'system') || {};
 
+  // Log viewing activity
+  await logActivity('VIEW_MR', `MR viewed: ${deposit.mrId} for ${deposit.memberId}`);
+  
   openMRReceiptModal(deposit, member, meta);
 }
 
@@ -445,13 +509,24 @@ async function printMR(depositId) {
   const w = window.open('', '_blank');
   w.document.write(`
     <html>
-      <head><title>Money Receipt</title></head>
+      <head>
+        <title>Money Receipt - ${deposit.mrId}</title>
+        <style>
+          body { font-family: Arial, sans-serif; padding: 20px; }
+          .receipt { max-width: 800px; margin: 0 auto; border: 1px solid #ddd; padding: 20px; }
+          .header { text-align: center; margin-bottom: 30px; }
+          .details { margin: 20px 0; }
+          .row { display: flex; justify-content: space-between; margin: 10px 0; }
+          .signature { display: flex; justify-content: space-between; margin-top: 50px; }
+          .signature div { text-align: center; }
+        </style>
+      </head>
       <body>
         ${receiptHTML}
         <script>
-          window.onload=()=>{
+          window.onload = () => {
             window.print();
-            setTimeout(()=>window.close(),500);
+            setTimeout(() => window.close(), 500);
           }
         </script>
       </body>
@@ -459,7 +534,11 @@ async function printMR(depositId) {
   `);
   w.document.close();
 
+  // Log printing activity and notify member
+  await logActivity('PRINT_MR', `MR printed: ${deposit.mrId} for ${deposit.memberId}`);
+  
   if (member) {
+    await sendNotificationToMember(member, deposit, 'PRINT');
     console.log(`WhatsApp to ${member.phone}: Money Receipt printed. MR ID: ${deposit.mrId}`);
     console.log(`Email to ${member.email}: Money Receipt printed. MR ID: ${deposit.mrId}`);
   }
@@ -475,16 +554,28 @@ function generateMRReceipt(deposit, member, meta) {
   return `
    <div class="receipt">
       <div class="header">
-        <h2>${meta?.companyName || "IMS Investment Ltd."}</h2>
+        <h2>${meta?.companyName || "Taqwa Properties BD"}</h2>
         <p>${meta?.companyAddress || "Dhaka, Bangladesh"}</p>
-        <p>Phone: ${meta?.companyPhone || "+8801234567890"} | Email: ${meta?.companyEmail || "info@imsinvestment.com"}</p>
+        <p>Phone: ${meta?.companyPhone || "+8801344119333"} | Email: ${meta?.companyEmail || "shaque.shamim@gmail.com"}</p>
       </div>
       <h2 style="text-align:center;margin-bottom:30px;">MONEY RECEIPT</h2>
       <div class="details">
-        <div class="row"><div><strong>MR No:</strong> ${deposit.mrId || deposit.id}</div><div><strong>Date:</strong> ${formattedDate}</div></div>
-        <div class="row"><div><strong>Received from:</strong> ${member?.name || "N/A"}</div><div><strong>Member ID:</strong> ${deposit.memberId}</div></div>
-        <div class="row"><div><strong>For the month of:</strong> ${deposit.month}</div><div><strong>Payment Method:</strong> ${deposit.paymentMethod}</div></div>
-        <div class="row"><div><strong>Transaction ID:</strong> ${deposit.trxId || "N/A"}</div><div></div></div>
+        <div class="row">
+          <div><strong>MR No:</strong> ${deposit.mrId || deposit.id}</div>
+          <div><strong>Date:</strong> ${formattedDate}</div>
+        </div>
+        <div class="row">
+          <div><strong>Received from:</strong> ${member?.name || "N/A"}</div>
+          <div><strong>Member ID:</strong> ${deposit.memberId}</div>
+        </div>
+        <div class="row">
+          <div><strong>For the month of:</strong> ${deposit.month} ${deposit.year}</div>
+          <div><strong>Payment Method:</strong> ${deposit.paymentMethod}</div>
+        </div>
+        <div class="row">
+          <div><strong>Transaction ID:</strong> ${deposit.trxId || "N/A"}</div>
+          <div></div>
+        </div>
         <div style="margin-top:30px;text-align:center;">
           <h3 style="font-size:24px;margin:0;">Amount in Words:</h3>
           <p style="font-size:18px;margin:10px 0 30px 0;">${numberToWords(deposit.amount)} Taka Only</p>
@@ -495,8 +586,16 @@ function generateMRReceipt(deposit, member, meta) {
         </div>
       </div>
       <div class="signature">
-        <div><p>_________________________</p><p>Receiver's Signature</p><p>Date: ${new Date().toLocaleDateString()}</p></div>
-        <div><p>_________________________</p><p>Authorized Signature</p><p>${meta?.companyName || "IMS Investment Ltd."}</p></div>
+        <div>
+          <p>_________________________</p>
+          <p>Receiver's Signature</p>
+          <p>Date: ${new Date().toLocaleDateString()}</p>
+        </div>
+        <div>
+          <p>_________________________</p>
+          <p>Authorized Signature</p>
+          <p>${meta?.companyName || "Taqwa Properties BD"}</p>
+        </div>
       </div>
       <div style="margin-top:40px;font-size:12px;text-align:center;color:#666;">
         <p>*** This is a computer generated receipt. No signature required. ***</p>

@@ -110,10 +110,6 @@ window.addEventListener('error', function (event) {
 // EmailJS Integration
 // ===============================
 
-// Make sure EmailJS CDN is loaded in HTML
-// <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
-// <script> emailjs.init("YOUR_PUBLIC_KEY"); </script>
-
 window.sendTestEmail = function () {
 
   if (typeof emailjs === "undefined") {
@@ -121,23 +117,31 @@ window.sendTestEmail = function () {
     return;
   }
 
-  emailjs.send(
-    "service_li1nizv",
-    "template_eq13h6v",
-    {
-      to_name: "Test User",
-      to_email: "shaque.shamim@gmail.com",
-      receipt_no: "MR001",
-      amount: "5000"
-    }
-  )
-  .then(function () {
-    showToast("Success", "Email Sent Successfully");
-  })
-  .catch(function (error) {
-    console.error("Email Error:", error);
-    showToast("Error", "Email sending failed");
-  });
+  // Get email from input (optional fallback)
+  const emailInput = document.getElementById("email")?.value || "shaque.shamim@gmail.com";
+
+  if (!emailInput) {
+    alert("Please enter recipient email");
+    return;
+  }
+
+  const templateParams = {
+    to_name: "Test User",
+    to_email: emailInput,
+    receipt_no: "MR001",
+    amount: "5000"
+  };
+
+  console.log("Sending email to:", templateParams.to_email);
+
+  emailjs.send("service_li1nizv", "template_eq13h6v", templateParams)
+    .then(function () {
+      showToast("Success", "Email Sent Successfully ✅");
+    })
+    .catch(function (error) {
+      console.error("Email Error:", error);
+      showToast("Error", "Email sending failed ❌");
+    });
 
 };
 

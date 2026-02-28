@@ -1,71 +1,69 @@
+// ===============================
 // Main Application Entry Point
+// ===============================
+
 import { initializeDatabase, getDatabase } from './modules/database/db.js';
 import { loadLoginModule } from './modules/auth/login.js';
 import { loadModalModules } from './modules/modals/modals.js';
 
-// Global variables
+
+// ===============================
+// Global Session
+// ===============================
+
 window.SESSION = {
   mode: 'admin',
   user: null,
   page: null
 };
 
-// Initialize Application
-document.addEventListener('DOMContentLoaded', async function() {
+
+// ===============================
+// App Initialize
+// ===============================
+
+document.addEventListener('DOMContentLoaded', async function () {
   try {
     showLoading('অ্যাপ্লিকেশন লোড হচ্ছে...');
-    
-    // Initialize Database
-  const dbMode = 'firebase'; // Always use Firebase
-// localStorage.removeItem('db_mode'); // optionally clear old value
+
+    const dbMode = 'firebase'; // Always use Firebase
     await initializeDatabase(dbMode);
-    
-    // Update UI with current database mode
+
+    // Show DB Mode in UI
     const dbTypeElement = document.getElementById('databaseType');
     if (dbTypeElement) {
       const modeNames = {
-        'local': 'LocalStorage',
-        'firebase': 'Firebase',
-        'mysql': 'MySQL',
-        'postgresql': 'PostgreSQL'
+        local: 'LocalStorage',
+        firebase: 'Firebase',
+        mysql: 'MySQL',
+        postgresql: 'PostgreSQL'
       };
       dbTypeElement.textContent = modeNames[dbMode] || dbMode;
     }
-    
-    // Load login module
+
+    // Load Modules
     loadLoginModule();
-    
-    // Load modal modules
     loadModalModules();
-    
-    // Set up database mode selector
-  //  const dbModeSelect = document.getElementById('dbModeSelect');
-    //if (dbModeSelect) {
-      //dbModeSelect.value = dbMode;
-      //dbModeSelect.addEventListener('change', async function() {
-        //if (confirm('ডাটাবেস মোড পরিবর্তন করলে অ্যাপ রিস্টার্ট হবে। আপনি কি নিশ্চিত?')) {
-          //localStorage.setItem('db_mode', this.value);
-          //showToast('Database Mode Changed', `ডাটাবেস মোড পরিবর্তন করা হয়েছে: ${this.value}`);
-          //setTimeout(() => window.location.reload(), 1000);
-        //} else {
-         // this.value = dbMode; // Reset to previous value
-        //}
-     // });
-   // }
-    
-    // Mobile menu
-    document.getElementById('mobileMenuBtn')?.addEventListener('click', function() {
-      document.getElementById('sidebar').classList.toggle('active');
-    });
-    
+
+    // Mobile Sidebar Toggle
+    document.getElementById('mobileMenuBtn')
+      ?.addEventListener('click', function () {
+        document.getElementById('sidebar')?.classList.toggle('active');
+      });
+
     hideLoading();
+
   } catch (error) {
     console.error('Application initialization failed:', error);
     showToast('Error', 'অ্যাপ্লিকেশন লোড করতে সমস্যা হয়েছে');
   }
 });
 
-// Utility functions
+
+// ===============================
+// Utility Functions
+// ===============================
+
 function showLoading(message) {
   const overlay = document.getElementById('loadingOverlay');
   if (overlay) {
@@ -81,10 +79,10 @@ function hideLoading() {
   }
 }
 
-
-
 function showToast(title, message) {
   const wrap = document.getElementById('toastWrap');
+  if (!wrap) return;
+
   const div = document.createElement('div');
   div.className = 'toast';
   div.innerHTML = `
@@ -92,32 +90,62 @@ function showToast(title, message) {
     <div class="t2">${message}</div>
     <div class="t3">${new Date().toLocaleString()}</div>
   `;
+
   wrap.appendChild(div);
   setTimeout(() => div.remove(), 3500);
 }
 
-// Global error handler
-window.addEventListener('error', function(event) {
+
+// ===============================
+// Global Error Handler
+// ===============================
+
+window.addEventListener('error', function (event) {
   console.error('Global Error:', event.error);
   showToast('Error', 'একটি ত্রুটি ঘটেছে। দয়া আবার চেষ্টা করুন।');
 });
 
-// ✅ Send Test Email Function
-window.sendTestEmail = function() {
 
-   emailjs.send("service_li1nizv","template_eq13h6v",{
+// ===============================
+// EmailJS Integration
+// ===============================
+
+// Make sure EmailJS CDN is loaded in HTML
+// <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+// <script> emailjs.init("YOUR_PUBLIC_KEY"); </script>
+
+window.sendTestEmail = function () {
+
+  if (typeof emailjs === "undefined") {
+    alert("EmailJS not loaded!");
+    return;
+  }
+
+  emailjs.send(
+    "service_li1nizv",
+    "template_eq13h6v",
+    {
       to_name: "Test User",
       to_email: "shaque.shamim@gmail.com",
       receipt_no: "MR001",
       amount: "5000"
-   }).then(function(){
-      alert("Email Sent Successfully");
-   }).catch(function(error){
-      alert("Error: " + JSON.stringify(error));
-   });
+    }
+  )
+  .then(function () {
+    showToast("Success", "Email Sent Successfully");
+  })
+  .catch(function (error) {
+    console.error("Email Error:", error);
+    showToast("Error", "Email sending failed");
+  });
 
 };
-// Export global functions
+
+
+// ===============================
+// Export Globals
+// ===============================
+
 window.showLoading = showLoading;
 window.hideLoading = hideLoading;
 window.showToast = showToast;

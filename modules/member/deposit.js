@@ -37,7 +37,7 @@ import { openViewerModal } from '../modals/viewer.js';
  * Render Member Deposit Submission Page
  * - Load member info
  * - Calculate required share amount
- * - Build dynamic dropdown
+ * - Build dynamic dropdown with month names
  * - Attach event listeners
  */
 export async function renderMemberDeposit() {
@@ -58,7 +58,8 @@ export async function renderMemberDeposit() {
   const meta = await db.get('meta', 'system') || { monthlyShareAmount: 10000 };
 
   const currentYear = new Date().getFullYear();
-  const currentMonthNum = new Date().getMonth() + 1;
+  const currentMonthNum = new Date().getMonth() + 1; // 1-12
+  
 
   // Required amount = Shares × Monthly Share Amount
   const required = (member.shares || 1) * meta.monthlyShareAmount;
@@ -79,15 +80,19 @@ export async function renderMemberDeposit() {
 
 
   // ============================================================
-  // 📅 MONTH DROPDOWN GENERATION
+  // 📅 MONTH DROPDOWN GENERATION (with proper month names)
   // ============================================================
+
+  const months = [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'
+  ];
 
   let monthOptions = '';
   for (let m = 1; m <= 12; m++) {
-
-    const monthKey = `${currentYear}-${String(m).padStart(2, '0')}`;
-    const monthName = getMonthName(m);
-
+    const monthName = months[m - 1]; // Get month name from array
+    const monthKey = `${currentYear}-${String(m).padStart(2, '0')}`; // Format: YYYY-MM
+    
     monthOptions += `
       <option value="${monthKey}" ${m == currentMonthNum ? 'selected' : ''}>
         ${monthName}
@@ -120,7 +125,7 @@ export async function renderMemberDeposit() {
           <select id="d_year">${yearOptions}</select>
         </div>
 
-        <!-- Month Selection -->
+        <!-- Month Selection (Shows Month Name) -->
         <div>
           <label>Select Month *</label>
           <select id="d_month">${monthOptions}</select>
@@ -136,13 +141,12 @@ export async function renderMemberDeposit() {
         <div>
           <label>Payment Method *</label>
           <select id="d_method">
-          <option value="Select Method">Select Method</option>
+            <option value="Select Method">Select Method</option>
             <option value="Bank Transfer">Bank Transfer</option>
             <option value="Cash">Cash</option>
             <option value="Cash Deposit">Cash Deposit</option>
             <option value="Bkash">Bkash</option>
             <option value="Rocket">Rocket</option>
-
           </select>
         </div>
 
@@ -254,11 +258,16 @@ async function validateDeposit(member, meta, required) {
     return;
   }
 
+  // Extract month number from monthKey (YYYY-MM)
+  const monthNum = monthKey.split('-')[1];
+  const monthName = getMonthName(parseInt(monthNum, 10));
+
+  // Show month name in confirmation modal
   openDepositConfirmModal(`
     <div class="panel">
       <h3>Confirm Deposit</h3>
       <div class="row"><b>Member:</b> ${member.name}</div>
-      <div class="row"><b>Month:</b> ${monthKey}</div>
+      <div class="row"><b>Month:</b> ${monthName} ${year}</div>
       <div class="row"><b>Amount:</b> ${formatMoney(required)}</div>
       <div class="row"><b>Method:</b> ${method}</div>
       <div class="row"><b>TRX ID:</b> ${trxId}</div>
@@ -269,7 +278,7 @@ async function validateDeposit(member, meta, required) {
     await confirmDepositSubmit(
       member,
       required,
-      monthKey,
+      monthKey, // Store as YYYY-MM in database
       method,
       trxId,
       date
@@ -288,7 +297,7 @@ async function validateDeposit(member, meta, required) {
 async function confirmDepositSubmit(
   member,
   required,
-  month,
+  monthKey, // Format: YYYY-MM
   method,
   trxId,
   date
@@ -296,10 +305,14 @@ async function confirmDepositSubmit(
 
   const db = getDatabase();
 
+  // Extract year and month from monthKey
+  const [year, monthNum] = monthKey.split('-');
+  const monthName = getMonthName(parseInt(monthNum, 10));
+
   // Prevent duplicate deposit
   const existing = await db.query('deposits', [
     { field: 'memberId', operator: '==', value: member.id },
-    { field: 'month', operator: '==', value: month },
+    { field: 'month', operator: '==', value: monthKey }, // Compare with YYYY-MM
     { field: 'status', operator: 'in', value: ['PENDING', 'APPROVED'] }
   ]);
 
@@ -319,27 +332,36 @@ async function confirmDepositSubmit(
   const depositData = {
     id: depositId,
     memberId: member.id,
-    month,
+    year: year, // Store year separately for MR generation
+    month: monthName, // Store month name for display
+    monthKey: monthKey, // Store YYYY-MM for queries
     amount: required,
     paymentMethod: method,
     trxId,
     slip,
     status: 'PENDING',
     depositDate: date,
-    submittedAt: new Date().toISOString()
+    submittedAt: new Date().toISOString(),
+    fromBank: method === 'Bank Transfer' ? document.getElementById('d_from_bank')?.value : '',
+    toBank: method === 'Bank Transfer' ? document.getElementById('d_to_bank')?.value : '',
+    note: document.getElementById('d_note')?.value.trim() || ''
   };
 
   await db.save('deposits', depositData, depositId);
 
   await logActivity(
     'SUBMIT_DEPOSIT',
-    `Member submitted deposit ${depositId}`
+    `Member submitted deposit ${depositId} for ${monthName} ${year}`
   );
 
   showToast('Success', 'Deposit submitted successfully.');
 
-  showDepositReceipt(depositId);
-  window.navigateTo('member_dashboard');
+  showDepositReceipt(depositId, monthName, year);
+  
+  // Navigate back to dashboard after 2 seconds
+  setTimeout(() => {
+    window.navigateTo('member_dashboard');
+  }, 2000);
 }
 
 
@@ -348,21 +370,47 @@ async function confirmDepositSubmit(
 // 🧾 RECEIPT VIEWER
 // ============================================================
 
-async function showDepositReceipt(depositId) {
+async function showDepositReceipt(depositId, monthName, year) {
 
   const db = getDatabase();
   const deposit = await db.get('deposits', depositId);
 
   const html = `
     <div class="panel">
-      <h3>Deposit Submitted Successfully</h3>
-      <div class="row"><b>Deposit ID:</b> ${deposit.id}</div>
-      <div class="row"><b>Status:</b> PENDING</div>
-      <div class="row"><b>Submitted:</b>
-        ${new Date(deposit.submittedAt).toLocaleString()}
+      <h3>✅ Deposit Submitted Successfully</h3>
+      
+      <div style="background: var(--bg-secondary); padding: 20px; border-radius: 12px; margin: 20px 0;">
+        <div class="row" style="justify-content: space-between; margin-bottom: 15px;">
+          <div><strong>Deposit ID:</strong></div>
+          <div>${deposit.id}</div>
+        </div>
+        <div class="row" style="justify-content: space-between; margin-bottom: 15px;">
+          <div><strong>Month:</strong></div>
+          <div>${monthName} ${year}</div>
+        </div>
+        <div class="row" style="justify-content: space-between; margin-bottom: 15px;">
+          <div><strong>Amount:</strong></div>
+          <div>${formatMoney(deposit.amount)}</div>
+        </div>
+        <div class="row" style="justify-content: space-between; margin-bottom: 15px;">
+          <div><strong>Status:</strong></div>
+          <div><span class="status st-pending">PENDING</span></div>
+        </div>
+        <div class="row" style="justify-content: space-between;">
+          <div><strong>Submitted:</strong></div>
+          <div>${new Date(deposit.submittedAt).toLocaleString()}</div>
+        </div>
       </div>
-      <div class="hint">
-        Please wait for admin approval.
+      
+      <div class="hint" style="text-align: center; padding: 15px;">
+        ⏳ Please wait for admin approval.<br/>
+        You will be notified once your deposit is approved.
+      </div>
+      
+      <div style="text-align: center; margin-top: 20px;">
+        <button class="btn" onclick="window.navigateTo('member_dashboard')">
+          Go to Dashboard
+        </button>
       </div>
     </div>
   `;

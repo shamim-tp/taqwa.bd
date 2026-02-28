@@ -324,10 +324,11 @@ async function addCashMR() {
 }
 
 // ------------------------------------------------------------
-// Save Cash MR including uploaded slip
+// Save Cash MR including uploaded slip - UPDATED with approver info
 // ------------------------------------------------------------
 async function saveCashMRWithSlip() {
   const db = getDatabase();
+  const currentUser = getCurrentUser();
   const memberId = document.getElementById('cash_member').value;
   const amount = Number(document.getElementById('cash_amount').value || 0);
   const year = document.getElementById('cash_year').value;
@@ -335,8 +336,12 @@ async function saveCashMRWithSlip() {
   const date = document.getElementById('cash_date').value;
   const note = document.getElementById('cash_note').value.trim();
   const slipFile = document.getElementById('cash_slip').files[0];
+  const paymentMethod = document.getElementById('d_method').value;
+  const fromBank = document.getElementById('d_from_bank')?.value || '';
+  const toBank = document.getElementById('d_to_bank')?.value || '';
+  const trxId = document.getElementById('d_trx')?.value || 'CASH-' + Date.now();
 
-  if (!memberId || !amount || !year || !month || !date) {
+  if (!memberId || !amount || !year || !month || !date || paymentMethod == 'Select Method') {
     showToast('Validation Error', 'Fill all required fields (*)');
     return;
   }
@@ -350,16 +355,18 @@ async function saveCashMRWithSlip() {
   const depositData = {
     id: generateId('DP', deposits),
     memberId, year, month, amount,
-    paymentMethod: 'Cash', fromBank: '', toBank: '', trxId: 'CASH-' + Date.now(),
+    paymentMethod, fromBank, toBank, trxId,
     slip: slipData, note, status: 'APPROVED',
     mrId, depositDate: date,
     submittedAt: new Date().toISOString(),
     approvedAt: new Date().toISOString(),
-    approvedBy: getCurrentUser().id
+    approvedBy: currentUser.id,
+    approvedByName: currentUser.name || currentUser.email || 'Admin',
+    approvedByEmail: currentUser.email || ''
   };
 
   await db.save('deposits', depositData, depositData.id);
-  await logActivity('ADD_CASH_MR', `Cash MR added: ${mrId} for ${memberId}`);
+  await logActivity('ADD_CASH_MR', `Cash MR added: ${mrId} for ${memberId} by ${depositData.approvedByName}`);
 
   // Send notification to member
   const member = await db.get('members', memberId);
@@ -373,7 +380,7 @@ async function saveCashMRWithSlip() {
 }
 
 // ------------------------------------------------------------
-// Approve Deposit with auto MR ID
+// Approve Deposit with auto MR ID - UPDATED with approver info
 // ------------------------------------------------------------
 async function approveDeposit(depositId) {
   const db = getDatabase();
@@ -381,6 +388,7 @@ async function approveDeposit(depositId) {
   if (!deposit) return;
 
   const deposits = await db.getAll('deposits') || [];
+  const currentUser = getCurrentUser();
 
   // Ensure year is defined (use current year if not set)
   const year = deposit.year || new Date().getFullYear().toString();
@@ -389,10 +397,12 @@ async function approveDeposit(depositId) {
   deposit.mrId = generateMRId(deposits, year);
   deposit.status = 'APPROVED';
   deposit.approvedAt = new Date().toISOString();
-  deposit.approvedBy = getCurrentUser().id;
+  deposit.approvedBy = currentUser.id;
+  deposit.approvedByName = currentUser.name || currentUser.email || 'Admin';
+  deposit.approvedByEmail = currentUser.email || '';
 
   await db.update('deposits', depositId, deposit);
-  await logActivity('APPROVE_DEPOSIT', `Deposit approved: ${depositId} MR: ${deposit.mrId}`);
+  await logActivity('APPROVE_DEPOSIT', `Deposit approved: ${depositId} MR: ${deposit.mrId} by ${deposit.approvedByName}`);
 
   // Send notification to member
   const member = await db.get('members', deposit.memberId);
@@ -428,23 +438,26 @@ async function viewSlip(depositId) {
 }
 
 // ------------------------------------------------------------
-// Reject Deposit with note and send notification
+// Reject Deposit with note and send notification - UPDATED with approver info
 // ------------------------------------------------------------
 async function rejectDeposit(depositId) {
   const db = getDatabase();
   const deposit = await db.get('deposits', depositId);
   if (!deposit) return;
 
+  const currentUser = getCurrentUser();
   const note = prompt('Rejection note?');
   if (note == null) return;
 
   deposit.status = 'REJECTED';
   deposit.note = (deposit.note ? deposit.note + '\n' : '') + 'Rejected: ' + note;
   deposit.approvedAt = new Date().toISOString();
-  deposit.approvedBy = getCurrentUser().id;
+  deposit.approvedBy = currentUser.id;
+  deposit.approvedByName = currentUser.name || currentUser.email || 'Admin';
+  deposit.approvedByEmail = currentUser.email || '';
 
   await db.update('deposits', depositId, deposit);
-  await logActivity('REJECT_DEPOSIT', `Deposit rejected: ${depositId}`);
+  await logActivity('REJECT_DEPOSIT', `Deposit rejected: ${depositId} by ${deposit.approvedByName}`);
 
   // Send notification to member
   const member = await db.get('members', deposit.memberId);
@@ -488,11 +501,12 @@ async function viewMRReceipt(depositId) {
   // Log viewing activity
   await logActivity('VIEW_MR', `MR viewed: ${deposit.mrId} for ${deposit.memberId}`);
   
+  // সরাসরি openMRReceiptModal কল করুন (এটা mr-receipt.js থেকে ইম্পোর্ট করা আছে)
   openMRReceiptModal(deposit, member, meta);
 }
 
 // ------------------------------------------------------------
-// Print MR Receipt (new window)
+// Print MR Receipt (new window) - UPDATED with approver info in receipt
 // ------------------------------------------------------------
 async function printMR(depositId) {
   const db = getDatabase();
@@ -519,6 +533,7 @@ async function printMR(depositId) {
           .row { display: flex; justify-content: space-between; margin: 10px 0; }
           .signature { display: flex; justify-content: space-between; margin-top: 50px; }
           .signature div { text-align: center; }
+          .approver-info { background: #f0f7f0; padding: 10px; border-radius: 5px; margin: 20px 0; text-align: center; border: 1px dashed #27ae60; }
         </style>
       </head>
       <body>
@@ -545,11 +560,16 @@ async function printMR(depositId) {
 }
 
 // ------------------------------------------------------------
-// Generate MR Receipt HTML (with all details)
+// Generate MR Receipt HTML (with all details) - UPDATED with approver info
 // ------------------------------------------------------------
 function generateMRReceipt(deposit, member, meta) {
   const date = new Date(deposit.approvedAt || deposit.submittedAt);
   const formattedDate = date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+
+  // Approver information
+  const approvedByName = deposit.approvedByName || 'Admin';
+  const approvedByEmail = deposit.approvedByEmail || 'admin@ims.com';
+  const approvedAt = deposit.approvedAt ? new Date(deposit.approvedAt).toLocaleString() : 'N/A';
 
   return `
    <div class="receipt">
@@ -585,6 +605,15 @@ function generateMRReceipt(deposit, member, meta) {
           <p style="font-size:18px;margin-top:10px;">(Paid in full)</p>
         </div>
       </div>
+      
+      <!-- Approver Information Section (New) -->
+      <div class="approver-info" style="background: #f0f7f0; padding: 15px; border-radius: 8px; margin: 20px 0; text-align: center; border: 1px dashed #27ae60;">
+        <p style="margin:0 0 5px; color:#27ae60; font-weight:600;">✓ APPROVED & VERIFIED</p>
+        <p style="margin:5px 0;"><strong>Approved By:</strong> ${approvedByName}</p>
+        <p style="margin:5px 0;"><strong>Email:</strong> ${approvedByEmail}</p>
+        <p style="margin:5px 0;"><strong>Approval Date:</strong> ${approvedAt}</p>
+      </div>
+      
       <div class="signature">
         <div>
           <p>_________________________</p>

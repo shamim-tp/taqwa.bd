@@ -5,25 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>TAQWA PROPERTIES BD - ERP</title>
   <link rel="stylesheet" href="style.css">
-
-  <!-- Firebase SDK -->
+  <!-- Firebase SDK (প্রয়োজনে) -->
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-
-  <!-- EmailJS SDK -->
-  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
-  <script>
-    emailjs.init("xcS33ZLabXqHGMPuw"); // EmailJS Public Key
-  </script>
-
-  <!-- Main JS -->
   <script type="module" src="script.js"></script>
-
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏢</text></svg>">
 </head>
 <body>
-
-  <!-- Loading Overlay -->
+  <!-- লোডিং ওভারলে -->
   <div id="loadingOverlay" class="loading-overlay">
     <div>
       <div class="loading-spinner"></div>
@@ -31,14 +20,16 @@
     </div>
   </div>
 
-  <!-- Toast Messages -->
+  <!-- টোস্ট বার্তা -->
   <div class="toastWrap" id="toastWrap"></div>
 
-  <!-- Login Page -->
+  <!-- লগইন পৃষ্ঠা (শুধু লগইন অপশন) -->
   <div id="loginPage" class="loginWrap">
     <div class="loginCard">
       <div class="loginGrid">
         <div class="loginLeft">
+          <!-- লোগো (যদি থাকে) -->
+          <!-- <img src="images/logo.png" alt="TAQWA PROPERTIES BD" class="company-logo"> -->
           <h1>TAQWA PROPERTIES BD</h1>
           <p>Professional Investment Management ERP System</p>
           <p class="slogan">Trust & Excellence</p>
@@ -48,25 +39,26 @@
             <button id="tabAdmin" class="active">Admin Login</button>
             <button id="tabMember">Member Login</button>
           </div>
-          <form id="loginForm" onsubmit="event.preventDefault();">
-            <div class="row">
-              <div>
-                <label id="loginIdLabel">Admin ID</label>
-                <input id="loginId" placeholder="Enter ID" autocomplete="username" />
-              </div>
-              <div>
-                <label>Password</label>
-                <input id="loginPass" type="password" placeholder="Enter Password" autocomplete="current-password" />
-              </div>
-              <button type="submit" class="btn primary" id="loginBtn">Login</button>
+          <!-- লগইন ফর্ম (পাসওয়ার্ড ম্যানেজারের জন্য) -->
+             <form id="loginForm" onsubmit="event.preventDefault();">
+          <div class="row">
+            <div>
+              <label id="loginIdLabel">Admin ID</label>
+              <input id="loginId" placeholder="Enter ID" autocomplete="username" />
             </div>
-          </form>
+            <div>
+              <label>Password</label>
+              <input id="loginPass" type="password" placeholder="Enter Password" autocomplete="current-password" />
+            </div>
+            <button type="submit" class="btn primary" id="loginBtn">Login</button>
+          </div>
+        </form>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- App Page -->
+  <!-- অ্যাপ পৃষ্ঠা (লগইন成功后 দেখাবে) - শুরুতে লুকানো -->
   <div id="appPage" class="app" style="display: none;">
     <button class="mobile-menu-btn" id="mobileMenuBtn">☰ Menu</button>
     <div class="sidebar" id="sidebar">
@@ -98,27 +90,14 @@
         <div class="rightTop">
           <button class="btn hidden" id="systemToolsBtn">System Tools</button>
           <button class="btn primary hidden" id="quickAddBtn">Quick Add</button>
+          
         </div>
       </div>
-
-      <div id="pageContent">
-
-        <!-- Email Test Form -->
-        <div class="emailTest">
-          <h3>Send Test Email</h3>
-          <input type="text" id="name" placeholder="Recipient Name">
-          <input type="email" id="email" placeholder="Recipient Email">
-          <input type="text" id="receipt_no" placeholder="Receipt No">
-          <input type="text" id="amount" placeholder="Amount">
-          <button onclick="sendTestEmail()">Send Test Email</button>
-        </div>
-
-      </div>
+      <div id="pageContent"></div>
     </div>
   </div>
 
-  <!-- Modals Container -->
+  <!-- মডাল কন্টেইনার -->
   <div id="modalsContainer"></div>
-
 </body>
 </html>

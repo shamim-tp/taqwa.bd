@@ -13,20 +13,6 @@ window.SESSION = {
   isDesktop: window.innerWidth > 1024
 };
 
-// Get base URL for GitHub Pages
-const getBaseUrl = () => {
-  // Check if running on GitHub Pages
-  if (window.location.hostname.includes('github.io')) {
-    const pathSegments = window.location.pathname.split('/');
-    if (pathSegments.length >= 2) {
-      return `/${pathSegments[1]}`;
-    }
-  }
-  return '';
-};
-
-const baseUrl = getBaseUrl();
-
 // Initialize Application
 document.addEventListener('DOMContentLoaded', async function() {
   try {
@@ -36,18 +22,6 @@ document.addEventListener('DOMContentLoaded', async function() {
     // Initialize Database
     const dbMode = 'firebase';
     await initializeDatabase(dbMode);
-    
-    // Update UI with current database mode
-    const dbTypeElement = document.getElementById('databaseType');
-    if (dbTypeElement) {
-      const modeNames = {
-        'local': 'LocalStorage',
-        'firebase': 'Firebase',
-        'mysql': 'MySQL',
-        'postgresql': 'PostgreSQL'
-      };
-      dbTypeElement.textContent = modeNames[dbMode] || dbMode;
-    }
     
     // Load modules
     loadLoginModule();
@@ -59,6 +33,9 @@ document.addEventListener('DOMContentLoaded', async function() {
     initResizeHandler();
     initTouchEvents();
     initNetworkChecker();
+    
+    // Initialize sidebar navigation
+    initSidebarNavigation();
     
     // Add logout button listener
     const logoutBtn = document.getElementById('logoutBtn');
@@ -81,6 +58,54 @@ document.addEventListener('DOMContentLoaded', async function() {
     showToast('Error', 'অ্যাপ্লিকেশন লোড করতে সমস্যা হয়েছে', 'error');
   }
 });
+
+// Initialize Sidebar Navigation
+function initSidebarNavigation() {
+  const sidebarNav = document.getElementById('sidebarNav');
+  if (!sidebarNav) return;
+  
+  // Clear existing content
+  sidebarNav.innerHTML = '';
+  
+  // Admin navigation items
+  const adminNavItems = [
+    { icon: '📊', label: 'Dashboard', page: 'admin_dashboard' },
+    { icon: '👥', label: 'Members', page: 'admin_members' },
+    { icon: '💰', label: 'Deposits', page: 'admin_deposits' },
+    { icon: '📈', label: 'Investments', page: 'admin_investments' },
+    { icon: '💸', label: 'Expenses', page: 'admin_expenses' },
+    { icon: '🛒', label: 'Sales', page: 'admin_sales' },
+    { icon: '📋', label: 'Reports', page: 'admin_reports' },
+    { icon: '⚙️', label: 'Settings', page: 'admin_settings' }
+  ];
+  
+  // Member navigation items
+  const memberNavItems = [
+    { icon: '📊', label: 'Dashboard', page: 'member_dashboard' },
+    { icon: '💰', label: 'Submit Deposit', page: 'member_deposit' },
+    { icon: '📜', label: 'Deposit History', page: 'member_deposit_history' },
+    { icon: '👤', label: 'My Profile', page: 'member_profile' },
+    { icon: '📈', label: 'My Investments', page: 'member_investments' },
+    { icon: '💰', label: 'My Profit', page: 'member_profit' }
+  ];
+  
+  // Function to render navigation
+  function renderNavigation(items) {
+    sidebarNav.innerHTML = items.map(item => `
+      <button class="nav-item" onclick="window.navigateTo('${item.page}')">
+        <span>${item.icon}</span>
+        <span style="flex:1; text-align:left;">${item.label}</span>
+      </button>
+    `).join('');
+  }
+  
+  // Render based on current mode
+  if (window.SESSION.mode === 'admin') {
+    renderNavigation(adminNavItems);
+  } else {
+    renderNavigation(memberNavItems);
+  }
+}
 
 // Login Tabs Initialization
 function initLoginTabs() {
@@ -106,6 +131,7 @@ function initLoginTabs() {
       if (loginPass) loginPass.value = '123456';
       if (defaultText) defaultText.innerHTML = 'Default: Admin (ADMIN-001 / 123456)';
       currentMode = 'admin';
+      window.SESSION.mode = 'admin';
     });
     
     tabMember.addEventListener('click', function() {
@@ -119,6 +145,7 @@ function initLoginTabs() {
       if (loginPass) loginPass.value = '123456';
       if (defaultText) defaultText.innerHTML = 'Default: Member (FM-001 / 123456)';
       currentMode = 'member';
+      window.SESSION.mode = 'member';
     });
   }
   
@@ -152,40 +179,38 @@ async function handleLogin(mode) {
   showLoading('Logging in...');
   
   try {
-    const db = getDatabase();
-    
     if (mode === 'admin') {
       // For demo, accept any admin login
-      if (loginId && loginPass) {
-        window.SESSION.user = { id: loginId, name: 'Administrator', role: 'Admin', mode: 'admin' };
-        
-        document.getElementById('loginPage').style.display = 'none';
-        document.getElementById('appPage').style.display = 'flex';
-        
-        updateUserInfo('Administrator', 'Admin', loginId, 'ADMIN');
-        showToast('Success', 'Admin login successful!', 'success');
-        
-        // Load admin dashboard with fallback
-        loadAdminDashboard();
-      } else {
-        showToast('Error', 'Invalid Admin credentials', 'error');
-      }
+      window.SESSION.user = { id: loginId, name: 'Administrator', role: 'Admin', mode: 'admin' };
+      window.SESSION.mode = 'admin';
+      
+      document.getElementById('loginPage').style.display = 'none';
+      document.getElementById('appPage').style.display = 'flex';
+      
+      updateUserInfo('Administrator', 'Admin', loginId, 'ADMIN');
+      showToast('Success', 'Admin login successful!', 'success');
+      
+      // Re-initialize sidebar with admin navigation
+      initSidebarNavigation();
+      
+      // Load admin dashboard
+      loadAdminDashboard();
     } else {
       // For demo, accept any member login
-      if (loginId && loginPass) {
-        window.SESSION.user = { id: loginId, name: 'Member User', role: 'Member', mode: 'member' };
-        
-        document.getElementById('loginPage').style.display = 'none';
-        document.getElementById('appPage').style.display = 'flex';
-        
-        updateUserInfo('Member User', 'Member', loginId, 'MEMBER');
-        showToast('Success', 'Member login successful!', 'success');
-        
-        // Load member dashboard with fallback
-        loadMemberDashboard();
-      } else {
-        showToast('Error', 'Invalid Member credentials', 'error');
-      }
+      window.SESSION.user = { id: loginId, name: 'Member User', role: 'Member', mode: 'member' };
+      window.SESSION.mode = 'member';
+      
+      document.getElementById('loginPage').style.display = 'none';
+      document.getElementById('appPage').style.display = 'flex';
+      
+      updateUserInfo('Member User', 'Member', loginId, 'MEMBER');
+      showToast('Success', 'Member login successful!', 'success');
+      
+      // Re-initialize sidebar with member navigation
+      initSidebarNavigation();
+      
+      // Load member dashboard
+      loadMemberDashboard();
     }
   } catch (error) {
     console.error('Login error:', error);
@@ -195,7 +220,7 @@ async function handleLogin(mode) {
   }
 }
 
-// Load Admin Dashboard (with fallback)
+// Load Admin Dashboard
 function loadAdminDashboard() {
   const pageContent = document.getElementById('pageContent');
   const pageTitle = document.getElementById('pageTitle');
@@ -204,24 +229,23 @@ function loadAdminDashboard() {
   if (pageTitle) pageTitle.textContent = 'Admin Dashboard';
   if (pageSubtitle) pageSubtitle.textContent = 'Welcome to Admin Panel';
   
-  // Simple admin dashboard HTML
   if (pageContent) {
     pageContent.innerHTML = `
       <div style="padding: 20px;">
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 30px;">
-          <div style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 25px; border-radius: 20px;">
+          <div class="stat-card" style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 25px; border-radius: 20px;">
             <div style="font-size: 14px; opacity: 0.9; margin-bottom: 10px;">Total Members</div>
             <div style="font-size: 32px; font-weight: 700;">0</div>
           </div>
-          <div style="background: linear-gradient(135deg, #4facfe, #00f2fe); color: white; padding: 25px; border-radius: 20px;">
+          <div class="stat-card" style="background: linear-gradient(135deg, #4facfe, #00f2fe); color: white; padding: 25px; border-radius: 20px;">
             <div style="font-size: 14px; opacity: 0.9; margin-bottom: 10px;">Total Deposits</div>
             <div style="font-size: 32px; font-weight: 700;">৳ 0</div>
           </div>
-          <div style="background: linear-gradient(135deg, #43e97b, #38f9d7); color: white; padding: 25px; border-radius: 20px;">
+          <div class="stat-card" style="background: linear-gradient(135deg, #43e97b, #38f9d7); color: white; padding: 25px; border-radius: 20px;">
             <div style="font-size: 14px; opacity: 0.9; margin-bottom: 10px;">Pending Approvals</div>
             <div style="font-size: 32px; font-weight: 700;">0</div>
           </div>
-          <div style="background: linear-gradient(135deg, #fa709a, #fee140); color: white; padding: 25px; border-radius: 20px;">
+          <div class="stat-card" style="background: linear-gradient(135deg, #fa709a, #fee140); color: white; padding: 25px; border-radius: 20px;">
             <div style="font-size: 14px; opacity: 0.9; margin-bottom: 10px;">Total Profit</div>
             <div style="font-size: 32px; font-weight: 700;">৳ 0</div>
           </div>
@@ -230,10 +254,10 @@ function loadAdminDashboard() {
         <div style="background: white; border-radius: 20px; padding: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
           <h3 style="color: #1e3c72; margin-bottom: 20px;">Quick Actions</h3>
           <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px;">
-            <button onclick="window.location.href='#'" style="padding: 15px; background: #f8f9fa; border: none; border-radius: 12px; cursor: pointer;">👥 Members</button>
-            <button onclick="window.location.href='#'" style="padding: 15px; background: #f8f9fa; border: none; border-radius: 12px; cursor: pointer;">💰 Deposits</button>
-            <button onclick="window.location.href='#'" style="padding: 15px; background: #f8f9fa; border: none; border-radius: 12px; cursor: pointer;">📈 Investments</button>
-            <button onclick="window.location.href='#'" style="padding: 15px; background: #f8f9fa; border: none; border-radius: 12px; cursor: pointer;">📊 Reports</button>
+            <button class="quick-action-btn" onclick="window.navigateTo('admin_members')" style="padding: 15px; background: #f8f9fa; border: none; border-radius: 12px; cursor: pointer;">👥 Members</button>
+            <button class="quick-action-btn" onclick="window.navigateTo('admin_deposits')" style="padding: 15px; background: #f8f9fa; border: none; border-radius: 12px; cursor: pointer;">💰 Deposits</button>
+            <button class="quick-action-btn" onclick="window.navigateTo('admin_investments')" style="padding: 15px; background: #f8f9fa; border: none; border-radius: 12px; cursor: pointer;">📈 Investments</button>
+            <button class="quick-action-btn" onclick="window.navigateTo('admin_reports')" style="padding: 15px; background: #f8f9fa; border: none; border-radius: 12px; cursor: pointer;">📊 Reports</button>
           </div>
         </div>
       </div>
@@ -241,7 +265,7 @@ function loadAdminDashboard() {
   }
 }
 
-// Load Member Dashboard (with fallback)
+// Load Member Dashboard
 function loadMemberDashboard() {
   const pageContent = document.getElementById('pageContent');
   const pageTitle = document.getElementById('pageTitle');
@@ -250,24 +274,23 @@ function loadMemberDashboard() {
   if (pageTitle) pageTitle.textContent = 'Member Dashboard';
   if (pageSubtitle) pageSubtitle.textContent = 'Welcome to Member Portal';
   
-  // Simple member dashboard HTML
   if (pageContent) {
     pageContent.innerHTML = `
       <div style="padding: 20px;">
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 30px;">
-          <div style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 25px; border-radius: 20px;">
+          <div class="stat-card" style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 25px; border-radius: 20px;">
             <div style="font-size: 14px; opacity: 0.9; margin-bottom: 10px;">My Shares</div>
             <div style="font-size: 32px; font-weight: 700;">1</div>
           </div>
-          <div style="background: linear-gradient(135deg, #4facfe, #00f2fe); color: white; padding: 25px; border-radius: 20px;">
+          <div class="stat-card" style="background: linear-gradient(135deg, #4facfe, #00f2fe); color: white; padding: 25px; border-radius: 20px;">
             <div style="font-size: 14px; opacity: 0.9; margin-bottom: 10px;">Total Deposit</div>
             <div style="font-size: 32px; font-weight: 700;">৳ 0</div>
           </div>
-          <div style="background: linear-gradient(135deg, #43e97b, #38f9d7); color: white; padding: 25px; border-radius: 20px;">
+          <div class="stat-card" style="background: linear-gradient(135deg, #43e97b, #38f9d7); color: white; padding: 25px; border-radius: 20px;">
             <div style="font-size: 14px; opacity: 0.9; margin-bottom: 10px;">This Month Due</div>
             <div style="font-size: 32px; font-weight: 700;">৳ 10,000</div>
           </div>
-          <div style="background: linear-gradient(135deg, #fa709a, #fee140); color: white; padding: 25px; border-radius: 20px;">
+          <div class="stat-card" style="background: linear-gradient(135deg, #fa709a, #fee140); color: white; padding: 25px; border-radius: 20px;">
             <div style="font-size: 14px; opacity: 0.9; margin-bottom: 10px;">My Profit</div>
             <div style="font-size: 32px; font-weight: 700;">৳ 0</div>
           </div>
@@ -276,15 +299,78 @@ function loadMemberDashboard() {
         <div style="background: white; border-radius: 20px; padding: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
           <h3 style="color: #1e3c72; margin-bottom: 20px;">Quick Actions</h3>
           <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px;">
-            <button onclick="window.location.href='#'" style="padding: 15px; background: #f8f9fa; border: none; border-radius: 12px; cursor: pointer;">💰 Submit Deposit</button>
-            <button onclick="window.location.href='#'" style="padding: 15px; background: #f8f9fa; border: none; border-radius: 12px; cursor: pointer;">📜 History</button>
-            <button onclick="window.location.href='#'" style="padding: 15px; background: #f8f9fa; border: none; border-radius: 12px; cursor: pointer;">👤 Profile</button>
+            <button class="quick-action-btn" onclick="window.navigateTo('member_deposit')" style="padding: 15px; background: #f8f9fa; border: none; border-radius: 12px; cursor: pointer;">💰 Submit Deposit</button>
+            <button class="quick-action-btn" onclick="window.navigateTo('member_deposit_history')" style="padding: 15px; background: #f8f9fa; border: none; border-radius: 12px; cursor: pointer;">📜 History</button>
+            <button class="quick-action-btn" onclick="window.navigateTo('member_profile')" style="padding: 15px; background: #f8f9fa; border: none; border-radius: 12px; cursor: pointer;">👤 Profile</button>
           </div>
         </div>
       </div>
     `;
   }
 }
+
+// Navigate to Page
+window.navigateTo = function(page) {
+  console.log('Navigating to:', page);
+  
+  // Update page title
+  const pageTitle = document.getElementById('pageTitle');
+  const pageSubtitle = document.getElementById('pageSubtitle');
+  
+  // Close mobile menu if open
+  if (window.SESSION.isMobile) {
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.querySelector('.sidebar-overlay');
+    if (sidebar && overlay) {
+      sidebar.classList.remove('show');
+      overlay.style.display = 'none';
+      overlay.style.opacity = '0';
+    }
+  }
+  
+  // Load different pages
+  const pageContent = document.getElementById('pageContent');
+  
+  if (page === 'admin_dashboard') {
+    if (pageTitle) pageTitle.textContent = 'Admin Dashboard';
+    if (pageSubtitle) pageSubtitle.textContent = 'Welcome to Admin Panel';
+    loadAdminDashboard();
+  } else if (page === 'member_dashboard') {
+    if (pageTitle) pageTitle.textContent = 'Member Dashboard';
+    if (pageSubtitle) pageSubtitle.textContent = 'Welcome to Member Portal';
+    loadMemberDashboard();
+  } else if (page === 'admin_members') {
+    if (pageTitle) pageTitle.textContent = 'Member Management';
+    if (pageSubtitle) pageSubtitle.textContent = 'Manage all members';
+    if (pageContent) {
+      pageContent.innerHTML = '<div style="padding: 40px; text-align: center; color: #666;">Member Management Page - Coming Soon</div>';
+    }
+  } else if (page === 'admin_deposits') {
+    if (pageTitle) pageTitle.textContent = 'Deposit Management';
+    if (pageSubtitle) pageSubtitle.textContent = 'Manage all deposits';
+    if (pageContent) {
+      pageContent.innerHTML = '<div style="padding: 40px; text-align: center; color: #666;">Deposit Management Page - Coming Soon</div>';
+    }
+  } else if (page === 'member_deposit') {
+    if (pageTitle) pageTitle.textContent = 'Submit Deposit';
+    if (pageSubtitle) pageSubtitle.textContent = 'Submit your monthly deposit';
+    if (pageContent) {
+      pageContent.innerHTML = '<div style="padding: 40px; text-align: center; color: #666;">Submit Deposit Page - Coming Soon</div>';
+    }
+  } else if (page === 'member_deposit_history') {
+    if (pageTitle) pageTitle.textContent = 'Deposit History';
+    if (pageSubtitle) pageSubtitle.textContent = 'View your deposit history';
+    if (pageContent) {
+      pageContent.innerHTML = '<div style="padding: 40px; text-align: center; color: #666;">Deposit History Page - Coming Soon</div>';
+    }
+  } else {
+    if (pageContent) {
+      pageContent.innerHTML = `<div style="padding: 40px; text-align: center; color: #666;">${page} - Coming Soon</div>`;
+    }
+  }
+  
+  showToast('Navigation', `Loading ${page}...`, 'info');
+};
 
 // Update User Info
 function updateUserInfo(name, role, id, mode) {
@@ -305,6 +391,10 @@ function initMobileMenu() {
   const sidebar = document.getElementById('sidebar');
   
   if (!menuBtn || !sidebar) return;
+  
+  // Remove existing overlay if any
+  const existingOverlay = document.querySelector('.sidebar-overlay');
+  if (existingOverlay) existingOverlay.remove();
   
   const overlay = document.createElement('div');
   overlay.className = 'sidebar-overlay';
@@ -539,10 +629,6 @@ window.addEventListener('unhandledrejection', function(event) {
   }
 });
 
-// Export global functions
-window.logout = logout;
-window.showToast = showToast;
-
 // Add CSS animations
 const style = document.createElement('style');
 style.textContent = `
@@ -596,6 +682,39 @@ style.textContent = `
   body.is-resizing * {
     pointer-events: none;
     transition: none !important;
+  }
+  
+  .nav-item {
+    width: 100%;
+    text-align: left;
+    padding: 12px 15px;
+    border: none;
+    background: none;
+    color: #555;
+    border-radius: 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: all 0.3s;
+  }
+  
+  .nav-item:hover {
+    background: #f0f0f0;
+  }
+  
+  .nav-item.active {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+  }
+  
+  .quick-action-btn {
+    transition: all 0.3s;
+  }
+  
+  .quick-action-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
   }
   
   @media (max-width: 768px) {

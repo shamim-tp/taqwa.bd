@@ -76,7 +76,7 @@ export async function downloadMemberBioData(memberId) {
             left: 0;
             right: 0;
             bottom: 0;
-            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" opacity="0.03"><text x="50" y="50" font-size="80" text-anchor="middle" dominant-baseline="middle" font-family="Arial" font-weight="bold">IMS</text></svg>') repeat;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" opacity="0.03"><text x="50" y="50" font-size="80" text-anchor="middle" dominant-baseline="middle" font-family="Arial" font-weight="bold">TAQWA</text></svg>') repeat;
             pointer-events: none;
           }
           
@@ -460,7 +460,7 @@ export async function downloadMemberBioData(memberId) {
         <div class="bio-container">
           <!-- Header -->
           <div class="bio-header">
-            <div class="company-name">IMS INVESTMENT LTD.</div>
+            <div class="company-name">Taqwa Properties BD</div>
             <div class="company-tagline">Trust • Growth • Prosperity</div>
             <div class="bio-title">MEMBER BIO-DATA</div>
             <div class="member-id-badge">ID: ${member.id}</div>
@@ -677,8 +677,8 @@ export async function downloadMemberBioData(memberId) {
             <div style="display: flex; justify-content: space-between; align-items: center;">
               <div>This is a computer generated document. No signature required.</div>
               <div style="display: flex; gap: 20px;">
-                <div>www.imsinvestment.com</div>
-                <div>info@imsinvestment.com</div>
+                <div>www.Taqwa Properties BD.com</div>
+                <div>Taqwa Properties BD.com</div>
               </div>
             </div>
             <div style="margin-top: 10px; font-size: 11px;">

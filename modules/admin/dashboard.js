@@ -101,7 +101,7 @@ export async function renderAdminDashboard() {
   
   const maxDeposit = Math.max(...monthlyDeposits, 1);
   
-  // --- CSS Styles for the dashboard ---
+  // --- CSS Styles for the dashboard - Only Cards Styled ---
   const styles = `
     <style>
       /* Dashboard Container */
@@ -109,95 +109,166 @@ export async function renderAdminDashboard() {
         padding: 20px;
       }
       
-      /* Stats Cards Grid */
-      .stats-grid {
+      /* Stats Cards Grid - Using original gridCards class */
+      .gridCards {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-        gap: 20px;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 25px;
         margin-bottom: 30px;
       }
       
-      /* Card Styles */
-      .stat-card {
+      /* Beautiful Card Styles */
+      .card {
         background: white;
-        border-radius: 20px;
+        border-radius: 24px;
         padding: 25px;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.08);
-        transition: all 0.3s ease;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         position: relative;
         overflow: hidden;
-        border: 1px solid rgba(0,0,0,0.05);
+        border: 1px solid rgba(255,255,255,0.2);
+        backdrop-filter: blur(10px);
       }
       
-      .stat-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 15px 40px rgba(0,0,0,0.12);
+      .card:hover {
+        transform: translateY(-8px) scale(1.02);
+        box-shadow: 0 25px 50px rgba(0,0,0,0.15);
       }
       
-      .stat-card::before {
+      /* Gradient backgrounds for each card */
+      .card:nth-child(1) {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+      }
+      .card:nth-child(2) {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        color: white;
+      }
+      .card:nth-child(3) {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        color: white;
+      }
+      .card:nth-child(4) {
+        background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+        color: white;
+      }
+      .card:nth-child(5) {
+        background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+        color: white;
+      }
+      .card:nth-child(6) {
+        background: linear-gradient(135deg, #30cfd0 0%, #330867 100%);
+        color: white;
+      }
+      .card:nth-child(7) {
+        background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+        color: #333;
+      }
+      .card:nth-child(8) {
+        background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+        color: #333;
+      }
+      
+      /* Decorative elements */
+      .card::before {
         content: '';
         position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 5px;
-        background: linear-gradient(90deg, #1e3c72, #2a5298);
+        top: -50%;
+        right: -50%;
+        width: 200px;
+        height: 200px;
+        background: rgba(255,255,255,0.1);
+        border-radius: 50%;
+        transform: rotate(25deg);
+        transition: all 0.5s;
       }
       
-      .stat-card.members::before { background: linear-gradient(90deg, #667eea, #764ba2); }
-      .stat-card.shares::before { background: linear-gradient(90deg, #f2994a, #f2c94c); }
-      .stat-card.deposits::before { background: linear-gradient(90deg, #27ae60, #2ecc71); }
-      .stat-card.expense::before { background: linear-gradient(90deg, #e74c3c, #c0392b); }
-      .stat-card.balance::before { background: linear-gradient(90deg, #3498db, #2980b9); }
-      .stat-card.investment::before { background: linear-gradient(90deg, #9b59b6, #8e44ad); }
-      .stat-card.sales::before { background: linear-gradient(90deg, #1abc9c, #16a085); }
-      .stat-card.bank::before { background: linear-gradient(90deg, #34495e, #2c3e50); }
-      
-      .card-tag {
-        display: inline-block;
-        padding: 4px 12px;
-        background: rgba(30,60,114,0.1);
-        color: #1e3c72;
-        border-radius: 30px;
-        font-size: 12px;
-        font-weight: 600;
-        margin-bottom: 15px;
+      .card:hover::before {
+        transform: rotate(45deg) scale(1.2);
       }
       
-      .card-title {
-        font-size: 14px;
-        color: #666;
-        margin-bottom: 10px;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-      }
-      
-      .card-value {
-        font-size: 32px;
-        font-weight: 700;
-        color: #1e3c72;
-        margin-bottom: 10px;
-      }
-      
-      .card-sub {
-        font-size: 13px;
-        color: #888;
-        border-top: 1px solid #eee;
-        padding-top: 10px;
-        margin-top: 5px;
-      }
-      
-      .card-icon {
+      .card::after {
+        content: '';
         position: absolute;
-        top: 20px;
-        right: 20px;
-        font-size: 48px;
-        opacity: 0.1;
-        color: #1e3c72;
+        bottom: -50%;
+        left: -50%;
+        width: 200px;
+        height: 200px;
+        background: rgba(255,255,255,0.1);
+        border-radius: 50%;
+        transform: rotate(-25deg);
+        transition: all 0.5s;
+      }
+      
+      .card:hover::after {
+        transform: rotate(-45deg) scale(1.2);
+      }
+      
+      /* Card content styles */
+      .card .tag {
+        display: inline-block;
+        padding: 6px 16px;
+        background: rgba(255,255,255,0.2);
+        color: inherit;
+        border-radius: 40px;
+        font-size: 13px;
+        font-weight: 600;
+        margin-bottom: 20px;
+        letter-spacing: 0.5px;
+        backdrop-filter: blur(5px);
+        position: relative;
+        z-index: 1;
+      }
+      
+      .card .title {
+        font-size: 16px;
+        opacity: 0.9;
+        margin-bottom: 12px;
+        font-weight: 500;
+        position: relative;
+        z-index: 1;
+      }
+      
+      .card .value {
+        font-size: 42px;
+        font-weight: 800;
+        margin-bottom: 15px;
+        line-height: 1.2;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        position: relative;
+        z-index: 1;
+      }
+      
+      .card .sub {
+        font-size: 14px;
+        opacity: 0.8;
+        border-top: 1px solid rgba(255,255,255,0.2);
+        padding-top: 15px;
+        margin-top: 10px;
+        position: relative;
+        z-index: 1;
+      }
+      
+      /* Adjust text color for dark cards */
+      .card:nth-child(7) .tag,
+      .card:nth-child(7) .title,
+      .card:nth-child(7) .value,
+      .card:nth-child(7) .sub,
+      .card:nth-child(8) .tag,
+      .card:nth-child(8) .title,
+      .card:nth-child(8) .value,
+      .card:nth-child(8) .sub {
+        color: #333;
+        border-top-color: rgba(0,0,0,0.1);
+      }
+      
+      .card:nth-child(7) .tag,
+      .card:nth-child(8) .tag {
+        background: rgba(0,0,0,0.1);
       }
       
       /* Two Column Layout */
-      .dashboard-cols {
+      .twoCols {
         display: grid;
         grid-template-columns: 1fr 1fr;
         gap: 25px;
@@ -205,20 +276,20 @@ export async function renderAdminDashboard() {
       }
       
       @media (max-width: 768px) {
-        .dashboard-cols {
+        .twoCols {
           grid-template-columns: 1fr;
         }
       }
       
       /* Panel Styles */
-      .dashboard-panel {
+      .panel {
         background: white;
         border-radius: 20px;
         overflow: hidden;
         box-shadow: 0 10px 30px rgba(0,0,0,0.08);
       }
       
-      .panel-header {
+      .panelHeader {
         padding: 20px 25px;
         border-bottom: 1px solid #eee;
         display: flex;
@@ -228,19 +299,19 @@ export async function renderAdminDashboard() {
         gap: 15px;
       }
       
-      .panel-header h3 {
+      .panelHeader h3 {
         margin: 0;
         color: #1e3c72;
         font-size: 18px;
       }
       
-      .panel-header p {
+      .panelHeader p {
         margin: 5px 0 0;
         color: #666;
         font-size: 13px;
       }
       
-      .manage-btn {
+      .panelHeader .btn.primary {
         padding: 8px 20px;
         background: linear-gradient(135deg, #1e3c72, #2a5298);
         color: white;
@@ -249,22 +320,20 @@ export async function renderAdminDashboard() {
         font-size: 14px;
         cursor: pointer;
         transition: all 0.3s;
-        text-decoration: none;
-        display: inline-block;
       }
       
-      .manage-btn:hover {
+      .panelHeader .btn.primary:hover {
         transform: translateY(-2px);
         box-shadow: 0 5px 15px rgba(30,60,114,0.3);
       }
       
       /* Table Styles */
-      .dashboard-table {
+      table {
         width: 100%;
         border-collapse: collapse;
       }
       
-      .dashboard-table th {
+      th {
         text-align: left;
         padding: 15px 25px;
         background: #f8f9fa;
@@ -275,17 +344,24 @@ export async function renderAdminDashboard() {
         letter-spacing: 0.5px;
       }
       
-      .dashboard-table td {
+      td {
         padding: 15px 25px;
         border-bottom: 1px solid #eee;
         color: #555;
       }
       
-      .dashboard-table tr:hover td {
+      tr:hover td {
         background: #f8f9fa;
       }
       
-      .status-badge {
+      td .small {
+        font-size: 11px;
+        color: #999;
+        margin-top: 3px;
+      }
+      
+      /* Status Badges */
+      .status {
         display: inline-block;
         padding: 5px 12px;
         border-radius: 30px;
@@ -293,52 +369,32 @@ export async function renderAdminDashboard() {
         font-weight: 600;
       }
       
-      .status-badge.pending {
+      .st-pending {
         background: #fff3cd;
         color: #856404;
       }
       
-      .status-badge.approved {
+      .st-approved {
         background: #d4edda;
         color: #155724;
       }
       
-      .status-badge.rejected {
+      .st-rejected {
         background: #f8d7da;
         color: #721c24;
       }
       
-      /* Summary Table */
-      .summary-table {
-        width: 100%;
-        border-collapse: collapse;
+      /* Monthly Trend Chart */
+      .trend-container {
+        background: white;
+        border-radius: 20px;
+        padding: 25px;
+        margin-bottom: 30px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.08);
       }
       
-      .summary-table tr {
-        border-bottom: 1px solid #eee;
-      }
-      
-      .summary-table td {
-        padding: 12px 25px;
-      }
-      
-      .summary-table td:first-child {
-        font-weight: 600;
-        color: #1e3c72;
-      }
-      
-      .summary-table td:last-child {
-        text-align: right;
-        color: #2c3e50;
-      }
-      
-      /* Chart Bar */
-      .chart-container {
-        padding: 20px 25px;
-      }
-      
-      .chart-title {
-        font-size: 16px;
+      .trend-title {
+        font-size: 18px;
         color: #1e3c72;
         margin-bottom: 20px;
         font-weight: 600;
@@ -351,106 +407,109 @@ export async function renderAdminDashboard() {
       }
       
       .chart-label {
-        width: 70px;
+        width: 80px;
         font-size: 13px;
         color: #666;
+        font-weight: 500;
       }
       
       .chart-bar-wrapper {
         flex: 1;
-        height: 30px;
+        height: 36px;
         background: #f0f0f0;
-        border-radius: 15px;
+        border-radius: 18px;
         overflow: hidden;
-        margin: 0 10px;
+        margin: 0 15px;
+        box-shadow: inset 0 2px 5px rgba(0,0,0,0.05);
       }
       
       .chart-bar {
         height: 100%;
-        background: linear-gradient(90deg, #1e3c72, #2a5298);
-        border-radius: 15px;
+        background: linear-gradient(90deg, #667eea, #764ba2);
+        border-radius: 18px;
         transition: width 1s ease;
         display: flex;
         align-items: center;
         justify-content: flex-end;
-        padding-right: 10px;
+        padding-right: 15px;
         color: white;
-        font-size: 11px;
+        font-size: 12px;
         font-weight: 600;
+        text-shadow: 0 1px 2px rgba(0,0,0,0.2);
       }
       
       .chart-value {
-        width: 80px;
+        width: 100px;
         text-align: right;
-        font-weight: 600;
+        font-weight: 700;
         color: #1e3c72;
+        font-size: 14px;
       }
       
       /* Quick Actions */
       .quick-actions {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
         gap: 15px;
         margin-top: 25px;
       }
       
       .action-btn {
-        padding: 15px;
+        padding: 18px;
         background: white;
-        border: 1px solid #eee;
-        border-radius: 12px;
+        border: none;
+        border-radius: 16px;
         text-align: center;
         cursor: pointer;
         transition: all 0.3s;
-        text-decoration: none;
         color: #1e3c72;
+        font-size: 14px;
+        font-weight: 600;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        border: 1px solid rgba(0,0,0,0.05);
       }
       
       .action-btn:hover {
         background: linear-gradient(135deg, #1e3c72, #2a5298);
         color: white;
-        transform: translateY(-3px);
-        box-shadow: 0 10px 25px rgba(30,60,114,0.2);
-      }
-      
-      .action-icon {
-        font-size: 24px;
-        margin-bottom: 8px;
-      }
-      
-      .action-label {
-        font-size: 13px;
-        font-weight: 600;
+        transform: translateY(-5px);
+        box-shadow: 0 15px 30px rgba(30,60,114,0.3);
       }
       
       /* Welcome Section */
       .welcome-section {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         color: white;
-        padding: 30px;
-        border-radius: 20px;
+        padding: 35px;
+        border-radius: 24px;
         margin-bottom: 30px;
         display: flex;
         justify-content: space-between;
         align-items: center;
         flex-wrap: wrap;
         gap: 20px;
+        box-shadow: 0 20px 40px rgba(102,126,234,0.3);
       }
       
       .welcome-title {
-        font-size: 28px;
+        font-size: 32px;
         font-weight: 700;
-        margin-bottom: 10px;
+        margin-bottom: 8px;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
       }
       
       .welcome-date {
         font-size: 16px;
-        opacity: 0.9;
+        opacity: 0.95;
       }
       
       .welcome-stats {
         display: flex;
-        gap: 30px;
+        gap: 40px;
+        background: rgba(255,255,255,0.15);
+        padding: 15px 30px;
+        border-radius: 50px;
+        backdrop-filter: blur(10px);
       }
       
       .welcome-stat {
@@ -458,13 +517,16 @@ export async function renderAdminDashboard() {
       }
       
       .welcome-stat-value {
-        font-size: 32px;
+        font-size: 28px;
         font-weight: 700;
+        line-height: 1.2;
       }
       
       .welcome-stat-label {
         font-size: 12px;
-        opacity: 0.8;
+        opacity: 0.9;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
       }
     </style>
   `;
@@ -501,190 +563,155 @@ export async function renderAdminDashboard() {
     </div>
   `;
 
-  // --- Stats Cards with Icons ---
-  const statsHTML = `
-    <div class="stats-grid">
-      <div class="stat-card members">
-        <div class="card-tag">Members</div>
-        <div class="card-icon">👥</div>
-        <div class="card-title">Active Members</div>
-        <div class="card-value">${activeMembers}</div>
-        <div class="card-sub">Total: ${totalMembers} | Pending: ${pendingMembers} | Resigned: ${resignedMembers}</div>
-      </div>
-
-      <div class="stat-card shares">
-        <div class="card-tag">Shares</div>
-        <div class="card-icon">📊</div>
-        <div class="card-title">Active Shares</div>
-        <div class="card-value">${activeShares}</div>
-        <div class="card-sub">Total Shares: ${totalShares} | Per Share: ${formatMoney(monthlyShareAmount)}</div>
-      </div>
-
-      <div class="stat-card deposits">
-        <div class="card-tag">Deposits</div>
-        <div class="card-icon">💰</div>
-        <div class="card-title">Total Deposits</div>
-        <div class="card-value">${formatMoney(totalDeposit)}</div>
-        <div class="card-sub">This Month: ${formatMoney(currentMonthDeposit)} | Pending: ${formatMoney(pendingAmount)}</div>
-      </div>
-
-      <div class="stat-card expense">
-        <div class="card-tag">Expenses</div>
-        <div class="card-icon">💸</div>
-        <div class="card-title">Total Expenses</div>
-        <div class="card-value">${formatMoney(totalExpense)}</div>
-        <div class="card-sub">All time expenses</div>
-      </div>
-
-      <div class="stat-card balance">
-        <div class="card-tag">Balance</div>
-        <div class="card-icon">⚖️</div>
-        <div class="card-title">Current Balance</div>
-        <div class="card-value">${formatMoney(totalBalance)}</div>
-        <div class="card-sub">Deposits - Expenses</div>
-      </div>
-
-      <div class="stat-card investment">
-        <div class="card-tag">Investments</div>
-        <div class="card-icon">📈</div>
-        <div class="card-title">Total Invested</div>
-        <div class="card-value">${formatMoney(totalInvestAmount)}</div>
-        <div class="card-sub">Total: ${totalInvestments} | Active: ${activeInvestCount} | Completed: ${completedInvestCount}</div>
-      </div>
-
-      <div class="stat-card sales">
-        <div class="card-tag">Sales</div>
-        <div class="card-icon">🛒</div>
-        <div class="card-title">Total Sales</div>
-        <div class="card-value">${formatMoney(totalSales)}</div>
-        <div class="card-sub">Investment Profit: ${formatMoney(completedInvestmentsProfit)}</div>
-      </div>
-
-      <div class="stat-card bank">
-        <div class="card-tag">Bank</div>
-        <div class="card-icon">🏦</div>
-        <div class="card-title">Present Balance</div>
-        <div class="card-value">${formatMoney(presentBalance)}</div>
-        <div class="card-sub">After investments</div>
-      </div>
-    </div>
-  `;
-
   // --- Monthly Trend Chart ---
   const trendHTML = `
-    <div class="dashboard-panel" style="margin-bottom: 30px;">
-      <div class="panel-header">
-        <div>
-          <h3>📈 Monthly Deposit Trend</h3>
-          <p>Last 6 months deposit summary</p>
-        </div>
-      </div>
-      <div class="chart-container">
-        ${last6Months.map((m, index) => {
-          const percentage = (monthlyDeposits[index] / maxDeposit) * 100;
-          return `
-            <div class="chart-bar-container">
-              <div class="chart-label">${m.full}</div>
-              <div class="chart-bar-wrapper">
-                <div class="chart-bar" style="width: ${percentage}%">
-                  ${percentage > 20 ? formatMoney(monthlyDeposits[index]) : ''}
-                </div>
+    <div class="trend-container">
+      <div class="trend-title">📈 Monthly Deposit Trend (Last 6 Months)</div>
+      ${last6Months.map((m, index) => {
+        const percentage = (monthlyDeposits[index] / maxDeposit) * 100;
+        return `
+          <div class="chart-bar-container">
+            <div class="chart-label">${m.full}</div>
+            <div class="chart-bar-wrapper">
+              <div class="chart-bar" style="width: ${percentage}%">
+                ${percentage > 15 ? formatMoney(monthlyDeposits[index]) : ''}
               </div>
-              <div class="chart-value">${formatMoney(monthlyDeposits[index])}</div>
             </div>
-          `;
-        }).join('')}
-      </div>
+            <div class="chart-value">${formatMoney(monthlyDeposits[index])}</div>
+          </div>
+        `;
+      }).join('')}
     </div>
   `;
 
-  // --- Summary Panel ---
-  const summaryHTML = `
-    <div class="dashboard-panel">
-      <div class="panel-header">
-        <div>
-          <h3>📋 Financial Summary</h3>
-          <p>System financial performance</p>
-        </div>
+  // --- Original Cards (with enhanced styling) ---
+  const originalCardsHTML = `
+    <div class="gridCards">
+      <div class="card">
+        <div class="tag">Members</div>
+        <div class="title">Total Active Members</div>
+        <div class="value">${activeMembers}</div>
+        <div class="sub">Total: ${totalMembers} | Pending: ${pendingMembers} | Resigned: ${resignedMembers}</div>
       </div>
-      <table class="summary-table">
-        <tr><td>Total Investments</td><td>${totalInvestments}</td></tr>
-        <tr><td>Total Sales</td><td>${formatMoney(totalSales)}</td></tr>
-        <tr><td>Net Profit (All)</td><td>${formatMoney(netProfitAll)}</td></tr>
-        <tr><td>Pending Deposits</td><td>${pendingCount} (${formatMoney(pendingAmount)})</td></tr>
-        <tr><td>Monthly Share Amount</td><td>${formatMoney(monthlyShareAmount)}</td></tr>
-        <tr><td>Total Shares</td><td>${totalShares}</td></tr>
-        <tr><td>Present Balance</td><td>${formatMoney(presentBalance)}</td></tr>
-        <tr><td>Active Investments</td><td>${activeInvestCount} (${formatMoney(activeInvestAmount)})</td></tr>
-      </table>
+
+      <div class="card">
+        <div class="tag">Shares</div>
+        <div class="title">Total Active Shares</div>
+        <div class="value">${activeShares}</div>
+        <div class="sub">Total Shares: ${totalShares} | Per Share: ${formatMoney(monthlyShareAmount)}</div>
+      </div>
+
+      <div class="card">
+        <div class="tag">Deposits</div>
+        <div class="title">Total Approved Deposit</div>
+        <div class="value">${formatMoney(totalDeposit)}</div>
+        <div class="sub">This Month: ${formatMoney(currentMonthDeposit)} | Pending: ${formatMoney(currentMonthPendingAmount)}</div>
+      </div>
+
+      <div class="card">
+        <div class="tag">Expense</div>
+        <div class="title">Total Expenses</div>
+        <div class="value">${formatMoney(totalExpense)}</div>
+        <div class="sub">All time expenses</div>
+      </div>
+
+      <div class="card">
+        <div class="tag">Balance</div>
+        <div class="title">Current Balance</div>
+        <div class="value">${formatMoney(totalBalance)}</div>
+        <div class="sub">Deposits - Expenses</div>
+      </div>
+
+      <div class="card">
+        <div class="tag">Investment</div>
+        <div class="title">Total Invest Amount</div>
+        <div class="value">${formatMoney(totalInvestAmount)}</div>
+        <div class="sub">Total: ${totalInvestments} | Active: ${activeInvestCount} | Completed: ${completedInvestCount}</div>
+      </div>
+
+      <div class="card">
+        <div class="tag">Sales</div>
+        <div class="title">Total Sales Amount</div>
+        <div class="value">${formatMoney(totalSales)}</div>
+        <div class="sub">Investment Profit: ${formatMoney(completedInvestmentsProfit)}</div>
+      </div>
+
+      <div class="card">
+        <div class="tag">Bank Balance</div>
+        <div class="title">Present Balance</div>
+        <div class="value">${formatMoney(presentBalance)}</div>
+        <div class="sub">After investments</div>
+      </div>
     </div>
   `;
 
   // --- Pending Deposits Panel ---
   const pendingHTML = `
-    <div class="dashboard-panel">
-      <div class="panel-header">
-        <div>
-          <h3>⏳ Pending Deposits</h3>
-          <p>Recent deposits waiting for approval</p>
+    <div class="twoCols">
+      <div class="panel">
+        <div class="panelHeader">
+          <div>
+            <h3>⏳ Pending Deposits</h3>
+            <p>Recent deposits waiting for approval</p>
+          </div>
+          <button class="btn primary" onclick="navigateTo('admin_deposits')">Manage All</button>
         </div>
-        <button class="manage-btn" onclick="navigateTo('admin_deposits')">Manage All</button>
+        <table>
+          <thead>
+            <tr>
+              <th>Deposit ID</th>
+              <th>Member</th>
+              <th>Month</th>
+              <th>Amount</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${pendingDeposits.slice(0, 5).map(d => {
+              const member = members.find(x => x.id === d.memberId);
+              return `
+                <tr>
+                  <td><strong>${d.id}</strong></td>
+                  <td>${member ? member.name : 'Unknown'}<div class="small">${d.memberId}</div></td>
+                  <td>${d.month} ${d.year || ''}</td>
+                  <td><strong style="color:#27ae60;">${formatMoney(d.amount)}</strong></td>
+                  <td><span class="status st-pending">PENDING</span></td>
+                </tr>
+              `;
+            }).join('') || `<tr><td colspan="5" style="text-align:center; padding:40px;">No pending deposits found.</td></tr>`}
+          </tbody>
+        </table>
       </div>
-      <table class="dashboard-table">
-        <thead>
-          <tr>
-            <th>Deposit ID</th>
-            <th>Member</th>
-            <th>Month</th>
-            <th>Amount</th>
-            <th>Status</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${pendingDeposits.slice(0, 5).map(d => {
-            const member = members.find(x => x.id === d.memberId);
-            return `
-              <tr>
-                <td><strong>${d.id}</strong></td>
-                <td>${member ? member.name : 'Unknown'}<br><small style="color:#999;">${d.memberId}</small></td>
-                <td>${d.month} ${d.year || ''}</td>
-                <td><strong style="color:#27ae60;">${formatMoney(d.amount)}</strong></td>
-                <td><span class="status-badge pending">PENDING</span></td>
-              </tr>
-            `;
-          }).join('') || `<tr><td colspan="5" style="text-align:center; padding:40px;">No pending deposits found.</td></tr>`}
-        </tbody>
-      </table>
+
+      <div class="panel">
+        <div class="panelHeader">
+          <div>
+            <h3>📊 Quick Stats</h3>
+            <p>System overview</p>
+          </div>
+        </div>
+        <table>
+          <tr><td>Total Investments</td><td><strong>${totalInvestments}</strong></td></tr>
+          <tr><td>Total Sales</td><td><strong>${formatMoney(totalSales)}</strong></td></tr>
+          <tr><td>Net Profit</td><td><strong>${formatMoney(netProfitAll)}</strong></td></tr>
+          <tr><td>Pending Deposits</td><td><strong>${pendingCount} (${formatMoney(pendingAmount)})</strong></td></tr>
+          <tr><td>Monthly Share Amount</td><td><strong>${formatMoney(monthlyShareAmount)}</strong></td></tr>
+          <tr><td>Total Shares</td><td><strong>${totalShares}</strong></td></tr>
+          <tr><td>Active Investments</td><td><strong>${activeInvestCount} (${formatMoney(activeInvestAmount)})</strong></td></tr>
+        </table>
+      </div>
     </div>
   `;
 
   // --- Quick Actions ---
   const actionsHTML = `
     <div class="quick-actions">
-      <div class="action-btn" onclick="navigateTo('admin_members')">
-        <div class="action-icon">👥</div>
-        <div class="action-label">Manage Members</div>
-      </div>
-      <div class="action-btn" onclick="navigateTo('admin_deposits')">
-        <div class="action-icon">💰</div>
-        <div class="action-label">Manage Deposits</div>
-      </div>
-      <div class="action-btn" onclick="navigateTo('admin_investments')">
-        <div class="action-icon">📈</div>
-        <div class="action-label">Investments</div>
-      </div>
-      <div class="action-btn" onclick="navigateTo('admin_expenses')">
-        <div class="action-icon">💸</div>
-        <div class="action-label">Expenses</div>
-      </div>
-      <div class="action-btn" onclick="navigateTo('admin_sales')">
-        <div class="action-icon">🛒</div>
-        <div class="action-label">Sales</div>
-      </div>
-      <div class="action-btn" onclick="navigateTo('admin_reports')">
-        <div class="action-icon">📊</div>
-        <div class="action-label">Reports</div>
-      </div>
+      <button class="action-btn" onclick="navigateTo('admin_members')">👥 Members</button>
+      <button class="action-btn" onclick="navigateTo('admin_deposits')">💰 Deposits</button>
+      <button class="action-btn" onclick="navigateTo('admin_investments')">📈 Investments</button>
+      <button class="action-btn" onclick="navigateTo('admin_expenses')">💸 Expenses</button>
+      <button class="action-btn" onclick="navigateTo('admin_sales')">🛒 Sales</button>
+      <button class="action-btn" onclick="navigateTo('admin_reports')">📊 Reports</button>
     </div>
   `;
 
@@ -693,12 +720,9 @@ export async function renderAdminDashboard() {
     ${styles}
     <div class="dashboard-container">
       ${welcomeHTML}
-      ${statsHTML}
+      ${originalCardsHTML}
       ${trendHTML}
-      <div class="dashboard-cols">
-        ${summaryHTML}
-        ${pendingHTML}
-      </div>
+      ${pendingHTML}
       ${actionsHTML}
     </div>
   `;

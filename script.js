@@ -1,69 +1,58 @@
-// ===============================
 // Main Application Entry Point
-// ===============================
-
 import { initializeDatabase, getDatabase } from './modules/database/db.js';
 import { loadLoginModule } from './modules/auth/login.js';
 import { loadModalModules } from './modules/modals/modals.js';
 
-
-// ===============================
-// Global Session
-// ===============================
-
+// Global variables
 window.SESSION = {
   mode: 'admin',
   user: null,
   page: null
 };
 
-
-// ===============================
-// App Initialize
-// ===============================
-
-document.addEventListener('DOMContentLoaded', async function () {
+// Initialize Application
+document.addEventListener('DOMContentLoaded', async function() {
   try {
     showLoading('অ্যাপ্লিকেশন লোড হচ্ছে...');
-
-    const dbMode = 'firebase'; // Always use Firebase
+    
+    // Initialize Database
+  const dbMode = 'firebase'; // Always use Firebase
+// localStorage.removeItem('db_mode'); // optionally clear old value
     await initializeDatabase(dbMode);
-
-    // Show DB Mode in UI
+    
+    // Update UI with current database mode
     const dbTypeElement = document.getElementById('databaseType');
     if (dbTypeElement) {
       const modeNames = {
-        local: 'LocalStorage',
-        firebase: 'Firebase',
-        mysql: 'MySQL',
-        postgresql: 'PostgreSQL'
+        'local': 'LocalStorage',
+        'firebase': 'Firebase',
+        'mysql': 'MySQL',
+        'postgresql': 'PostgreSQL'
       };
       dbTypeElement.textContent = modeNames[dbMode] || dbMode;
     }
-
-    // Load Modules
+    
+    // Load login module
     loadLoginModule();
+    
+    // Load modal modules
     loadModalModules();
-
-    // Mobile Sidebar Toggle
-    document.getElementById('mobileMenuBtn')
-      ?.addEventListener('click', function () {
-        document.getElementById('sidebar')?.classList.toggle('active');
-      });
-
+    
+    
+    
+    // Mobile menu
+    document.getElementById('mobileMenuBtn')?.addEventListener('click', function() {
+      document.getElementById('sidebar').classList.toggle('active');
+    });
+    
     hideLoading();
-
   } catch (error) {
     console.error('Application initialization failed:', error);
     showToast('Error', 'অ্যাপ্লিকেশন লোড করতে সমস্যা হয়েছে');
   }
 });
 
-
-// ===============================
-// Utility Functions
-// ===============================
-
+// Utility functions
 function showLoading(message) {
   const overlay = document.getElementById('loadingOverlay');
   if (overlay) {
@@ -81,8 +70,6 @@ function hideLoading() {
 
 function showToast(title, message) {
   const wrap = document.getElementById('toastWrap');
-  if (!wrap) return;
-
   const div = document.createElement('div');
   div.className = 'toast';
   div.innerHTML = `
@@ -90,76 +77,18 @@ function showToast(title, message) {
     <div class="t2">${message}</div>
     <div class="t3">${new Date().toLocaleString()}</div>
   `;
-
   wrap.appendChild(div);
   setTimeout(() => div.remove(), 3500);
 }
 
-
-// ===============================
-// Global Error Handler
-// ===============================
-
-window.addEventListener('error', function (event) {
+// Global error handler
+window.addEventListener('error', function(event) {
   console.error('Global Error:', event.error);
   showToast('Error', 'একটি ত্রুটি ঘটেছে। দয়া আবার চেষ্টা করুন।');
 });
 
-
-// ===============================
-// EmailJS Integration
-// ===============================
-
-// Make sure EmailJS CDN is loaded in HTML
-// <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
-// <script> emailjs.init("YOUR_PUBLIC_KEY"); </script>
-
-window.sendTestEmail = function () {
-
-  if (typeof emailjs === "undefined") {
-    alert("EmailJS not loaded!");
-    return;
-  }
-
-  // Get email from input (optional fallback)
-  const emailInput = document.getElementById("email")?.value || "shaque.shamim@gmail.com";
-
-  if (!emailInput) {
-    alert("Please enter recipient email");
-    return;
-  }
-
-  const templateParams = {
-    to_name: document.getElementById("name")?.value || "Test User",
-    to_email: emailInput,
-    receipt_no: document.getElementById("receipt_no")?.value || "MR001",
-    amount: document.getElementById("amount")?.value || "5000"
-  };
-
-  console.log("Sending email to:", templateParams.to_email);
-
-  showLoading("Sending Email...");
-
-  emailjs.send("service_li1nizv", "template_eq13h6v", templateParams)
-    .then(function () {
-      hideLoading();
-      showToast("Success", "Email Sent Successfully ✅");
-    })
-    .catch(function (error) {
-      hideLoading();
-      console.error("Email Error:", error);
-      showToast("Error", "Email sending failed ❌");
-    });
-
-};
-
-
-// ===============================
-// Export Globals
-// ===============================
-
+// Export global functions
 window.showLoading = showLoading;
 window.hideLoading = hideLoading;
 window.showToast = showToast;
 window.getDatabase = getDatabase;
-window.sendTestEmail = sendTestEmail;

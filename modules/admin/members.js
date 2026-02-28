@@ -100,7 +100,7 @@ async function sendLoginInfoToMember(member, silent = false) {
     
     // WhatsApp মেসেজ (টেক্সট ফরম্যাট)
     const whatsappMsg = 
-`🏦 *IMS Investment Ltd.*
+`🏦 *Taqwa Properties BD*
 
 👋 *Dear ${member.name}*
 
@@ -117,7 +117,7 @@ async function sendLoginInfoToMember(member, silent = false) {
 📱 Please login and complete your profile.
 
 Thank you,
-IMS Investment Ltd.`;
+Taqwa Properties BD`;
 
   // ইমেল মেসেজ (HTML ফরম্যাট)
   const emailMsg = `
@@ -141,8 +141,8 @@ IMS Investment Ltd.`;
     <body>
       <div class="container">
         <div class="header">
-          <h2>🏦 IMS Investment Ltd.</h2>
-          <p>Welcome to IMS Family!</p>
+          <h2>🏦 Taqwa Properties BD</h2>
+          <p>Welcome to Taqwa Properties BD Family!</p>
         </div>
         
         <div class="content">
@@ -184,8 +184,8 @@ IMS Investment Ltd.`;
         </div>
         
         <div class="footer">
-          <p>📱 IMS Investment Ltd. | Dhaka, Bangladesh</p>
-          <p>📧 info@imsinvestment.com | 📞 +880 1234-567890</p>
+          <p>📱 Taqwa Properties BD | Dhaka, Bangladesh</p>
+          <p>📧 shaque.shamim@gmail.com | 📞 +880 1712-263593</p>
           <p style="margin-top: 10px;">This is an automated message. Please do not reply.</p>
         </div>
       </div>
@@ -196,7 +196,7 @@ IMS Investment Ltd.`;
     // উভয় চ্যানেলে পাঠান (একসাথে)
     const [whatsappResult, emailResult] = await Promise.allSettled([
       sendWhatsAppNotification(member.phone, whatsappMsg),
-      sendEmailNotification(member.email, '🎉 Welcome to IMS Investment Ltd. - Your Membership Information', emailMsg)
+      sendEmailNotification(member.email, '🎉 Welcome to Taqwa Properties BD - Your Membership Information', emailMsg)
     ]);
 
     // ফলাফল চেক

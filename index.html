@@ -766,7 +766,7 @@
       const loginPass = document.getElementById('loginPass');
       if (loginPass) {
         loginPass.addEventListener('keypress', function(e) {
-          if (e.key === 'Enter') {
+          if (e.key == 'Enter') {
             e.preventDefault();
             handleLogin();
           }
@@ -781,7 +781,7 @@
         const loginId = document.getElementById('loginId');
         const defaultText = document.querySelector('.loginRight p:last-child');
         
-        if (tab === 'admin') {
+        if (tab == 'admin') {
           tabAdmin.classList.add('active');
           tabMember.classList.remove('active');
           loginIdLabel.innerHTML = '👤 Admin ID';
@@ -831,7 +831,7 @@
           const chipIdEl = document.getElementById('chipId');
           const systemModeEl = document.getElementById('systemMode');
           
-          if (currentMode === 'admin') {
+          if (currentMode == 'admin') {
             if (userNameEl) userNameEl.textContent = 'Administrator';
             if (userRoleEl) userRoleEl.textContent = 'Admin';
             if (chipIdEl) chipIdEl.textContent = 'ID: ADMIN-001';
@@ -850,7 +850,7 @@
           showToast('Success', 'Login successful!', 'success');
           
           // Navigate to appropriate dashboard
-          if (currentMode === 'admin') {
+          if (currentMode == 'admin') {
             navigateTo('admin_dashboard');
           } else {
             navigateTo('member_dashboard');
@@ -925,10 +925,10 @@
         const pageTitle = document.getElementById('pageTitle');
         const pageSubtitle = document.getElementById('pageSubtitle');
         
-        if (page === 'admin_dashboard') {
+        if (page == 'admin_dashboard') {
           if (pageTitle) pageTitle.textContent = 'Admin Dashboard';
           if (pageSubtitle) pageSubtitle.textContent = 'Welcome to Admin Panel';
-        } else if (page === 'member_dashboard') {
+        } else if (page == 'member_dashboard') {
           if (pageTitle) pageTitle.textContent = 'Member Dashboard';
           if (pageSubtitle) pageSubtitle.textContent = 'Welcome to Member Portal';
         }
@@ -948,7 +948,7 @@
       
       // Close modal on Escape key
       document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') {
+        if (e.key == 'Escape') {
           const modals = document.querySelectorAll('.modalWrap.show');
           modals.forEach(modal => {
             modal.classList.remove('show');

@@ -3,6 +3,19 @@ import { initializeDatabase, getDatabase } from './modules/database/db.js';
 import { loadLoginModule } from './modules/auth/login.js';
 import { loadModalModules } from './modules/modals/modals.js';
 
+// Suppress Chrome extension errors
+const originalConsoleError = console.error;
+console.error = function(...args) {
+  // Filter out Chrome extension errors
+  if (args[0] && typeof args[0] === 'string' && 
+      (args[0].includes('runtime.lastError') || 
+       args[0].includes('message port closed') ||
+       args[0].includes('Extension context invalid'))) {
+    return; // Suppress these errors
+  }
+  originalConsoleError.apply(console, args);
+};
+
 // Global variables
 window.SESSION = {
   mode: 'admin', // Default mode
@@ -16,6 +29,7 @@ window.SESSION = {
 // Initialize Application
 document.addEventListener('DOMContentLoaded', async function() {
   try {
+    console.log('Document loaded');
     showLoading('🔄 অ্যাপ্লিকেশন লোড হচ্ছে...');
     
     // Initialize Database
@@ -90,10 +104,12 @@ function initLoginTabs() {
       window.SESSION.mode = 'admin';
       
       // Update UI
-      loginIdLabel.innerHTML = '👤 Admin ID';
-      loginId.placeholder = 'Enter Admin ID';
-      loginId.value = 'ADMIN-001';
-      loginPass.value = '123456';
+      if (loginIdLabel) loginIdLabel.innerHTML = '👤 Admin ID';
+      if (loginId) {
+        loginId.placeholder = 'Enter Admin ID';
+        loginId.value = 'ADMIN-001';
+      }
+      if (loginPass) loginPass.value = '123456';
       if (defaultText) {
         defaultText.innerHTML = 'Default: Admin (ADMIN-001 / 123456)';
       }
@@ -111,10 +127,12 @@ function initLoginTabs() {
       window.SESSION.mode = 'member';
       
       // Update UI
-      loginIdLabel.innerHTML = '👥 Member ID';
-      loginId.placeholder = 'Enter Member ID';
-      loginId.value = 'FM-001';
-      loginPass.value = '123456';
+      if (loginIdLabel) loginIdLabel.innerHTML = '👥 Member ID';
+      if (loginId) {
+        loginId.placeholder = 'Enter Member ID';
+        loginId.value = 'FM-001';
+      }
+      if (loginPass) loginPass.value = '123456';
       if (defaultText) {
         defaultText.innerHTML = 'Default: Member (FM-001 / 123456)';
       }
@@ -170,14 +188,21 @@ async function handleLogin() {
         };
         
         // Update UI
-        document.getElementById('loginPage').style.display = 'none';
-        document.getElementById('appPage').style.display = 'flex';
+        const loginPage = document.getElementById('loginPage');
+        const appPage = document.getElementById('appPage');
+        if (loginPage) loginPage.style.display = 'none';
+        if (appPage) appPage.style.display = 'flex';
         
         // Update user info
-        document.getElementById('currentUserName').textContent = 'Administrator';
-        document.getElementById('currentUserRole').textContent = 'Admin';
-        document.getElementById('chipId').textContent = `ID: ${loginId}`;
-        document.getElementById('systemMode').textContent = 'ADMIN';
+        const userNameEl = document.getElementById('currentUserName');
+        const userRoleEl = document.getElementById('currentUserRole');
+        const chipIdEl = document.getElementById('chipId');
+        const systemModeEl = document.getElementById('systemMode');
+        
+        if (userNameEl) userNameEl.textContent = 'Administrator';
+        if (userRoleEl) userRoleEl.textContent = 'Admin';
+        if (chipIdEl) chipIdEl.textContent = `ID: ${loginId}`;
+        if (systemModeEl) systemModeEl.textContent = 'ADMIN';
         
         showToast('Success', 'Admin login successful!', 'success');
         
@@ -203,14 +228,21 @@ async function handleLogin() {
         };
         
         // Update UI
-        document.getElementById('loginPage').style.display = 'none';
-        document.getElementById('appPage').style.display = 'flex';
+        const loginPage = document.getElementById('loginPage');
+        const appPage = document.getElementById('appPage');
+        if (loginPage) loginPage.style.display = 'none';
+        if (appPage) appPage.style.display = 'flex';
         
         // Update user info
-        document.getElementById('currentUserName').textContent = member.name;
-        document.getElementById('currentUserRole').textContent = member.memberType || 'Member';
-        document.getElementById('chipId').textContent = `ID: ${loginId}`;
-        document.getElementById('systemMode').textContent = 'MEMBER';
+        const userNameEl = document.getElementById('currentUserName');
+        const userRoleEl = document.getElementById('currentUserRole');
+        const chipIdEl = document.getElementById('chipId');
+        const systemModeEl = document.getElementById('systemMode');
+        
+        if (userNameEl) userNameEl.textContent = member.name;
+        if (userRoleEl) userRoleEl.textContent = member.memberType || 'Member';
+        if (chipIdEl) chipIdEl.textContent = `ID: ${loginId}`;
+        if (systemModeEl) systemModeEl.textContent = 'MEMBER';
         
         showToast('Success', `Welcome ${member.name}!`, 'success');
         
@@ -287,8 +319,10 @@ function initMobileMenu() {
   window.addEventListener('resize', function() {
     if (window.innerWidth > 768) {
       sidebar.classList.remove('show');
-      overlay.style.display = 'none';
-      overlay.style.opacity = '0';
+      if (overlay) {
+        overlay.style.display = 'none';
+        overlay.style.opacity = '0';
+      }
       document.body.style.overflow = '';
     }
   });
@@ -548,8 +582,11 @@ window.logout = function() {
     window.SESSION.mode = 'admin';
     window.SESSION.page = null;
     
-    document.getElementById('appPage').style.display = 'none';
-    document.getElementById('loginPage').style.display = 'flex';
+    const appPage = document.getElementById('appPage');
+    const loginPage = document.getElementById('loginPage');
+    
+    if (appPage) appPage.style.display = 'none';
+    if (loginPage) loginPage.style.display = 'flex';
     
     // Reset login form
     const loginId = document.getElementById('loginId');
@@ -563,6 +600,13 @@ window.logout = function() {
 
 // Global error handler
 window.addEventListener('error', function(event) {
+  // Filter out extension errors
+  if (event.error?.message?.includes('runtime.lastError') ||
+      event.error?.message?.includes('message port closed') ||
+      event.error?.message?.includes('Extension context')) {
+    return; // Suppress extension errors
+  }
+  
   console.error('Global Error:', event.error);
   
   // Don't show error for cancelled requests
@@ -576,6 +620,13 @@ window.addEventListener('error', function(event) {
 
 // Handle unhandled promise rejections
 window.addEventListener('unhandledrejection', function(event) {
+  // Filter out extension errors
+  if (event.reason?.message?.includes('runtime.lastError') ||
+      event.reason?.message?.includes('message port closed') ||
+      event.reason?.message?.includes('Extension context')) {
+    return; // Suppress extension errors
+  }
+  
   console.error('Unhandled Rejection:', event.reason);
   
   // Don't show error for cancelled requests

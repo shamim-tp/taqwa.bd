@@ -4,109 +4,45 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>TAQWA PROPERTIES BD - ERP</title>
+
   <link rel="stylesheet" href="style.css">
-  <!-- Firebase SDK (প্রয়োজনে) -->
+
+  <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-  <script type="module" src="script.js"></script>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏢</text></svg>">
 
+  <!-- EmailJS -->
   <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+  <script>
+    emailjs.init("xcS33ZLabXqHGMPuw");
+  </script>
 
-<script>
-   emailjs.init("xcS33ZLabXqHGMPuw");
-</script>
+  <!-- jsPDF -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
-  
+  <!-- Main Script -->
+  <script type="module" src="script.js"></script>
 </head>
+
 <body>
-  <!-- লোডিং ওভারলে -->
+
   <div id="loadingOverlay" class="loading-overlay">
     <div>
-      <div class="loading-spinner"></div>
       <p>Loading...</p>
     </div>
   </div>
 
-  <!-- টোস্ট বার্তা -->
-  <div class="toastWrap" id="toastWrap"></div>
+  <div id="toastWrap"></div>
 
-  <!-- লগইন পৃষ্ঠা (শুধু লগইন অপশন) -->
-  <div id="loginPage" class="loginWrap">
-    <div class="loginCard">
-      <div class="loginGrid">
-        <div class="loginLeft">
-          <!-- লোগো (যদি থাকে) -->
-          <!-- <img src="images/logo.png" alt="TAQWA PROPERTIES BD" class="company-logo"> -->
-          <h1>TAQWA PROPERTIES BD</h1>
-          <p>Professional Investment Management ERP System</p>
-          <p class="slogan">Trust & Excellence</p>
-        </div>
-        <div class="loginRight">
-          <div class="tabs">
-            <button id="tabAdmin" class="active">Admin Login</button>
-            <button id="tabMember">Member Login</button>
-          </div>
-          <!-- লগইন ফর্ম (পাসওয়ার্ড ম্যানেজারের জন্য) -->
-             <form id="loginForm" onsubmit="event.preventDefault();">
-          <div class="row">
-            <div>
-              <label id="loginIdLabel">Admin ID</label>
-              <input id="loginId" placeholder="Enter ID" autocomplete="username" />
-            </div>
-            <div>
-              <label>Password</label>
-              <input id="loginPass" type="password" placeholder="Enter Password" autocomplete="current-password" />
-            </div>
-            <button type="submit" class="btn primary" id="loginBtn">Login</button>
-          </div>
-        </form>
-        </div>
-      </div>
-    </div>
+  <div style="padding:40px">
+    <h2>Test Deposit</h2>
+
+    <input id="memberName" placeholder="Member Name"><br><br>
+    <input id="memberEmail" placeholder="Member Email"><br><br>
+    <input id="amount" placeholder="Amount"><br><br>
+
+    <button id="saveDepositBtn">Save Deposit</button>
   </div>
 
-  <!-- অ্যাপ পৃষ্ঠা (লগইন成功后 দেখাবে) - শুরুতে লুকানো -->
-  <div id="appPage" class="app" style="display: none;">
-    <button class="mobile-menu-btn" id="mobileMenuBtn">☰ Menu</button>
-    <div class="sidebar" id="sidebar">
-      <div class="brand">
-        <div>
-          <h2>TAQWA PROPERTIES BD</h2>
-          <div class="small">ERP System</div>
-        </div>
-        <div class="badge" id="systemMode">ADMIN</div>
-      </div>
-      <div class="userBox">
-        <div class="name" id="currentUserName">-</div>
-        <div class="role" id="currentUserRole">-</div>
-        <div class="mini">
-          <span class="chip" id="chipId">ID: -</span>
-          <span class="chip" id="chipStatus">Active</span>
-        </div>
-      </div>
-      <div class="navTitle">Navigation</div>
-      <div class="nav" id="sidebarNav"></div>
-      <button class="logoutBtn" id="logoutBtn">Logout</button>
-    </div>
-    <div class="main">
-      <div class="topbar">
-        <div>
-          <h1 id="pageTitle">Dashboard</h1>
-          <p id="pageSubtitle">Welcome to TAQWA PROPERTIES ERP</p>
-        </div>
-        <div class="rightTop">
-          <button class="btn hidden" id="systemToolsBtn">System Tools</button>
-          <button class="btn primary hidden" id="quickAddBtn">Quick Add</button>
-          <button onclick="sendTestEmail()">Test Email</button>
-          
-        </div>
-      </div>
-      <div id="pageContent"></div>
-    </div>
-  </div>
-
-  <!-- মডাল কন্টেইনার -->
-  <div id="modalsContainer"></div>
 </body>
 </html>

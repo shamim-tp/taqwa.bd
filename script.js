@@ -100,8 +100,10 @@ function showToast(title, message) {
 window.addEventListener('error', function(event) {
   console.error('Global Error:', event.error);
   showToast('Error', 'একটি ত্রুটি ঘটেছে। দয়া আবার চেষ্টা করুন।');
-}
-window.sendTestEmail = function(){
+});
+
+// ✅ Send Test Email Function
+window.sendTestEmail = function() {
 
    emailjs.send("service_li1nizv","template_eq13h6v",{
       to_name: "Test User",
@@ -114,10 +116,7 @@ window.sendTestEmail = function(){
       alert("Error: " + JSON.stringify(error));
    });
 
-}
-                       
-                       );
-
+};
 // Export global functions
 window.showLoading = showLoading;
 window.hideLoading = hideLoading;

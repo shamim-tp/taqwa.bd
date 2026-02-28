@@ -13,8 +13,10 @@ import {
 import { openViewerModal } from '../modals/viewer.js';
 import { previewMemberBioData, downloadMemberBioData } from '../modals/member-bio.js';
 
+console.log('members module loaded – FINAL FIXED VERSION');
+
 // ============================================================
-// 📱 নোটিফিকেশন ফাংশন
+// 📱 নোটিফিকেশন ফাংশন (Error handling improved)
 // ============================================================
 
 /**
@@ -22,17 +24,30 @@ import { previewMemberBioData, downloadMemberBioData } from '../modals/member-bi
  */
 async function sendWhatsAppNotification(phone, message) {
   try {
+    if (!phone) {
+      console.warn('No phone number provided for WhatsApp notification');
+      return false;
+    }
+    
+    // ফোন নম্বর ফরম্যাট চেক
+    const formattedPhone = phone.replace(/\D/g, '');
+    if (formattedPhone.length < 10) {
+      console.warn('Invalid phone number format:', phone);
+      return false;
+    }
+    
     // এখানে আপনার প্রকৃত WhatsApp API কল করবেন
-    console.log(`📱 WhatsApp to ${phone}:`, message);
+    console.log(`📱 WhatsApp to ${phone}:`, message.substring(0, 100) + '...');
+    
+    // API কল সিমুলেশন
+    await new Promise(resolve => setTimeout(resolve, 500));
     
     // ডেমো লগ
-    await logActivity('WHATSAPP_SENT', `WhatsApp sent to ${phone}: ${message.substring(0, 50)}...`);
+    await logActivity('WHATSAPP_SENT', `WhatsApp sent to ${phone}`);
     
-    showToast('WhatsApp Sent', `Message sent to ${phone}`);
     return true;
   } catch (error) {
     console.error('WhatsApp error:', error);
-    showToast('WhatsApp Error', 'Message send failed', 'error');
     return false;
   }
 }
@@ -42,17 +57,30 @@ async function sendWhatsAppNotification(phone, message) {
  */
 async function sendEmailNotification(email, subject, message) {
   try {
+    if (!email) {
+      console.warn('No email address provided for email notification');
+      return false;
+    }
+    
+    // ইমেল ভ্যালিডেশন
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      console.warn('Invalid email format:', email);
+      return false;
+    }
+    
     // এখানে আপনার প্রকৃত Email API কল করবেন
-    console.log(`📧 Email to ${email}:`, { subject, message });
+    console.log(`📧 Email to ${email}:`, { subject, messageLength: message.length });
+    
+    // API কল সিমুলেশন
+    await new Promise(resolve => setTimeout(resolve, 500));
     
     // ডেমো লগ
     await logActivity('EMAIL_SENT', `Email sent to ${email}: ${subject}`);
     
-    showToast('Email Sent', `Email sent to ${email}`);
     return true;
   } catch (error) {
     console.error('Email error:', error);
-    showToast('Email Error', 'Email send failed', 'error');
     return false;
   }
 }
@@ -60,48 +88,175 @@ async function sendEmailNotification(email, subject, message) {
 /**
  * মেম্বারকে লগইন তথ্য পাঠান (WhatsApp + Email)
  */
-async function sendLoginInfoToMember(member) {
-  if (!member) return;
-  
-  const loginUrl = window.location.origin + window.location.pathname;
-  
-  // WhatsApp মেসেজ
-  const whatsappMsg = 
+async function sendLoginInfoToMember(member, silent = false) {
+  try {
+    if (!member) {
+      console.warn('No member provided for sending login info');
+      return false;
+    }
+    
+    const loginUrl = window.location.origin + window.location.pathname;
+    const password = member.pass || '123456';
+    
+    // WhatsApp মেসেজ (টেক্সট ফরম্যাট)
+    const whatsappMsg = 
 `🏦 *IMS Investment Ltd.*
-👋 Dear ${member.name},
 
-✅ Your membership information:
-🔑 Member ID: ${member.id}
-🔐 Password: ${member.pass || '123456'}
-🌐 Login: ${loginUrl}
+👋 *Dear ${member.name}*
 
-📱 Please login and complete your profile.`;
+✅ *Your Membership Information:*
+━━━━━━━━━━━━━━━━━━━━━
+🆔 Member ID: ${member.id}
+🔐 Password: ${password}
+👤 Type: ${member.memberType || 'N/A'}
+📊 Status: ${member.status || 'PENDING'}
+━━━━━━━━━━━━━━━━━━━━━
 
-  // ইমেল মেসেজ  
+🌐 *Login:* ${loginUrl}
+
+📱 Please login and complete your profile.
+
+Thank you,
+IMS Investment Ltd.`;
+
+  // ইমেল মেসেজ (HTML ফরম্যাট)
   const emailMsg = `
-    <h2>IMS Investment Ltd. - Membership Information</h2>
-    <p>Dear ${member.name},</p>
-    <p>Your membership has been created successfully.</p>
-    <table style="border-collapse: collapse; margin: 20px 0;">
-      <tr><td><strong>Member ID:</strong></td><td>${member.id}</td></tr>
-      <tr><td><strong>Password:</strong></td><td>${member.pass || '123456'}</td></tr>
-      <tr><td><strong>Member Type:</strong></td><td>${member.memberType}</td></tr>
-      <tr><td><strong>Status:</strong></td><td>${member.status}</td></tr>
-    </table>
-    <p><strong>Login URL:</strong> <a href="${loginUrl}">${loginUrl}</a></p>
-    <p>Please login and complete your profile.</p>
-    <br>
-    <p>Thanks,<br>IMS Investment Ltd.</p>
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="UTF-8">
+      <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: linear-gradient(135deg, #1e3c72, #2a5298); color: white; padding: 20px; text-align: center; border-radius: 10px 10px 0 0; }
+        .content { background: #f9f9f9; padding: 20px; border: 1px solid #ddd; }
+        .info-box { background: white; padding: 15px; border-radius: 5px; margin: 15px 0; }
+        .info-row { display: flex; margin: 10px 0; border-bottom: 1px solid #eee; padding-bottom: 5px; }
+        .info-label { font-weight: bold; width: 120px; color: #1e3c72; }
+        .info-value { flex: 1; }
+        .footer { background: #f0f0f0; padding: 15px; text-align: center; font-size: 12px; color: #666; border-radius: 0 0 10px 10px; }
+        .btn { background: #1e3c72; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block; }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="header">
+          <h2>🏦 IMS Investment Ltd.</h2>
+          <p>Welcome to IMS Family!</p>
+        </div>
+        
+        <div class="content">
+          <h3>Dear ${member.name},</h3>
+          <p>Your membership has been created successfully. Below is your login information:</p>
+          
+          <div class="info-box">
+            <div class="info-row">
+              <div class="info-label">Member ID:</div>
+              <div class="info-value"><strong>${member.id}</strong></div>
+            </div>
+            <div class="info-row">
+              <div class="info-label">Password:</div>
+              <div class="info-value"><strong>${password}</strong></div>
+            </div>
+            <div class="info-row">
+              <div class="info-label">Member Type:</div>
+              <div class="info-value">${member.memberType || 'N/A'}</div>
+            </div>
+            <div class="info-row">
+              <div class="info-label">Status:</div>
+              <div class="info-value">${member.status || 'PENDING'}</div>
+            </div>
+            <div class="info-row">
+              <div class="info-label">Phone:</div>
+              <div class="info-value">${member.phone || 'N/A'}</div>
+            </div>
+            <div class="info-row">
+              <div class="info-label">Email:</div>
+              <div class="info-value">${member.email || 'N/A'}</div>
+            </div>
+          </div>
+          
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="${loginUrl}" class="btn">🔑 Login to Dashboard</a>
+          </div>
+          
+          <p style="color: #666; font-size: 14px;">For security reasons, please change your password after first login.</p>
+        </div>
+        
+        <div class="footer">
+          <p>📱 IMS Investment Ltd. | Dhaka, Bangladesh</p>
+          <p>📧 info@imsinvestment.com | 📞 +880 1234-567890</p>
+          <p style="margin-top: 10px;">This is an automated message. Please do not reply.</p>
+        </div>
+      </div>
+    </body>
+    </html>
   `;
 
-  // উভয় চ্যানেলে পাঠান
-  await Promise.allSettled([
-    sendWhatsAppNotification(member.phone, whatsappMsg),
-    sendEmailNotification(member.email, 'IMS Investment Ltd. - Membership Information', emailMsg)
-  ]);
+    // উভয় চ্যানেলে পাঠান (একসাথে)
+    const [whatsappResult, emailResult] = await Promise.allSettled([
+      sendWhatsAppNotification(member.phone, whatsappMsg),
+      sendEmailNotification(member.email, '🎉 Welcome to IMS Investment Ltd. - Your Membership Information', emailMsg)
+    ]);
+
+    // ফলাফল চেক
+    const successCount = [whatsappResult, emailResult].filter(r => r.status === 'fulfilled' && r.value === true).length;
+    
+    if (!silent) {
+      if (successCount > 0) {
+        showToast('✅ Notification Sent', `Login info sent via ${successCount} channel(s)`);
+      } else {
+        showToast('⚠️ Partial Success', 'Some notifications failed to send', 'warning');
+      }
+    }
+    
+    return successCount > 0;
+    
+  } catch (error) {
+    console.error('sendLoginInfoToMember error:', error);
+    if (!silent) {
+      showToast('❌ Error', 'Failed to send login information', 'error');
+    }
+    return false;
+  }
 }
 
-console.log('members module loaded – FINAL FIXED VERSION');
+// ============================================================
+// ম্যানুয়ালি লগইন তথ্য পাঠানোর ফাংশন
+// ============================================================
+
+async function sendLoginInfoManually(memberId) {
+  try {
+    const db = getDatabase();
+    const member = await db.get('members', memberId);
+    if (!member) {
+      showToast('Error', 'Member not found', 'error');
+      return;
+    }
+
+    // কনফার্মেশন ডায়ালগ
+    const confirmSend = confirm(
+      `📨 Send login information to ${member.name}?\n\n` +
+      `📱 Phone: ${member.phone || 'Not provided'}\n` +
+      `📧 Email: ${member.email || 'Not provided'}\n\n` +
+      `Press OK to send via WhatsApp & Email.`
+    );
+    
+    if (!confirmSend) return;
+
+    showToast('📨 Sending', 'Sending login information...', 'info');
+    
+    const success = await sendLoginInfoToMember(member, false);
+    
+    if (success) {
+      await logActivity('MANUAL_LOGIN_INFO', `Login info sent manually to ${memberId}`);
+    }
+    
+  } catch (error) {
+    console.error('sendLoginInfoManually error:', error);
+    showToast('Error', 'Failed to send login information', 'error');
+  }
+}
 
 /* --------------------------------------------------------------------------
    MAIN RENDER – full admin members page
@@ -155,17 +310,17 @@ export async function renderAdminMembers() {
           </div>
           <div class="row row-3">
             <div>
-              <label>Phone Number</label>
+              <label>Phone Number *</label>
               <div style="display:flex;gap:8px;">
                 <select id="m_country_code" style="width:100px;">
                   <option value="+880">+880 (BD)</option>
                 </select>
-                <input id="m_phone" placeholder="17XXXXXXXX" style="flex:1;" />
+                <input id="m_phone" placeholder="17XXXXXXXX" style="flex:1;" required />
               </div>
             </div>
             <div>
-              <label>Email</label>
-              <input id="m_email" placeholder="member@gmail.com" />
+              <label>Email *</label>
+              <input id="m_email" placeholder="member@gmail.com" type="email" required />
             </div>
             <div>
               <label>Shares</label>
@@ -267,7 +422,8 @@ export async function renderAdminMembers() {
           <button type="submit" class="btn success">Save Member</button>
           <div class="hint">
             ✔ Member will be saved with PENDING status. Admin must approve after verification.<br/>
-            ✔ Member ID auto-generated based on member type (FM-001 or RM-001).
+            ✔ Member ID auto-generated based on member type (FM-001 or RM-001).<br/>
+            ✔ Login credentials will be sent automatically upon approval.
           </div>
         </form>
       </div>
@@ -323,7 +479,7 @@ function renderMembersTable(members) {
           <th>Phone</th>
           <th>Status</th>
           <th>Approved</th>
-          <th style="min-width: 250px;">Tools</th>
+          <th style="min-width: 300px;">Tools</th>
         </tr>
       </thead>
       <tbody>
@@ -332,7 +488,7 @@ function renderMembersTable(members) {
             <td><b>${m.id}</b><div class="small">${m.memberType || 'N/A'}</div></td>
             <td><b>${m.name}</b><div class="small">${m.fatherName || ''}</div></td>
             <td>${m.memberType || 'N/A'}</td>
-            <td>${m.phone}</td>
+            <td>${m.phone || 'N/A'}</td>
             <td>
               <span class="status ${m.status == 'ACTIVE' ? 'st-approved' : m.status == 'PENDING' ? 'st-pending' : 'st-rejected'}">
                 ${m.status}
@@ -340,15 +496,15 @@ function renderMembersTable(members) {
             </td>
             <td>${m.approved ? '<span class="status st-approved">YES</span>' : '<span class="status st-pending">NO</span>'}</td>
             <td>
-              <button class="btn view-member" data-id="${m.id}">View</button>
+              <button class="btn view-member" data-id="${m.id}">👁️ View</button>
               <button class="btn info bio-data-btn" data-id="${m.id}">📄 Bio</button>
               ${!m.approved ? `
-                <button class="btn success approve-member" data-id="${m.id}">Approve</button>
-                <button class="btn warn update-member" data-id="${m.id}">Update</button>
+                <button class="btn success approve-member" data-id="${m.id}">✓ Approve</button>
+                <button class="btn warn update-member" data-id="${m.id}">✎ Update</button>
               ` : ''}
               ${m.approved ? `
-                <button class="btn warn reset-pass" data-id="${m.id}">Reset Pass</button>
-                <button class="btn warn resetProfileBtn" data-id="${m.id}">Reset Profile</button>
+                <button class="btn warn reset-pass" data-id="${m.id}">🔄 Reset Pass</button>
+                <button class="btn warn resetProfileBtn" data-id="${m.id}">↻ Reset Profile</button>
               ` : ''}
               <button class="btn primary send-login-info" data-id="${m.id}" title="Send Login Info via WhatsApp & Email">
                 📨 Send Info
@@ -395,7 +551,7 @@ function attachMemberButtons() {
     });
   });
   
-  // নতুন: লগইন তথ্য পাঠানোর বাটন
+  // লগইন তথ্য পাঠানোর বাটন
   document.querySelectorAll('.send-login-info').forEach(btn => {
     btn.addEventListener('click', async function () {
       const memberId = this.dataset.id;
@@ -502,6 +658,16 @@ async function adminAddMember(e) {
       showToast('Password Error', 'Passwords do not match.');
       return;
     }
+    
+    if (!phone) {
+      showToast('Validation Error', 'Phone number is required.');
+      return;
+    }
+    
+    if (!email) {
+      showToast('Validation Error', 'Email is required.');
+      return;
+    }
 
     const existing = await db.get('members', id);
     if (existing) {
@@ -542,7 +708,7 @@ async function adminAddMember(e) {
     
     // যদি ACTIVE status দেওয়া হয় তাহলে লগইন তথ্য পাঠান
     if (approved) {
-      await sendLoginInfoToMember(memberData);
+      await sendLoginInfoToMember(memberData, false);
       showToast('Member Added', `${name} (${id}) saved with ACTIVE status. Login info sent.`);
     } else {
       showToast('Member Added', `${name} (${id}) saved with ${status} status.`);
@@ -586,37 +752,13 @@ async function approveMember(memberId) {
     await logActivity('APPROVE_MEMBER', `Member approved: ${memberId}`);
 
     // অ্যাপ্রুভ করার পর লগইন তথ্য পাঠান
-    await sendLoginInfoToMember(member);
+    await sendLoginInfoToMember(member, false);
 
     showToast('Member Approved', `${member.name} has been approved successfully. Login info sent.`);
     await renderAdminMembers();
   } catch (error) {
     console.error('approveMember error:', error);
     showToast('Error', 'Approve করতে সমস্যা হয়েছে।');
-  }
-}
-
-/* --------------------------------------------------------------------------
-   MANUALLY SEND LOGIN INFO
--------------------------------------------------------------------------- */
-async function sendLoginInfoManually(memberId) {
-  try {
-    const db = getDatabase();
-    const member = await db.get('members', memberId);
-    if (!member) return;
-
-    const confirmSend = confirm(`Send login information to ${member.name}?\nPhone: ${member.phone}\nEmail: ${member.email}`);
-    if (!confirmSend) return;
-
-    showToast('Sending', 'Sending login information...', 'info');
-    
-    await sendLoginInfoToMember(member);
-    
-    await logActivity('MANUAL_LOGIN_INFO', `Login info sent manually to ${memberId}`);
-    
-  } catch (error) {
-    console.error('sendLoginInfoManually error:', error);
-    showToast('Error', 'লগইন তথ্য পাঠাতে সমস্যা।');
   }
 }
 
@@ -640,7 +782,7 @@ async function resetMemberPassword(memberId) {
     
     // পাসওয়ার্ড রিসেট করার পর নতুন পাসওয়ার্ড পাঠান কিনা জিজ্ঞাসা করুন
     if (confirm('Send new password to member via WhatsApp/Email?')) {
-      await sendLoginInfoToMember(member);
+      await sendLoginInfoToMember(member, false);
     }
     
     showToast('Password Reset', `New password saved for ${memberId}`);
@@ -675,7 +817,7 @@ async function viewMember(memberId) {
       return `
         <div>
           <img src="${base64}" style="width:100%;max-width:320px;border-radius:18px;border:1px solid var(--line);">
-          <button class="btn download-btn" data-base64="${base64}" data-filename="${filename}">Download ${label}</button>
+          <button class="btn download-btn" data-base64="${base64}" data-filename="${filename}">⬇️ Download ${label}</button>
         </div>
       `;
     };
@@ -690,6 +832,9 @@ async function viewMember(memberId) {
           <div class="panelTools">
             <button class="btn primary" id="modalSendLoginInfo" data-id="${member.id}">
               📨 Send Login Info
+            </button>
+            <button class="btn info" id="modalViewBio" data-id="${member.id}">
+              📄 View Bio-data
             </button>
           </div>
         </div>
@@ -721,18 +866,18 @@ async function viewMember(memberId) {
         </div>
 
         <div class="row row-2">
-          <div><label>Phone</label><input value="${member.phone}" disabled /></div>
-          <div><label>Email</label><input value="${member.email}" disabled /></div>
+          <div><label>Phone</label><input value="${member.phone || 'Not set'}" disabled /></div>
+          <div><label>Email</label><input value="${member.email || 'Not set'}" disabled /></div>
         </div>
 
         <div class="row row-2">
-          <div><label>Address</label><input value="${member.address}" disabled /></div>
-          <div><label>Join Date</label><input value="${member.joinDate}" disabled /></div>
+          <div><label>Address</label><input value="${member.address || 'Not set'}" disabled /></div>
+          <div><label>Join Date</label><input value="${member.joinDate || 'Not set'}" disabled /></div>
         </div>
 
         <div class="row row-2">
           <div><label>NID No</label><input value="${member.nidNo || 'Not set'}" disabled /></div>
-          <div><label>Password</label><input value="${member.pass}" disabled /></div>
+          <div><label>Password</label><input value="${member.pass || 'Not set'}" disabled /></div>
         </div>
 
         <div class="hr"></div>
@@ -784,7 +929,7 @@ async function viewMember(memberId) {
 
     openViewerModal('Member Viewer', 'Member profile details preview', html);
 
-    // Attach download event listeners after modal is loaded
+    // Attach event listeners after modal is loaded
     setTimeout(() => {
       document.querySelectorAll('.download-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
@@ -799,6 +944,14 @@ async function viewMember(memberId) {
       if (modalSendBtn) {
         modalSendBtn.addEventListener('click', () => {
           sendLoginInfoManually(memberId);
+        });
+      }
+      
+      // Modal এর ভিতরে View Bio-data বাটন
+      const modalBioBtn = document.getElementById('modalViewBio');
+      if (modalBioBtn) {
+        modalBioBtn.addEventListener('click', () => {
+          previewMemberBioData(memberId);
         });
       }
     }, 200);

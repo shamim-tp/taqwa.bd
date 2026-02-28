@@ -13,9 +13,93 @@ import {
 import { openViewerModal } from '../modals/viewer.js';
 import { previewMemberBioData, downloadMemberBioData } from '../modals/member-bio.js';
 
-// Optional notification functions
-const sendWhatsAppNotification = () => {};  
-const sendEmailNotification = () => {};     
+// ============================================================
+// 📱 নোটিফিকেশন ফাংশন
+// ============================================================
+
+/**
+ * WhatsApp নোটিফিকেশন পাঠান
+ */
+async function sendWhatsAppNotification(phone, message) {
+  try {
+    // এখানে আপনার প্রকৃত WhatsApp API কল করবেন
+    console.log(`📱 WhatsApp to ${phone}:`, message);
+    
+    // ডেমো লগ
+    await logActivity('WHATSAPP_SENT', `WhatsApp sent to ${phone}: ${message.substring(0, 50)}...`);
+    
+    showToast('WhatsApp Sent', `Message sent to ${phone}`);
+    return true;
+  } catch (error) {
+    console.error('WhatsApp error:', error);
+    showToast('WhatsApp Error', 'Message send failed', 'error');
+    return false;
+  }
+}
+
+/**
+ * ইমেল নোটিফিকেশন পাঠান
+ */
+async function sendEmailNotification(email, subject, message) {
+  try {
+    // এখানে আপনার প্রকৃত Email API কল করবেন
+    console.log(`📧 Email to ${email}:`, { subject, message });
+    
+    // ডেমো লগ
+    await logActivity('EMAIL_SENT', `Email sent to ${email}: ${subject}`);
+    
+    showToast('Email Sent', `Email sent to ${email}`);
+    return true;
+  } catch (error) {
+    console.error('Email error:', error);
+    showToast('Email Error', 'Email send failed', 'error');
+    return false;
+  }
+}
+
+/**
+ * মেম্বারকে লগইন তথ্য পাঠান (WhatsApp + Email)
+ */
+async function sendLoginInfoToMember(member) {
+  if (!member) return;
+  
+  const loginUrl = window.location.origin + window.location.pathname;
+  
+  // WhatsApp মেসেজ
+  const whatsappMsg = 
+`🏦 *IMS Investment Ltd.*
+👋 Dear ${member.name},
+
+✅ Your membership information:
+🔑 Member ID: ${member.id}
+🔐 Password: ${member.pass || '123456'}
+🌐 Login: ${loginUrl}
+
+📱 Please login and complete your profile.`;
+
+  // ইমেল মেসেজ  
+  const emailMsg = `
+    <h2>IMS Investment Ltd. - Membership Information</h2>
+    <p>Dear ${member.name},</p>
+    <p>Your membership has been created successfully.</p>
+    <table style="border-collapse: collapse; margin: 20px 0;">
+      <tr><td><strong>Member ID:</strong></td><td>${member.id}</td></tr>
+      <tr><td><strong>Password:</strong></td><td>${member.pass || '123456'}</td></tr>
+      <tr><td><strong>Member Type:</strong></td><td>${member.memberType}</td></tr>
+      <tr><td><strong>Status:</strong></td><td>${member.status}</td></tr>
+    </table>
+    <p><strong>Login URL:</strong> <a href="${loginUrl}">${loginUrl}</a></p>
+    <p>Please login and complete your profile.</p>
+    <br>
+    <p>Thanks,<br>IMS Investment Ltd.</p>
+  `;
+
+  // উভয় চ্যানেলে পাঠান
+  await Promise.allSettled([
+    sendWhatsAppNotification(member.phone, whatsappMsg),
+    sendEmailNotification(member.email, 'IMS Investment Ltd. - Membership Information', emailMsg)
+  ]);
+}
 
 console.log('members module loaded – FINAL FIXED VERSION');
 
@@ -169,6 +253,16 @@ export async function renderAdminMembers() {
               <input id="m_nom_photo" type="file" accept="image/*" />
             </div>
           </div>
+          <div class="row row-2">
+            <div>
+              <label>Nominee NID Front</label>
+              <input id="m_nom_nid_front" type="file" accept="image/*" />
+            </div>
+            <div>
+              <label>Nominee NID Back</label>
+              <input id="m_nom_nid_back" type="file" accept="image/*" />
+            </div>
+          </div>
           <div class="hr"></div>
           <button type="submit" class="btn success">Save Member</button>
           <div class="hint">
@@ -229,7 +323,7 @@ function renderMembersTable(members) {
           <th>Phone</th>
           <th>Status</th>
           <th>Approved</th>
-          <th>Tools</th>
+          <th style="min-width: 250px;">Tools</th>
         </tr>
       </thead>
       <tbody>
@@ -247,10 +341,18 @@ function renderMembersTable(members) {
             <td>${m.approved ? '<span class="status st-approved">YES</span>' : '<span class="status st-pending">NO</span>'}</td>
             <td>
               <button class="btn view-member" data-id="${m.id}">View</button>
-              ${!m.approved ? `<button class="btn success approve-member" data-id="${m.id}">Approve</button>` : ''}
-              ${!m.approved ? `<button class="btn warn update-member" data-id="${m.id}">Update</button>` : ''}
-              ${m.approved ? `<button class="btn warn reset-pass" data-id="${m.id}">Reset Pass</button>` : ''}
-              ${m.approved ? `<button class="btn warn resetProfileBtn" data-id="${m.id}">Reset Profile</button>` : ''}
+              <button class="btn info bio-data-btn" data-id="${m.id}">📄 Bio</button>
+              ${!m.approved ? `
+                <button class="btn success approve-member" data-id="${m.id}">Approve</button>
+                <button class="btn warn update-member" data-id="${m.id}">Update</button>
+              ` : ''}
+              ${m.approved ? `
+                <button class="btn warn reset-pass" data-id="${m.id}">Reset Pass</button>
+                <button class="btn warn resetProfileBtn" data-id="${m.id}">Reset Profile</button>
+              ` : ''}
+              <button class="btn primary send-login-info" data-id="${m.id}" title="Send Login Info via WhatsApp & Email">
+                📨 Send Info
+              </button>
             </td>
           </tr>
         `).join('')}
@@ -266,19 +368,38 @@ function attachMemberButtons() {
   document.querySelectorAll('.view-member').forEach(btn =>
     btn.addEventListener('click', () => viewMember(btn.dataset.id))
   );
+  
   document.querySelectorAll('.approve-member').forEach(btn =>
     btn.addEventListener('click', () => approveMember(btn.dataset.id))
   );
+  
   document.querySelectorAll('.update-member').forEach(btn =>
     btn.addEventListener('click', () => openMemberForUpdate(btn.dataset.id))
   );
+  
   document.querySelectorAll('.reset-pass').forEach(btn =>
     btn.addEventListener('click', () => resetMemberPassword(btn.dataset.id))
   );
+  
   document.querySelectorAll('.resetProfileBtn').forEach(btn => {
     btn.addEventListener('click', async function () {
       const memberId = this.dataset.id;
       await resetProfilePermission(memberId);
+    });
+  });
+  
+  document.querySelectorAll('.bio-data-btn').forEach(btn => {
+    btn.addEventListener('click', async function () {
+      const memberId = this.dataset.id;
+      await previewMemberBioData(memberId);
+    });
+  });
+  
+  // নতুন: লগইন তথ্য পাঠানোর বাটন
+  document.querySelectorAll('.send-login-info').forEach(btn => {
+    btn.addEventListener('click', async function () {
+      const memberId = this.dataset.id;
+      await sendLoginInfoManually(memberId);
     });
   });
 }
@@ -311,6 +432,9 @@ async function updateMemberIdPreview() {
   }
 }
 
+/* --------------------------------------------------------------------------
+   RESET PROFILE PERMISSION
+-------------------------------------------------------------------------- */
 async function resetProfilePermission(memberId) {
   try {
     const db = getDatabase();
@@ -332,7 +456,7 @@ async function resetProfilePermission(memberId) {
     await logActivity('ADMIN_RESET_PROFILE_PERMISSION', `Admin reset profile update for ${m.id}`);
 
     showToast('Success', 'Profile update permission restored.');
-    await renderAdminMembers(); // Refresh list
+    await renderAdminMembers();
 
   } catch (error) {
     console.error('resetProfilePermission error:', error);
@@ -389,11 +513,15 @@ async function adminAddMember(e) {
     const nidFrontFile = document.getElementById('m_nid_front')?.files?.[0];
     const nidBackFile = document.getElementById('m_nid_back')?.files?.[0];
     const nomineePhotoFile = document.getElementById('m_nom_photo')?.files?.[0];
+    const nomineeNidFrontFile = document.getElementById('m_nom_nid_front')?.files?.[0];
+    const nomineeNidBackFile = document.getElementById('m_nom_nid_back')?.files?.[0];
 
     const photo = photoFile ? await fileToBase64(photoFile) : '';
     const nidFront = nidFrontFile ? await fileToBase64(nidFrontFile) : '';
     const nidBack = nidBackFile ? await fileToBase64(nidBackFile) : '';
     const nomineePhoto = nomineePhotoFile ? await fileToBase64(nomineePhotoFile) : '';
+    const nomineeNidFront = nomineeNidFrontFile ? await fileToBase64(nomineeNidFrontFile) : '';
+    const nomineeNidBack = nomineeNidBackFile ? await fileToBase64(nomineeNidBackFile) : '';
 
     const approved = status == 'ACTIVE';
 
@@ -403,6 +531,7 @@ async function adminAddMember(e) {
       address, joinDate,
       photo, nidNo, nidFront, nidBack,
       nomineeName, nomineeRelation, nomineeNid, nomineePhone, nomineePhoto,
+      nomineeNidFront, nomineeNidBack,
       status, approved,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
@@ -410,7 +539,14 @@ async function adminAddMember(e) {
 
     await db.save('members', memberData, id);
     await logActivity('ADD_MEMBER', `Added member: ${id} (${memberType})`);
-    showToast('Member Added', `${name} (${id}) saved with ${status} status.`);
+    
+    // যদি ACTIVE status দেওয়া হয় তাহলে লগইন তথ্য পাঠান
+    if (approved) {
+      await sendLoginInfoToMember(memberData);
+      showToast('Member Added', `${name} (${id}) saved with ACTIVE status. Login info sent.`);
+    } else {
+      showToast('Member Added', `${name} (${id}) saved with ${status} status.`);
+    }
 
     e.target.reset();
     await updateMemberIdPreview();
@@ -449,16 +585,38 @@ async function approveMember(memberId) {
     await db.update('members', memberId, member);
     await logActivity('APPROVE_MEMBER', `Member approved: ${memberId}`);
 
-    const whatsappMsg = `Dear ${member.name},\nYour member registration has been approved. Member ID: ${member.id}\nPassword: ${member.pass}\nLogin: ${window.location.href.split('#')[0]}`;
-    const emailMsg = `Your membership has been approved. Member ID: ${member.id}`;
-    sendWhatsAppNotification(member.phone, whatsappMsg);
-    sendEmailNotification(member.email, 'Membership Approved', emailMsg);
+    // অ্যাপ্রুভ করার পর লগইন তথ্য পাঠান
+    await sendLoginInfoToMember(member);
 
-    showToast('Member Approved', `${member.name} has been approved successfully.`);
+    showToast('Member Approved', `${member.name} has been approved successfully. Login info sent.`);
     await renderAdminMembers();
   } catch (error) {
     console.error('approveMember error:', error);
     showToast('Error', 'Approve করতে সমস্যা হয়েছে।');
+  }
+}
+
+/* --------------------------------------------------------------------------
+   MANUALLY SEND LOGIN INFO
+-------------------------------------------------------------------------- */
+async function sendLoginInfoManually(memberId) {
+  try {
+    const db = getDatabase();
+    const member = await db.get('members', memberId);
+    if (!member) return;
+
+    const confirmSend = confirm(`Send login information to ${member.name}?\nPhone: ${member.phone}\nEmail: ${member.email}`);
+    if (!confirmSend) return;
+
+    showToast('Sending', 'Sending login information...', 'info');
+    
+    await sendLoginInfoToMember(member);
+    
+    await logActivity('MANUAL_LOGIN_INFO', `Login info sent manually to ${memberId}`);
+    
+  } catch (error) {
+    console.error('sendLoginInfoManually error:', error);
+    showToast('Error', 'লগইন তথ্য পাঠাতে সমস্যা।');
   }
 }
 
@@ -471,7 +629,7 @@ async function resetMemberPassword(memberId) {
     const member = await db.get('members', memberId);
     if (!member) return;
 
-    const newPass = prompt(`Enter new password for ${member.name}:`);
+    const newPass = prompt(`Enter new password for ${member.name}:`, '123456');
     if (!newPass) return;
 
     member.pass = newPass;
@@ -479,6 +637,12 @@ async function resetMemberPassword(memberId) {
 
     await db.update('members', memberId, member);
     await logActivity('RESET_MEMBER_PASSWORD', `Password reset for ${memberId}`);
+    
+    // পাসওয়ার্ড রিসেট করার পর নতুন পাসওয়ার্ড পাঠান কিনা জিজ্ঞাসা করুন
+    if (confirm('Send new password to member via WhatsApp/Email?')) {
+      await sendLoginInfoToMember(member);
+    }
+    
     showToast('Password Reset', `New password saved for ${memberId}`);
     await renderAdminMembers();
   } catch (error) {
@@ -522,6 +686,11 @@ async function viewMember(memberId) {
           <div>
             <h3>${member.name} (${member.id})</h3>
             <p>Full Profile Information</p>
+          </div>
+          <div class="panelTools">
+            <button class="btn primary" id="modalSendLoginInfo" data-id="${member.id}">
+              📨 Send Login Info
+            </button>
           </div>
         </div>
 
@@ -624,6 +793,14 @@ async function viewMember(memberId) {
           downloadBase64Image(base64, filename);
         });
       });
+      
+      // Modal এর ভিতরে Send Login Info বাটন
+      const modalSendBtn = document.getElementById('modalSendLoginInfo');
+      if (modalSendBtn) {
+        modalSendBtn.addEventListener('click', () => {
+          sendLoginInfoManually(memberId);
+        });
+      }
     }, 200);
   } catch (error) {
     console.error('viewMember error:', error);
@@ -727,13 +904,6 @@ async function openMemberForUpdate(memberId) {
         <div class="hr"></div>
         <button class="btn success" id="updateMemberBtn">Update Information</button>
         <button class="btn" id="cancelUpdateBtn">Cancel</button>
-
-        // Tools কলামের ভিতর
-        <td>
-          <button class="btn view-member" data-id="${m.id}">View</button>
-          <button class="btn info bio-data-btn" data-id="${m.id}" onclick="previewMemberBioData('${m.id}')">📄 Bio-data</button>
-          // ... অন্যান্য বাটন
-        </td>
       </div>
     `;
 
@@ -767,6 +937,9 @@ async function updateMemberInfo(memberId) {
     const fatherName = document.getElementById('upd_father')?.value?.trim();
     const motherName = document.getElementById('upd_mother')?.value?.trim();
     const dob = document.getElementById('upd_dob')?.value;
+    const phone = document.getElementById('upd_phone')?.value?.trim();
+    const email = document.getElementById('upd_email')?.value?.trim();
+    const address = document.getElementById('upd_address')?.value?.trim();
 
     if (!nidNo || !nomineeName || !nomineeNid) {
       showToast('Required Fields', 'Please fill all required fields (*)');
@@ -774,9 +947,18 @@ async function updateMemberInfo(memberId) {
     }
 
     const photoFile = document.getElementById('upd_photo')?.files?.[0];
-    if (photoFile) {
-      member.photo = await fileToBase64(photoFile);
-    }
+    const nidFrontFile = document.getElementById('upd_nid_front')?.files?.[0];
+    const nidBackFile = document.getElementById('upd_nid_back')?.files?.[0];
+    const nomineePhotoFile = document.getElementById('upd_nom_photo')?.files?.[0];
+    const nomineeNidFrontFile = document.getElementById('upd_nom_nid_front')?.files?.[0];
+    const nomineeNidBackFile = document.getElementById('upd_nom_nid_back')?.files?.[0];
+
+    if (photoFile) member.photo = await fileToBase64(photoFile);
+    if (nidFrontFile) member.nidFront = await fileToBase64(nidFrontFile);
+    if (nidBackFile) member.nidBack = await fileToBase64(nidBackFile);
+    if (nomineePhotoFile) member.nomineePhoto = await fileToBase64(nomineePhotoFile);
+    if (nomineeNidFrontFile) member.nomineeNidFront = await fileToBase64(nomineeNidFrontFile);
+    if (nomineeNidBackFile) member.nomineeNidBack = await fileToBase64(nomineeNidBackFile);
 
     member.nidNo = nidNo;
     member.nomineeName = nomineeName;
@@ -785,6 +967,10 @@ async function updateMemberInfo(memberId) {
     member.fatherName = fatherName;
     member.motherName = motherName;
     member.dob = dob;
+    if (phone) member.phone = phone;
+    if (email) member.email = email;
+    if (address) member.address = address;
+    
     member.updatedAt = new Date().toISOString();
 
     await db.update('members', memberId, member);
@@ -811,8 +997,3 @@ function filterMembers() {
     row.style.display = row.textContent.toLowerCase().includes(search) ? '' : 'none';
   });
 }
-// প্রিভিউ দেখানোর জন্য
-await previewMemberBioData('FM-001');
-
-// সরাসরি ডাউনলোডের জন্য
-await downloadMemberBioData('FM-001');

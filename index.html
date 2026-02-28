@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>TAQWA PROPERTIES BD - ERP</title>
   <link rel="stylesheet" href="style.css">
   <!-- Firebase SDK (প্রয়োজনে) -->
@@ -10,663 +10,65 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
   <script type="module" src="script.js"></script>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏢</text></svg>">
-  
-  <style>
-    /* ইনলাইন স্টাইল - দ্রুত লোডের জন্য */
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-    }
-
-    body {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    /* লোডিং ওভারলে */
-    .loading-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(255,255,255,0.95);
-      backdrop-filter: blur(5px);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 9999;
-    }
-
-    .loading-overlay.show {
-      display: flex;
-    }
-
-    .loading-spinner {
-      width: 50px;
-      height: 50px;
-      border: 4px solid #f3f3f3;
-      border-top: 4px solid #667eea;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-      margin-bottom: 15px;
-    }
-
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-
-    /* টোস্ট বার্তা */
-    .toastWrap {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      z-index: 9998;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      max-width: 350px;
-      width: calc(100% - 40px);
-    }
-
-    .toast {
-      background: white;
-      padding: 16px 20px;
-      border-radius: 16px;
-      box-shadow: 0 15px 35px rgba(0,0,0,0.2);
-      display: flex;
-      align-items: center;
-      gap: 15px;
-      animation: slideIn 0.3s ease;
-      border-left: 5px solid;
-    }
-
-    .toast.success { border-left-color: #27ae60; }
-    .toast.error { border-left-color: #dc3545; }
-    .toast.info { border-left-color: #667eea; }
-
-    @keyframes slideIn {
-      from { transform: translateX(100%); opacity: 0; }
-      to { transform: translateX(0); opacity: 1; }
-    }
-
-    /* লগইন পৃষ্ঠা */
-    .loginWrap {
-      width: 100%;
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-    }
-
-    .loginCard {
-      background: white;
-      border-radius: 32px;
-      box-shadow: 0 30px 60px rgba(0,0,0,0.3);
-      max-width: 1000px;
-      width: 100%;
-      overflow: hidden;
-    }
-
-    .loginGrid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-    }
-
-    @media (max-width: 768px) {
-      .loginGrid {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    .loginLeft {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      padding: 50px 40px;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-    }
-
-    .loginLeft h1 {
-      font-size: 2.2rem;
-      margin-bottom: 15px;
-      line-height: 1.2;
-    }
-
-    .loginLeft p {
-      font-size: 1.1rem;
-      opacity: 0.95;
-      margin-bottom: 10px;
-    }
-
-    .loginLeft .slogan {
-      font-size: 1.3rem;
-      font-weight: 700;
-      margin-top: 20px;
-      position: relative;
-      padding-left: 20px;
-    }
-
-    .loginLeft .slogan::before {
-      content: '';
-      position: absolute;
-      left: 0;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 5px;
-      height: 30px;
-      background: #ffd700;
-      border-radius: 5px;
-    }
-
-    @media (max-width: 768px) {
-      .loginLeft {
-        padding: 40px 30px;
-        text-align: center;
-      }
-      .loginLeft .slogan {
-        text-align: left;
-      }
-    }
-
-    .loginRight {
-      padding: 50px 40px;
-      background: white;
-    }
-
-    .tabs {
-      display: flex;
-      gap: 15px;
-      margin-bottom: 30px;
-      border-bottom: 2px solid #eee;
-      padding-bottom: 15px;
-    }
-
-    .tabs button {
-      flex: 1;
-      padding: 12px 20px;
-      border: none;
-      background: none;
-      font-size: 16px;
-      font-weight: 600;
-      color: #666;
-      cursor: pointer;
-      border-radius: 12px;
-      transition: all 0.3s;
-    }
-
-    .tabs button.active {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-    }
-
-    /* ফর্ম স্টাইল */
-    .row {
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-    }
-
-    .row > div {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    label {
-      font-size: 14px;
-      font-weight: 600;
-      color: #1e3c72;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    input {
-      padding: 16px 18px;
-      border: 2px solid #e0e0e0;
-      border-radius: 16px;
-      font-size: 16px;
-      transition: all 0.3s;
-      width: 100%;
-    }
-
-    input:focus {
-      border-color: #667eea;
-      outline: none;
-      box-shadow: 0 0 0 4px rgba(102,126,234,0.1);
-    }
-
-    .btn.primary {
-      width: 100%;
-      padding: 18px;
-      background: linear-gradient(135deg, #667eea, #764ba2);
-      color: white;
-      border: none;
-      border-radius: 50px;
-      font-size: 18px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: all 0.3s;
-      box-shadow: 0 10px 20px rgba(102,126,234,0.3);
-      margin-top: 10px;
-    }
-
-    .btn.primary:active {
-      transform: scale(0.98);
-    }
-
-    /* অ্যাপ পৃষ্ঠা */
-    .app {
-      display: flex;
-      min-height: 100vh;
-      background: #f8fafc;
-      position: relative;
-    }
-
-    .app.show {
-      display: flex;
-    }
-
-    /* মোবাইল মেনু বাটন */
-    .mobile-menu-btn {
-      display: none;
-      position: fixed;
-      top: 15px;
-      left: 15px;
-      z-index: 1001;
-      background: linear-gradient(135deg, #667eea, #764ba2);
-      color: white;
-      border: none;
-      border-radius: 12px;
-      padding: 12px 18px;
-      font-size: 20px;
-      cursor: pointer;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-    }
-
-    @media (max-width: 768px) {
-      .mobile-menu-btn {
-        display: block;
-      }
-    }
-
-    /* সাইডবার */
-    .sidebar {
-      width: 280px;
-      background: white;
-      box-shadow: 5px 0 30px rgba(0,0,0,0.05);
-      display: flex;
-      flex-direction: column;
-      padding: 25px 0;
-      transition: all 0.3s;
-      position: relative;
-      z-index: 1000;
-    }
-
-    @media (max-width: 768px) {
-      .sidebar {
-        position: fixed;
-        left: -280px;
-        top: 0;
-        bottom: 0;
-        z-index: 1002;
-        box-shadow: none;
-      }
-      .sidebar.show {
-        left: 0;
-        box-shadow: 5px 0 30px rgba(0,0,0,0.1);
-      }
-    }
-
-    .brand {
-      padding: 0 20px 20px;
-      border-bottom: 1px solid #eee;
-      position: relative;
-    }
-
-    .brand h2 {
-      font-size: 18px;
-      color: #1e3c72;
-      margin-bottom: 5px;
-    }
-
-    .brand .small {
-      font-size: 12px;
-      color: #666;
-    }
-
-    .brand .badge {
-      position: absolute;
-      top: 0;
-      right: 20px;
-      background: linear-gradient(135deg, #667eea, #764ba2);
-      color: white;
-      padding: 5px 12px;
-      border-radius: 30px;
-      font-size: 11px;
-      font-weight: 600;
-    }
-
-    .userBox {
-      padding: 20px;
-      background: #f8f9fa;
-      margin: 0 15px 20px;
-      border-radius: 16px;
-    }
-
-    .userBox .name {
-      font-weight: 700;
-      font-size: 16px;
-      color: #1e3c72;
-      margin-bottom: 3px;
-    }
-
-    .userBox .role {
-      font-size: 13px;
-      color: #666;
-      margin-bottom: 12px;
-    }
-
-    .userBox .mini {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-
-    .chip {
-      background: white;
-      padding: 4px 12px;
-      border-radius: 30px;
-      font-size: 11px;
-      font-weight: 600;
-      color: #1e3c72;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-    }
-
-    .navTitle {
-      padding: 0 20px;
-      font-size: 12px;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      color: #999;
-      margin-bottom: 10px;
-    }
-
-    .nav {
-      flex: 1;
-      padding: 0 15px;
-      overflow-y: auto;
-    }
-
-    .nav-item {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 12px 15px;
-      color: #555;
-      border-radius: 12px;
-      margin-bottom: 5px;
-      transition: all 0.3s;
-      cursor: pointer;
-    }
-
-    .nav-item:hover {
-      background: #f0f0f0;
-    }
-
-    .nav-item.active {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-    }
-
-    .nav-item span {
-      font-size: 20px;
-    }
-
-    .logoutBtn {
-      margin: 20px;
-      padding: 14px;
-      background: #fee;
-      color: #dc3545;
-      border: none;
-      border-radius: 12px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s;
-    }
-
-    .logoutBtn:active {
-      background: #fdd;
-    }
-
-    /* মেইন কন্টেন্ট */
-    .main {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      overflow-x: hidden;
-    }
-
-    .topbar {
-      padding: 20px 25px;
-      background: white;
-      border-bottom: 1px solid #eee;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 15px;
-    }
-
-    @media (max-width: 768px) {
-      .topbar {
-        padding: 70px 20px 20px;
-      }
-    }
-
-    .topbar h1 {
-      font-size: 24px;
-      color: #1e3c72;
-      margin-bottom: 5px;
-    }
-
-    .topbar p {
-      color: #666;
-      font-size: 14px;
-    }
-
-    .rightTop {
-      display: flex;
-      gap: 10px;
-    }
-
-    .btn {
-      padding: 10px 20px;
-      border: none;
-      border-radius: 12px;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s;
-    }
-
-    .btn.hidden {
-      display: none;
-    }
-
-    /* পৃষ্ঠা কন্টেন্ট */
-    #pageContent {
-      flex: 1;
-      padding: 25px;
-      overflow-y: auto;
-    }
-
-    @media (max-width: 768px) {
-      #pageContent {
-        padding: 20px;
-      }
-    }
-
-    /* মডাল কন্টেইনার */
-    #modalsContainer {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      pointer-events: none;
-      z-index: 2000;
-    }
-
-    .modalWrap {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(0,0,0,0.5);
-      backdrop-filter: blur(5px);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-      pointer-events: all;
-    }
-
-    .modalWrap.show {
-      display: flex;
-    }
-
-    .modalContent {
-      max-width: 90%;
-      max-height: 90vh;
-      overflow-y: auto;
-      background: white;
-      border-radius: 24px;
-      box-shadow: 0 30px 60px rgba(0,0,0,0.3);
-      animation: modalSlideIn 0.3s ease;
-    }
-
-    @keyframes modalSlideIn {
-      from {
-        opacity: 0;
-        transform: translateY(30px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    /* স্ক্রলবার কাস্টমাইজ */
-    ::-webkit-scrollbar {
-      width: 8px;
-      height: 8px;
-    }
-
-    ::-webkit-scrollbar-track {
-      background: #f1f1f1;
-    }
-
-    ::-webkit-scrollbar-thumb {
-      background: #667eea;
-      border-radius: 4px;
-    }
-
-    ::-webkit-scrollbar-thumb:hover {
-      background: #764ba2;
-    }
-
-    /* নোটিফিকেশন ব্যাজ */
-    .notification-badge {
-      position: relative;
-    }
-    
-    .notification-badge::after {
-      content: attr(data-count);
-      position: absolute;
-      top: -5px;
-      right: -5px;
-      background: #dc3545;
-      color: white;
-      font-size: 10px;
-      padding: 2px 6px;
-      border-radius: 10px;
-      min-width: 18px;
-      text-align: center;
-    }
-  </style>
 </head>
 <body>
   <!-- লোডিং ওভারলে -->
   <div id="loadingOverlay" class="loading-overlay">
-    <div style="text-align: center;">
+    <div>
       <div class="loading-spinner"></div>
-      <p style="color: #1e3c72; font-weight: 600;">Loading...</p>
+      <p>Loading...</p>
     </div>
   </div>
 
   <!-- টোস্ট বার্তা -->
   <div class="toastWrap" id="toastWrap"></div>
 
-  <!-- লগইন পৃষ্ঠা -->
+  <!-- লগইন পৃষ্ঠা (শুধু লগইন অপশন) -->
   <div id="loginPage" class="loginWrap">
     <div class="loginCard">
       <div class="loginGrid">
         <div class="loginLeft">
+          <!-- লোগো (যদি থাকে) -->
+          <!-- <img src="images/logo.png" alt="TAQWA PROPERTIES BD" class="company-logo"> -->
           <h1>TAQWA PROPERTIES BD</h1>
           <p>Professional Investment Management ERP System</p>
           <p class="slogan">Trust & Excellence</p>
         </div>
         <div class="loginRight">
           <div class="tabs">
-            <button id="tabAdmin" class="active" onclick="switchLoginTab('admin')">👤 Admin Login</button>
-            <button id="tabMember" onclick="switchLoginTab('member')">👥 Member Login</button>
+            <button id="tabAdmin" class="active">Admin Login</button>
+            <button id="tabMember">Member Login</button>
           </div>
-          
-          <form id="loginForm" onsubmit="handleLogin(event)">
-            <div class="row">
-              <div>
-                <label id="loginIdLabel">👤 Admin ID</label>
-                <input id="loginId" placeholder="Enter your ID" autocomplete="username" />
-              </div>
-              <div>
-                <label>🔐 Password</label>
-                <input id="loginPass" type="password" placeholder="Enter your password" autocomplete="current-password" />
-              </div>
-              <button type="submit" class="btn primary" id="loginBtn">Login</button>
+          <!-- লগইন ফর্ম (পাসওয়ার্ড ম্যানেজারের জন্য) -->
+             <form id="loginForm" onsubmit="event.preventDefault();">
+          <div class="row">
+            <div>
+              <label id="loginIdLabel">Admin ID</label>
+              <input id="loginId" placeholder="Enter ID" autocomplete="username" />
             </div>
-          </form>
-          
-          <p style="text-align: center; margin-top: 20px; color: #666; font-size: 13px;">
-            Default: Admin (ADMIN-001 / 123456)
-          </p>
+            <div>
+              <label>Password</label>
+              <input id="loginPass" type="password" placeholder="Enter Password" autocomplete="current-password" />
+            </div>
+            <button type="submit" class="btn primary" id="loginBtn">Login</button>
+          </div>
+        </form>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- অ্যাপ পৃষ্ঠা -->
+  <!-- অ্যাপ পৃষ্ঠা (লগইন成功后 দেখাবে) - শুরুতে লুকানো -->
   <div id="appPage" class="app" style="display: none;">
-    <button class="mobile-menu-btn" id="mobileMenuBtn" onclick="toggleSidebar()">☰</button>
-    
+    <button class="mobile-menu-btn" id="mobileMenuBtn">☰ Menu</button>
     <div class="sidebar" id="sidebar">
       <div class="brand">
         <div>
           <h2>TAQWA PROPERTIES BD</h2>
-          <div class="small">Investment ERP</div>
+          <div class="small">ERP System</div>
         </div>
         <div class="badge" id="systemMode">ADMIN</div>
       </div>
-      
       <div class="userBox">
         <div class="name" id="currentUserName">-</div>
         <div class="role" id="currentUserRole">-</div>
@@ -675,15 +77,10 @@
           <span class="chip" id="chipStatus">Active</span>
         </div>
       </div>
-      
-      <div class="navTitle">📌 Navigation</div>
+      <div class="navTitle">Navigation</div>
       <div class="nav" id="sidebarNav"></div>
-      
-      <button class="logoutBtn" id="logoutBtn" onclick="handleLogout()">
-        <span style="margin-right: 8px;">🚪</span> Logout
-      </button>
+      <button class="logoutBtn" id="logoutBtn">Logout</button>
     </div>
-    
     <div class="main">
       <div class="topbar">
         <div>
@@ -691,169 +88,16 @@
           <p id="pageSubtitle">Welcome to TAQWA PROPERTIES ERP</p>
         </div>
         <div class="rightTop">
-          <button class="btn hidden" id="systemToolsBtn" onclick="openSystemTools()">⚙️ Tools</button>
-          <button class="btn primary hidden" id="quickAddBtn" onclick="openQuickAdd()">➕ Quick Add</button>
+          <button class="btn hidden" id="systemToolsBtn">System Tools</button>
+          <button class="btn primary hidden" id="quickAddBtn">Quick Add</button>
+          
         </div>
       </div>
-      
       <div id="pageContent"></div>
     </div>
   </div>
 
   <!-- মডাল কন্টেইনার -->
   <div id="modalsContainer"></div>
-
-  <script>
-    // গ্লোবাল ফাংশন - লগইন ট্যাব সুইচ
-    window.switchLoginTab = function(tab) {
-      const tabAdmin = document.getElementById('tabAdmin');
-      const tabMember = document.getElementById('tabMember');
-      const loginIdLabel = document.getElementById('loginIdLabel');
-      const loginId = document.getElementById('loginId');
-      const defaultText = document.querySelector('.loginRight p');
-      
-      if (tab === 'admin') {
-        tabAdmin.classList.add('active');
-        tabMember.classList.remove('active');
-        loginIdLabel.innerHTML = '👤 Admin ID';
-        loginId.placeholder = 'Enter Admin ID';
-        defaultText.innerHTML = 'Default: Admin (ADMIN-001 / 123456)';
-      } else {
-        tabMember.classList.add('active');
-        tabAdmin.classList.remove('active');
-        loginIdLabel.innerHTML = '👥 Member ID';
-        loginId.placeholder = 'Enter Member ID';
-        defaultText.innerHTML = 'Default: Member (FM-001 / 123456)';
-      }
-    };
-
-    // লগইন হ্যান্ডলার
-    window.handleLogin = function(event) {
-      event.preventDefault();
-      const loginId = document.getElementById('loginId').value;
-      const loginPass = document.getElementById('loginPass').value;
-      
-      if (!loginId || !loginPass) {
-        showToast('Error', 'Please enter ID and password', 'error');
-        return;
-      }
-      
-      // এখানে আপনার অ্যাকচুয়াল লগইন লজিক থাকবে
-      console.log('Login attempt:', { id: loginId, password: loginPass });
-      
-      // সিমুলেট লগইন
-      document.getElementById('loginPage').style.display = 'none';
-      document.getElementById('appPage').style.display = 'flex';
-      
-      showToast('Success', 'Login successful!', 'success');
-    };
-
-    // লগআউট হ্যান্ডলার
-    window.handleLogout = function() {
-      if (confirm('Are you sure you want to logout?')) {
-        document.getElementById('appPage').style.display = 'none';
-        document.getElementById('loginPage').style.display = 'flex';
-        showToast('Info', 'Logged out successfully', 'info');
-      }
-    };
-
-    // সাইডবার টগল
-    window.toggleSidebar = function() {
-      const sidebar = document.getElementById('sidebar');
-      sidebar.classList.toggle('show');
-    };
-
-    // টোস্ট দেখান
-    window.showToast = function(title, message, type = 'info') {
-      const wrap = document.getElementById('toastWrap');
-      const toast = document.createElement('div');
-      toast.className = `toast ${type}`;
-      toast.innerHTML = `
-        <div style="flex:1">
-          <div style="font-weight:700; margin-bottom:5px;">${title}</div>
-          <div style="font-size:14px;">${message}</div>
-        </div>
-        <button onclick="this.parentElement.remove()" style="background:none; border:none; font-size:18px; cursor:pointer;">✕</button>
-      `;
-      wrap.appendChild(toast);
-      
-      setTimeout(() => {
-        if (toast.parentElement) {
-          toast.style.animation = 'slideOut 0.3s ease';
-          setTimeout(() => toast.remove(), 300);
-        }
-      }, 3500);
-    };
-
-    // সিস্টেম টুলস
-    window.openSystemTools = function() {
-      alert('System Tools - Coming Soon');
-    };
-
-    // কুইক অ্যাড
-    window.openQuickAdd = function() {
-      alert('Quick Add - Coming Soon');
-    };
-
-    // সাইডবারে ক্লিক করলে মোবাইলে অটো বন্ধ
-    document.addEventListener('click', function(e) {
-      if (window.innerWidth <= 768) {
-        const sidebar = document.getElementById('sidebar');
-        const menuBtn = document.getElementById('mobileMenuBtn');
-        
-        if (!sidebar.contains(e.target) && !menuBtn.contains(e.target) && sidebar.classList.contains('show')) {
-          sidebar.classList.remove('show');
-        }
-      }
-    });
-
-    // এস্কেপ কী প্রেস করলে মডাল বন্ধ
-    document.addEventListener('keydown', function(e) {
-      if (e.key === 'Escape') {
-        const modals = document.querySelectorAll('.modalWrap.show');
-        modals.forEach(modal => {
-          modal.classList.remove('show');
-        });
-      }
-    });
-
-    // উইন্ডো রিসাইজ হলে সাইডবার রিসেট
-    window.addEventListener('resize', function() {
-      if (window.innerWidth > 768) {
-        document.getElementById('sidebar').classList.remove('show');
-      }
-    });
-
-    // নেভিগেশন ফাংশন (পৃষ্ঠা পরিবর্তন)
-    window.navigateTo = function(page) {
-      console.log('Navigating to:', page);
-      // এখানে আপনার নেভিগেশন লজিক থাকবে
-      
-      // মোবাইলে সাইডবার বন্ধ
-      if (window.innerWidth <= 768) {
-        document.getElementById('sidebar').classList.remove('show');
-      }
-      
-      showToast('Navigation', `Loading ${page}...`, 'info');
-    };
-
-    // ডকুমেন্ট লোড হলে
-    document.addEventListener('DOMContentLoaded', function() {
-      console.log('Document loaded');
-      
-      // ডিফল্ট লগইন ট্যাব
-      switchLoginTab('admin');
-    });
-
-    // কীফ্রেম অ্যানিমেশন যোগ করা
-    const style = document.createElement('style');
-    style.textContent = `
-      @keyframes slideOut {
-        from { transform: translateX(0); opacity: 1; }
-        to { transform: translateX(100%); opacity: 0; }
-      }
-    `;
-    document.head.appendChild(style);
-  </script>
 </body>
 </html>

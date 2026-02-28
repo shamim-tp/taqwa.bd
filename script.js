@@ -5,7 +5,7 @@ import { loadModalModules } from './modules/modals/modals.js';
 
 // Global variables
 window.SESSION = {
-  mode: 'admin',
+  mode: 'admin', // Default mode
   user: null,
   page: null,
   isMobile: window.innerWidth <= 768,
@@ -40,6 +40,9 @@ document.addEventListener('DOMContentLoaded', async function() {
     // Load modal modules
     loadModalModules();
     
+    // Initialize login tabs
+    initLoginTabs();
+    
     // Initialize mobile menu
     initMobileMenu();
     
@@ -66,10 +69,174 @@ document.addEventListener('DOMContentLoaded', async function() {
   }
 });
 
+// Login Tabs Initialization
+function initLoginTabs() {
+  const tabAdmin = document.getElementById('tabAdmin');
+  const tabMember = document.getElementById('tabMember');
+  const loginIdLabel = document.getElementById('loginIdLabel');
+  const loginId = document.getElementById('loginId');
+  const loginPass = document.getElementById('loginPass');
+  const loginBtn = document.getElementById('loginBtn');
+  const defaultText = document.querySelector('.loginRight p:last-child');
+  
+  if (tabAdmin && tabMember) {
+    // Admin tab click
+    tabAdmin.addEventListener('click', function() {
+      // Update active tab
+      tabAdmin.classList.add('active');
+      tabMember.classList.remove('active');
+      
+      // Update session mode
+      window.SESSION.mode = 'admin';
+      
+      // Update UI
+      loginIdLabel.innerHTML = '👤 Admin ID';
+      loginId.placeholder = 'Enter Admin ID';
+      loginId.value = 'ADMIN-001';
+      loginPass.value = '123456';
+      if (defaultText) {
+        defaultText.innerHTML = 'Default: Admin (ADMIN-001 / 123456)';
+      }
+      
+      console.log('Switched to Admin mode');
+    });
+    
+    // Member tab click
+    tabMember.addEventListener('click', function() {
+      // Update active tab
+      tabMember.classList.add('active');
+      tabAdmin.classList.remove('active');
+      
+      // Update session mode
+      window.SESSION.mode = 'member';
+      
+      // Update UI
+      loginIdLabel.innerHTML = '👥 Member ID';
+      loginId.placeholder = 'Enter Member ID';
+      loginId.value = 'FM-001';
+      loginPass.value = '123456';
+      if (defaultText) {
+        defaultText.innerHTML = 'Default: Member (FM-001 / 123456)';
+      }
+      
+      console.log('Switched to Member mode');
+    });
+  }
+  
+  // Login form submission
+  const loginForm = document.getElementById('loginForm');
+  if (loginForm) {
+    loginForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      handleLogin();
+    });
+  }
+  
+  // Login button click
+  if (loginBtn) {
+    loginBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      handleLogin();
+    });
+  }
+}
+
+// Handle Login
+async function handleLogin() {
+  const loginId = document.getElementById('loginId')?.value;
+  const loginPass = document.getElementById('loginPass')?.value;
+  const mode = window.SESSION.mode;
+  
+  if (!loginId || !loginPass) {
+    showToast('Error', 'Please enter ID and password', 'error');
+    return;
+  }
+  
+  showLoading('Logging in...');
+  
+  try {
+    // Simulate login validation
+    // In production, this should validate against database
+    const db = getDatabase();
+    
+    if (mode === 'admin') {
+      // Admin login validation
+      if (loginId === 'ADMIN-001' && loginPass === '123456') {
+        window.SESSION.user = {
+          id: loginId,
+          name: 'Administrator',
+          role: 'Admin',
+          mode: 'admin'
+        };
+        
+        // Update UI
+        document.getElementById('loginPage').style.display = 'none';
+        document.getElementById('appPage').style.display = 'flex';
+        
+        // Update user info
+        document.getElementById('currentUserName').textContent = 'Administrator';
+        document.getElementById('currentUserRole').textContent = 'Admin';
+        document.getElementById('chipId').textContent = `ID: ${loginId}`;
+        document.getElementById('systemMode').textContent = 'ADMIN';
+        
+        showToast('Success', 'Admin login successful!', 'success');
+        
+        // Navigate to admin dashboard
+        setTimeout(() => {
+          navigateTo('admin_dashboard');
+        }, 500);
+      } else {
+        showToast('Error', 'Invalid Admin credentials', 'error');
+      }
+    } else {
+      // Member login validation
+      // Check if member exists in database
+      const member = await db.get('members', loginId);
+      
+      if (member && member.pass === loginPass) {
+        window.SESSION.user = {
+          id: loginId,
+          name: member.name,
+          role: 'Member',
+          mode: 'member',
+          data: member
+        };
+        
+        // Update UI
+        document.getElementById('loginPage').style.display = 'none';
+        document.getElementById('appPage').style.display = 'flex';
+        
+        // Update user info
+        document.getElementById('currentUserName').textContent = member.name;
+        document.getElementById('currentUserRole').textContent = member.memberType || 'Member';
+        document.getElementById('chipId').textContent = `ID: ${loginId}`;
+        document.getElementById('systemMode').textContent = 'MEMBER';
+        
+        showToast('Success', `Welcome ${member.name}!`, 'success');
+        
+        // Navigate to member dashboard
+        setTimeout(() => {
+          navigateTo('member_dashboard');
+        }, 500);
+      } else {
+        showToast('Error', 'Invalid Member credentials', 'error');
+      }
+    }
+  } catch (error) {
+    console.error('Login error:', error);
+    showToast('Error', 'Login failed. Please try again.', 'error');
+  } finally {
+    hideLoading();
+  }
+}
+
 // Mobile Menu Initialization
 function initMobileMenu() {
   const menuBtn = document.getElementById('mobileMenuBtn');
   const sidebar = document.getElementById('sidebar');
+  
+  if (!menuBtn || !sidebar) return;
+  
   const overlay = document.createElement('div');
   
   // Create overlay for mobile
@@ -89,34 +256,32 @@ function initMobileMenu() {
   `;
   document.body.appendChild(overlay);
   
-  if (menuBtn && sidebar) {
-    // Toggle menu
-    menuBtn.addEventListener('click', function(e) {
-      e.stopPropagation();
-      toggleMenu(sidebar, overlay);
-    });
-    
-    // Close menu when clicking overlay
-    overlay.addEventListener('click', function() {
-      closeMenu(sidebar, overlay);
-    });
-    
-    // Close menu when clicking a nav item (mobile)
-    sidebar.querySelectorAll('.nav-item').forEach(item => {
-      item.addEventListener('click', function() {
-        if (window.SESSION.isMobile) {
-          closeMenu(sidebar, overlay);
-        }
-      });
-    });
-    
-    // Handle escape key
-    document.addEventListener('keydown', function(e) {
-      if (e.key === 'Escape' && sidebar.classList.contains('show')) {
+  // Toggle menu
+  menuBtn.addEventListener('click', function(e) {
+    e.stopPropagation();
+    toggleMenu(sidebar, overlay);
+  });
+  
+  // Close menu when clicking overlay
+  overlay.addEventListener('click', function() {
+    closeMenu(sidebar, overlay);
+  });
+  
+  // Close menu when clicking a nav item (mobile)
+  sidebar.querySelectorAll('.nav-item, .nav button').forEach(item => {
+    item.addEventListener('click', function() {
+      if (window.SESSION.isMobile) {
         closeMenu(sidebar, overlay);
       }
     });
-  }
+  });
+  
+  // Handle escape key
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && sidebar.classList.contains('show')) {
+      closeMenu(sidebar, overlay);
+    }
+  });
   
   // Update menu visibility on resize
   window.addEventListener('resize', function() {
@@ -189,6 +354,8 @@ function adjustUIForScreenSize() {
   const sidebar = document.getElementById('sidebar');
   const main = document.querySelector('.main');
   
+  if (!sidebar) return;
+  
   if (window.SESSION.isDesktop) {
     sidebar.style.width = '280px';
     if (main) main.style.marginLeft = '280px';
@@ -220,7 +387,7 @@ function initTouchEvents() {
     const overlay = document.querySelector('.sidebar-overlay');
     const swipeThreshold = 100;
     
-    if (window.SESSION.isMobile) {
+    if (window.SESSION.isMobile && sidebar && overlay) {
       // Swipe right to open menu (from left edge)
       if (touchStartX < 50 && touchEndX - touchStartX > swipeThreshold) {
         openMenu(sidebar, overlay);
@@ -342,7 +509,9 @@ async function navigateTo(page, params = {}) {
     if (window.SESSION.isMobile) {
       const sidebar = document.getElementById('sidebar');
       const overlay = document.querySelector('.sidebar-overlay');
-      closeMenu(sidebar, overlay);
+      if (sidebar && overlay) {
+        closeMenu(sidebar, overlay);
+      }
     }
     
     // Import page module dynamically
@@ -371,6 +540,26 @@ async function navigateTo(page, params = {}) {
     showToast('Error', 'পৃষ্ঠা লোড করতে সমস্যা হয়েছে', 'error');
   }
 }
+
+// Logout function
+window.logout = function() {
+  if (confirm('Are you sure you want to logout?')) {
+    window.SESSION.user = null;
+    window.SESSION.mode = 'admin';
+    window.SESSION.page = null;
+    
+    document.getElementById('appPage').style.display = 'none';
+    document.getElementById('loginPage').style.display = 'flex';
+    
+    // Reset login form
+    const loginId = document.getElementById('loginId');
+    const loginPass = document.getElementById('loginPass');
+    if (loginId) loginId.value = 'ADMIN-001';
+    if (loginPass) loginPass.value = '123456';
+    
+    showToast('Info', 'Logged out successfully', 'info');
+  }
+};
 
 // Global error handler
 window.addEventListener('error', function(event) {
@@ -404,6 +593,7 @@ window.showLoading = showLoading;
 window.hideLoading = hideLoading;
 window.showToast = showToast;
 window.getDatabase = getDatabase;
+window.handleLogin = handleLogin;
 
 // Add CSS for toast types and mobile features
 const style = document.createElement('style');
@@ -561,6 +751,32 @@ style.textContent = `
     .toast-message {
       font-size: 13px;
     }
+  }
+
+  /* Login Tabs Enhancement */
+  .tabs button {
+    transition: all 0.3s ease;
+  }
+  
+  .tabs button.active {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    transform: scale(1.02);
+  }
+  
+  /* Navigation Enhancement */
+  .nav button {
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  
+  .nav button:hover {
+    background: rgba(102,126,234,0.1);
+  }
+  
+  .nav button.active {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
   }
 `;
 

@@ -110,6 +110,10 @@ window.addEventListener('error', function (event) {
 // EmailJS Integration
 // ===============================
 
+// Make sure EmailJS CDN is loaded in HTML
+// <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+// <script> emailjs.init("YOUR_PUBLIC_KEY"); </script>
+
 window.sendTestEmail = function () {
 
   if (typeof emailjs === "undefined") {
@@ -126,19 +130,23 @@ window.sendTestEmail = function () {
   }
 
   const templateParams = {
-    to_name: "Test User",
+    to_name: document.getElementById("name")?.value || "Test User",
     to_email: emailInput,
-    receipt_no: "MR001",
-    amount: "5000"
+    receipt_no: document.getElementById("receipt_no")?.value || "MR001",
+    amount: document.getElementById("amount")?.value || "5000"
   };
 
   console.log("Sending email to:", templateParams.to_email);
 
+  showLoading("Sending Email...");
+
   emailjs.send("service_li1nizv", "template_eq13h6v", templateParams)
     .then(function () {
+      hideLoading();
       showToast("Success", "Email Sent Successfully ✅");
     })
     .catch(function (error) {
+      hideLoading();
       console.error("Email Error:", error);
       showToast("Error", "Email sending failed ❌");
     });
@@ -154,3 +162,4 @@ window.showLoading = showLoading;
 window.hideLoading = hideLoading;
 window.showToast = showToast;
 window.getDatabase = getDatabase;
+window.sendTestEmail = sendTestEmail;

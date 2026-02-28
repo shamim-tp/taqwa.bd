@@ -78,267 +78,279 @@ export async function renderMemberDashboard() {
       myProfit += Number(p.profitPerShare || 0) * shares;
     });
 
-    setPageTitle(
-      'Member Dashboard',
-      'Your deposit status, profit, shares and notices.'
-    );
+    setPageTitle('Member Dashboard', 'Your deposit status, profit, shares and notices.');
 
-    // CSS Styles
+    // Mobile-First CSS Styles
     const styles = `
       <style>
+        /* Mobile-First Reset */
+        * {
+          box-sizing: border-box;
+          margin: 0;
+          padding: 0;
+        }
+
         /* Dashboard Container */
         .member-dashboard {
-          padding: 25px;
+          padding: 12px;
           background: #f8fafc;
           min-height: 100vh;
         }
 
-        /* Welcome Section */
+        /* Welcome Section - Mobile First */
         .member-welcome {
           background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
           color: white;
-          padding: 30px 35px;
-          border-radius: 24px;
-          margin-bottom: 30px;
+          padding: 20px;
+          border-radius: 20px;
+          margin-bottom: 20px;
           display: flex;
-          justify-content: space-between;
-          align-items: center;
-          flex-wrap: wrap;
-          gap: 20px;
-          box-shadow: 0 20px 40px rgba(102,126,234,0.3);
+          flex-direction: column;
+          gap: 15px;
+        }
+
+        @media (min-width: 640px) {
+          .member-welcome {
+            flex-direction: row;
+            justify-content: space-between;
+            align-items: center;
+            padding: 25px 30px;
+          }
         }
 
         .welcome-title {
-          font-size: 28px;
+          font-size: 20px;
           font-weight: 700;
-          margin-bottom: 8px;
+          margin-bottom: 5px;
+        }
+
+        @media (min-width: 640px) {
+          .welcome-title {
+            font-size: 24px;
+          }
         }
 
         .welcome-subtitle {
-          font-size: 16px;
-          opacity: 0.95;
+          font-size: 12px;
+          opacity: 0.9;
         }
 
         .member-badge {
           background: rgba(255,255,255,0.2);
-          padding: 15px 25px;
-          border-radius: 50px;
+          padding: 12px 20px;
+          border-radius: 40px;
           backdrop-filter: blur(10px);
           text-align: center;
         }
 
         .member-badge .id {
-          font-size: 20px;
+          font-size: 16px;
           font-weight: 700;
-          letter-spacing: 1px;
         }
 
         .member-badge .type {
-          font-size: 13px;
+          font-size: 11px;
           opacity: 0.9;
-          margin-top: 5px;
+          margin-top: 3px;
         }
 
-        /* Stats Cards Grid */
+        /* Quick Stats Row - Mobile First */
+        .quick-stats {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 8px;
+          margin-bottom: 20px;
+        }
+
+        @media (min-width: 640px) {
+          .quick-stats {
+            gap: 15px;
+            margin-bottom: 25px;
+          }
+        }
+
+        .stat-item {
+          background: white;
+          padding: 12px 8px;
+          border-radius: 16px;
+          text-align: center;
+          box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+          border: 1px solid #eee;
+        }
+
+        .stat-label {
+          font-size: 11px;
+          color: #666;
+          margin-bottom: 5px;
+          text-transform: uppercase;
+          letter-spacing: 0.3px;
+        }
+
+        .stat-value {
+          font-size: 16px;
+          font-weight: 700;
+          color: #1e3c72;
+          word-break: break-word;
+        }
+
+        @media (min-width: 640px) {
+          .stat-value {
+            font-size: 18px;
+          }
+        }
+
+        /* Stats Cards Grid - Mobile First */
         .gridCards {
           display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-          gap: 25px;
-          margin-bottom: 30px;
+          grid-template-columns: 1fr;
+          gap: 12px;
+          margin-bottom: 20px;
         }
 
-        /* Beautiful Card Styles */
+        @media (min-width: 480px) {
+          .gridCards {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+          }
+        }
+
+        @media (min-width: 1024px) {
+          .gridCards {
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+          }
+        }
+
+        /* Card Styles - Mobile Optimized */
         .card {
           background: white;
-          border-radius: 24px;
-          padding: 25px;
-          box-shadow: 0 15px 35px rgba(0,0,0,0.1);
-          transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+          border-radius: 18px;
+          padding: 16px;
+          box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+          transition: all 0.3s ease;
           position: relative;
           overflow: hidden;
-          border: 1px solid rgba(255,255,255,0.2);
         }
 
-        .card:hover {
-          transform: translateY(-8px) scale(1.02);
-          box-shadow: 0 25px 50px rgba(0,0,0,0.15);
+        .card:active {
+          transform: scale(0.98);
         }
 
-        /* Gradient backgrounds for each card */
-        .card:nth-child(1) {
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-          color: white;
-        }
-        .card:nth-child(2) {
-          background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-          color: white;
-        }
-        .card:nth-child(3) {
-          background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-          color: white;
-        }
-        .card:nth-child(4) {
-          background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
-          color: white;
-        }
-        .card:nth-child(5) {
-          background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
-          color: white;
-        }
-        .card:nth-child(6) {
-          background: linear-gradient(135deg, #30cfd0 0%, #330867 100%);
-          color: white;
-        }
-        .card:nth-child(7) {
-          background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
-          color: #333;
-        }
+        /* Gradient backgrounds */
+        .card:nth-child(1) { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+        .card:nth-child(2) { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; }
+        .card:nth-child(3) { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; }
+        .card:nth-child(4) { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); color: white; }
+        .card:nth-child(5) { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); color: white; }
+        .card:nth-child(6) { background: linear-gradient(135deg, #30cfd0 0%, #330867 100%); color: white; }
+        .card:nth-child(7) { background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); color: #333; }
 
-        /* Decorative elements */
-        .card::before {
-          content: '';
-          position: absolute;
-          top: -50%;
-          right: -50%;
-          width: 200px;
-          height: 200px;
-          background: rgba(255,255,255,0.1);
-          border-radius: 50%;
-          transform: rotate(25deg);
-          transition: all 0.5s;
-        }
-
-        .card:hover::before {
-          transform: rotate(45deg) scale(1.2);
-        }
-
-        .card::after {
-          content: '';
-          position: absolute;
-          bottom: -50%;
-          left: -50%;
-          width: 200px;
-          height: 200px;
-          background: rgba(255,255,255,0.1);
-          border-radius: 50%;
-          transform: rotate(-25deg);
-          transition: all 0.5s;
-        }
-
-        .card:hover::after {
-          transform: rotate(-45deg) scale(1.2);
-        }
-
-        /* Card content */
+        /* Card Content */
         .card .tag {
           display: inline-block;
-          padding: 6px 16px;
+          padding: 4px 10px;
           background: rgba(255,255,255,0.2);
           color: inherit;
-          border-radius: 40px;
-          font-size: 13px;
+          border-radius: 30px;
+          font-size: 10px;
           font-weight: 600;
-          margin-bottom: 20px;
-          letter-spacing: 0.5px;
-          backdrop-filter: blur(5px);
-          position: relative;
-          z-index: 1;
+          margin-bottom: 10px;
         }
 
         .card .title {
-          font-size: 16px;
+          font-size: 12px;
           opacity: 0.9;
-          margin-bottom: 12px;
-          font-weight: 500;
-          position: relative;
-          z-index: 1;
+          margin-bottom: 6px;
         }
 
         .card .value {
-          font-size: 42px;
+          font-size: 22px;
           font-weight: 800;
-          margin-bottom: 15px;
+          margin-bottom: 8px;
           line-height: 1.2;
-          text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
-          position: relative;
-          z-index: 1;
+          word-break: break-word;
+        }
+
+        @media (min-width: 640px) {
+          .card .value {
+            font-size: 24px;
+          }
         }
 
         .card .sub {
-          font-size: 14px;
+          font-size: 10px;
           opacity: 0.8;
           border-top: 1px solid rgba(255,255,255,0.2);
-          padding-top: 15px;
-          margin-top: 10px;
-          position: relative;
-          z-index: 1;
-        }
-
-        /* Dark text for light cards */
-        .card:nth-child(7) .tag,
-        .card:nth-child(7) .title,
-        .card:nth-child(7) .value,
-        .card:nth-child(7) .sub {
-          color: #333;
-          border-top-color: rgba(0,0,0,0.1);
-        }
-
-        .card:nth-child(7) .tag {
-          background: rgba(0,0,0,0.1);
+          padding-top: 8px;
+          line-height: 1.4;
         }
 
         /* Panel Styles */
         .panel {
           background: white;
-          border-radius: 24px;
+          border-radius: 20px;
           overflow: hidden;
-          box-shadow: 0 15px 35px rgba(0,0,0,0.1);
-          margin-bottom: 30px;
+          box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+          margin-bottom: 20px;
         }
 
         .panelHeader {
-          padding: 25px 30px;
+          padding: 16px;
           border-bottom: 1px solid #eee;
           display: flex;
-          justify-content: space-between;
-          align-items: center;
-          flex-wrap: wrap;
-          gap: 20px;
+          flex-direction: column;
+          gap: 12px;
           background: linear-gradient(to right, #f8f9fa, #ffffff);
+        }
+
+        @media (min-width: 640px) {
+          .panelHeader {
+            flex-direction: row;
+            justify-content: space-between;
+            align-items: center;
+            padding: 18px 20px;
+          }
         }
 
         .panelHeader h3 {
           margin: 0;
           color: #1e3c72;
-          font-size: 22px;
+          font-size: 16px;
           font-weight: 700;
         }
 
         .panelHeader p {
-          margin: 8px 0 0;
+          margin: 5px 0 0;
           color: #666;
-          font-size: 14px;
+          font-size: 12px;
         }
 
         .panelHeader .btn.primary {
-          padding: 12px 28px;
+          padding: 10px 20px;
           background: linear-gradient(135deg, #667eea, #764ba2);
           color: white;
           border: none;
-          border-radius: 50px;
-          font-size: 15px;
+          border-radius: 40px;
+          font-size: 14px;
           font-weight: 600;
           cursor: pointer;
-          transition: all 0.3s;
-          box-shadow: 0 10px 20px rgba(102,126,234,0.3);
+          width: 100%;
+          text-align: center;
         }
 
-        .panelHeader .btn.primary:hover {
-          transform: translateY(-3px);
-          box-shadow: 0 15px 30px rgba(102,126,234,0.4);
+        @media (min-width: 640px) {
+          .panelHeader .btn.primary {
+            width: auto;
+            padding: 10px 24px;
+          }
         }
 
         /* Table Styles */
+        .table-responsive {
+          overflow-x: auto;
+          -webkit-overflow-scrolling: touch;
+        }
+
         table {
           width: 100%;
           border-collapse: collapse;
@@ -346,144 +358,71 @@ export async function renderMemberDashboard() {
 
         th {
           text-align: left;
-          padding: 18px 25px;
+          padding: 12px 16px;
           background: #f8f9fa;
           color: #1e3c72;
           font-weight: 600;
-          font-size: 14px;
-          text-transform: uppercase;
-          letter-spacing: 0.5px;
+          font-size: 12px;
         }
 
         td {
-          padding: 18px 25px;
+          padding: 12px 16px;
           border-bottom: 1px solid #eee;
           color: #555;
-          font-size: 15px;
-        }
-
-        tr:hover td {
-          background: #f8f9fa;
+          font-size: 13px;
         }
 
         /* Status Badges */
         .status {
           display: inline-block;
-          padding: 6px 16px;
-          border-radius: 40px;
-          font-size: 13px;
+          padding: 4px 10px;
+          border-radius: 30px;
+          font-size: 11px;
           font-weight: 600;
-          text-transform: uppercase;
-          letter-spacing: 0.5px;
         }
 
-        .st-approved {
-          background: linear-gradient(135deg, #d4edda, #c3e6cb);
-          color: #155724;
-          border: 1px solid #28a745;
-        }
+        .st-approved { background: #d4edda; color: #155724; }
+        .st-pending { background: #fff3cd; color: #856404; }
+        .st-rejected { background: #f8d7da; color: #721c24; }
 
-        .st-pending {
-          background: linear-gradient(135deg, #fff3cd, #ffeeba);
-          color: #856404;
-          border: 1px solid #ffc107;
-        }
-
-        .st-rejected {
-          background: linear-gradient(135deg, #f8d7da, #f5c6cb);
-          color: #721c24;
-          border: 1px solid #dc3545;
-        }
-
-        /* Company Mission Section */
+        /* Company Mission */
         .companyMission {
           background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
           color: white;
-          padding: 40px;
-          border-radius: 24px;
+          padding: 25px 20px;
+          border-radius: 20px;
           text-align: center;
-          box-shadow: 0 20px 40px rgba(30,60,114,0.3);
         }
 
         .companyMission h3 {
-          font-size: 28px;
-          margin-bottom: 15px;
+          font-size: 20px;
+          margin-bottom: 10px;
           font-weight: 700;
         }
 
         .companyMission p {
-          font-size: 16px;
+          font-size: 13px;
           opacity: 0.95;
-          line-height: 1.8;
-          max-width: 800px;
-          margin: 0 auto;
+          line-height: 1.6;
         }
 
         .companyMission .btn {
-          padding: 12px 35px;
+          padding: 10px 25px;
           background: white;
           color: #1e3c72;
           border: none;
-          border-radius: 50px;
-          font-size: 16px;
+          border-radius: 40px;
+          font-size: 14px;
           font-weight: 600;
           cursor: pointer;
-          transition: all 0.3s;
-          margin-top: 20px;
-          box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+          margin-top: 15px;
+          width: 100%;
         }
 
-        .companyMission .btn:hover {
-          transform: translateY(-3px);
-          box-shadow: 0 15px 30px rgba(0,0,0,0.3);
-        }
-
-        /* Responsive Design */
-        @media (max-width: 768px) {
-          .member-welcome {
-            flex-direction: column;
-            text-align: center;
+        @media (min-width: 640px) {
+          .companyMission .btn {
+            width: auto;
           }
-          
-          .card .value {
-            font-size: 32px;
-          }
-          
-          .panelHeader {
-            flex-direction: column;
-            text-align: center;
-          }
-        }
-
-        /* Quick Stats Row */
-        .quick-stats {
-          display: grid;
-          grid-template-columns: repeat(3, 1fr);
-          gap: 20px;
-          margin-bottom: 30px;
-        }
-
-        .stat-item {
-          background: white;
-          padding: 20px;
-          border-radius: 16px;
-          text-align: center;
-          box-shadow: 0 10px 25px rgba(0,0,0,0.05);
-          border: 1px solid #eee;
-        }
-
-        .stat-label {
-          font-size: 14px;
-          color: #666;
-          margin-bottom: 8px;
-          text-transform: uppercase;
-          letter-spacing: 0.5px;
-        }
-
-        .stat-value {
-          font-size: 28px;
-          font-weight: 700;
-          color: #1e3c72;
         }
       </style>
     `;
@@ -492,8 +431,8 @@ export async function renderMemberDashboard() {
     const welcomeHTML = `
       <div class="member-welcome">
         <div>
-          <div class="welcome-title">👋 Welcome back, ${member.name}!</div>
-          <div class="welcome-subtitle">${new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</div>
+          <div class="welcome-title">👋 Welcome, ${member.name}!</div>
+          <div class="welcome-subtitle">${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</div>
         </div>
         <div class="member-badge">
           <div class="id">${member.id}</div>
@@ -502,156 +441,68 @@ export async function renderMemberDashboard() {
       </div>
     `;
 
-    // Quick Stats Row
+    // Quick Stats
     const quickStatsHTML = `
       <div class="quick-stats">
-        <div class="stat-item">
-          <div class="stat-label">Member Since</div>
-          <div class="stat-value">${new Date(member.joinDate || Date.now()).getFullYear()}</div>
-        </div>
-        <div class="stat-item">
-          <div class="stat-label">Total Deposits</div>
-          <div class="stat-value">${approvedDeposits.length}</div>
-        </div>
-        <div class="stat-item">
-          <div class="stat-label">Shares Value</div>
-          <div class="stat-value">${formatMoney(totalSharesAmount)}/mo</div>
-        </div>
+        <div class="stat-item"><div class="stat-label">Joined</div><div class="stat-value">${new Date(member.joinDate || Date.now()).getFullYear()}</div></div>
+        <div class="stat-item"><div class="stat-label">Deposits</div><div class="stat-value">${approvedDeposits.length}</div></div>
+        <div class="stat-item"><div class="stat-label">Shares</div><div class="stat-value">${formatMoney(totalSharesAmount)}/mo</div></div>
       </div>
     `;
 
-    // Original Cards with enhanced styling
+    // Cards
     const cardsHTML = `
       <div class="gridCards">
-        <div class="card">
-          <div class="tag">My Shares</div>
-          <div class="title">Total Shares</div>
-          <div class="value">${shares}</div>
-          <div class="sub">
-            Share Amount: ${formatMoney(monthlyShareAmount)} | 
-            Monthly Total: ${formatMoney(totalSharesAmount)}
-          </div>
-        </div>
-
-        <div class="card">
-          <div class="tag">My Deposits</div>
-          <div class="title">Total Approved</div>
-          <div class="value">${formatMoney(totalDeposit)}</div>
-          <div class="sub">Total Deposits: ${approvedDeposits.length} | All time record</div>
-        </div>
-
-        <div class="card">
-          <div class="tag">Due Status</div>
-          <div class="title">This Month Due</div>
-          <div class="value">${formatMoney(due)}</div>
-          <div class="sub">
-            ${
-              thisMonthApproved
-                ? '✅ Approved for this month'
-                : thisMonthPending
-                ? '⏳ Pending submission'
-                : '⚠️ Not submitted yet'
-            }
-          </div>
-        </div>
-
-        <div class="card">
-          <div class="tag">My Profit</div>
-          <div class="title">Total Profit</div>
-          <div class="value">${formatMoney(myProfit)}</div>
-          <div class="sub">Based on profit distribution</div>
-        </div>
-
-        <div class="card">
-          <div class="tag">Active Members</div>
-          <div class="title">Total Members</div>
-          <div class="value">${activeMembers}</div>
-          <div class="sub">Active Shares: ${activeShares} | Monthly: ${formatMoney(activeSharesAmount)}</div>
-        </div>
-
-        <div class="card">
-          <div class="tag">Organization</div>
-          <div class="title">Total Approved Deposit</div>
-          <div class="value">${formatMoney(totalApprovedDeposit)}</div>
-          <div class="sub">Bank Balance: ${formatMoney(totalBalance - (totalExpense + InvestmentStatusAmount.ACTIVE))}</div>
-        </div>
-
-        <div class="card">
-          <div class="tag">Investments</div>
-          <div class="title">Active Investment</div>
-          <div class="value">${formatMoney(InvestmentStatusAmount.ACTIVE)}</div>
-          <div class="sub">
-            Total Projects: ${totalinvestments} | Total Invest: ${formatMoney(totalInvestmentAmount)}
-          </div>
-          <div class="sub" style="margin-top:8px;">
-            Completed: ${formatMoney(InvestmentStatusAmount.COMPLETED)} | 
-            Sales: ${formatMoney(totalInvestmentSales)} | 
-            Net Profit: ${formatMoney(netProfitAll)}
-          </div>
-        </div>
+        <div class="card"><div class="tag">My Shares</div><div class="title">Total Shares</div><div class="value">${shares}</div><div class="sub">Per Share: ${formatMoney(monthlyShareAmount)}</div></div>
+        <div class="card"><div class="tag">My Deposits</div><div class="title">Total Approved</div><div class="value">${formatMoney(totalDeposit)}</div><div class="sub">${approvedDeposits.length} deposits</div></div>
+        <div class="card"><div class="tag">Due Status</div><div class="title">This Month</div><div class="value">${formatMoney(due)}</div><div class="sub">${thisMonthApproved ? '✅ Approved' : thisMonthPending ? '⏳ Pending' : '⚠️ Not submitted'}</div></div>
+        <div class="card"><div class="tag">My Profit</div><div class="title">Total Profit</div><div class="value">${formatMoney(myProfit)}</div><div class="sub">From investments</div></div>
+        <div class="card"><div class="tag">Organization</div><div class="title">Total Deposit</div><div class="value">${formatMoney(totalApprovedDeposit)}</div><div class="sub">Bank Balance: ${formatMoney(totalBalance - (totalExpense + InvestmentStatusAmount.ACTIVE))}</div></div>
+        <div class="card"><div class="tag">Investments</div><div class="title">Active Investment</div><div class="value">${formatMoney(InvestmentStatusAmount.ACTIVE)}</div><div class="sub">${totalinvestments} Projects</div></div>
+        <div class="card"><div class="tag">Sales</div><div class="title">Total Sales</div><div class="value">${formatMoney(totalInvestmentSales)}</div><div class="sub">Net Profit: ${formatMoney(netProfitAll)}</div></div>
       </div>
     `;
 
-    // Current Month Status Panel
+    // Status Panel
     const statusPanelHTML = `
       <div class="panel">
         <div class="panelHeader">
           <div>
-            <h3>📅 Current Month Deposit Status</h3>
-            <p>Month: ${currentMonth}</p>
+            <h3>📅 Current Month</h3>
+            <p>${currentMonth}</p>
           </div>
-          <div class="panelTools">
-            <button class="btn primary" onclick="navigateTo('member_deposit')">
-              + Submit Deposit
-            </button>
-          </div>
+          <button class="btn primary" onclick="navigateTo('member_deposit')">+ Submit</button>
         </div>
-
-        <table>
-          <thead>
+        <div class="table-responsive">
+          <table>
             <tr>
-              <th>Status</th>
-              <th>Details</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
+              <td>Status</td>
               <td>
-                ${
-                  thisMonthApproved
-                    ? '<span class="status st-approved">✓ APPROVED</span>'
-                    : thisMonthPending
-                    ? '<span class="status st-pending">⏳ PENDING</span>'
-                    : '<span class="status st-rejected">⚠️ NOT SUBMITTED</span>'
-                }
-              </td>
-              <td>
-                ${
-                  thisMonthApproved
-                    ? `✅ Approved with MR ID: <strong style="color:#1e3c72;">${thisMonthApproved.mrId || '-'}</strong>`
-                    : thisMonthPending
-                    ? '📤 Deposit submitted. Waiting for admin approval.'
-                    : '📝 Please submit your deposit slip and transaction ID.'
-                }
+                ${thisMonthApproved ? '<span class="status st-approved">✓ APPROVED</span>' : 
+                  thisMonthPending ? '<span class="status st-pending">⏳ PENDING</span>' : 
+                  '<span class="status st-rejected">⚠️ NOT SUBMITTED</span>'}
               </td>
             </tr>
-          </tbody>
-        </table>
+            <tr>
+              <td>Details</td>
+              <td>${thisMonthApproved ? `MR: ${thisMonthApproved.mrId || '-'}` : 
+                  thisMonthPending ? 'Waiting approval' : 
+                  'Please submit deposit'}</td>
+            </tr>
+          </table>
+        </div>
       </div>
     `;
 
-    // Company Mission Section
+    // Mission Section
     const missionHTML = `
       <div class="companyMission">
-        <h3>🚀 Our Vision & Mission</h3>
-        <p>To become the leading investment management company in the region, providing exceptional returns and financial security to our valued members through transparent and innovative investment strategies.</p>
-        <button class="btn" onclick="openModal('modalCompanyInfo')">
-          Learn More About Us
-        </button>
+        <h3>🚀 Our Vision</h3>
+        <p>Leading investment management company providing exceptional returns to our members.</p>
+        <button class="btn" onclick="openModal('modalCompanyInfo')">Learn More</button>
       </div>
     `;
 
-    // Complete HTML
     const html = `
       ${styles}
       <div class="member-dashboard">
@@ -663,10 +514,7 @@ export async function renderMemberDashboard() {
       </div>
     `;
 
-    const container = document.getElementById('pageContent');
-    if (container) {
-      container.innerHTML = html;
-    }
+    document.getElementById('pageContent').innerHTML = html;
 
   } catch (error) {
     console.error(error);

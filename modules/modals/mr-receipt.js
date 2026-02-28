@@ -1,7 +1,7 @@
 // ============================================================
 // 📄 MR RECEIPT MODAL MODULE
 // IMS ERP V5
-// Money Receipt Viewer Modal
+// Money Receipt Viewer Modal - UPDATED with Approver Info
 // ============================================================
 
 import { openViewerModal } from './viewer.js';
@@ -21,6 +21,11 @@ function generateMRReceipt(deposit, member, meta) {
     month: 'long', 
     day: 'numeric' 
   });
+
+  // Approver information from deposit
+  const approvedByName = deposit.approvedByName || 'Admin';
+  const approvedByEmail = deposit.approvedByEmail || 'admin@ims.com';
+  const approvedAt = deposit.approvedAt ? new Date(deposit.approvedAt).toLocaleString() : 'N/A';
 
   return `
    <div class="receipt" style="max-width: 700px; margin: 0 auto; background: white; border-radius: 18px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
@@ -55,6 +60,27 @@ function generateMRReceipt(deposit, member, meta) {
           </div>
         </div>
         
+        <!-- APPROVER INFORMATION SECTION - NEW -->
+        <div style="background: #f0f7f0; border-radius: 12px; padding: 15px; margin-bottom: 25px; text-align: center; border: 2px dashed #27ae60;">
+          <div style="display: inline-block; background: #27ae60; color: white; padding: 5px 20px; border-radius: 30px; font-size: 14px; font-weight: 600; margin-bottom: 10px;">
+            ✓ APPROVED & VERIFIED
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px;">
+            <div style="text-align: left;">
+              <div style="font-size: 11px; color: #666;">Approved By</div>
+              <div style="font-weight: 600; color: #1e3c72;">${approvedByName}</div>
+            </div>
+            <div style="text-align: left;">
+              <div style="font-size: 11px; color: #666;">Email</div>
+              <div style="font-weight: 600; color: #1e3c72; font-size: 12px;">${approvedByEmail}</div>
+            </div>
+            <div style="text-align: left; grid-column: span 2;">
+              <div style="font-size: 11px; color: #666;">Approval Date & Time</div>
+              <div style="font-weight: 600; color: #1e3c72;">${approvedAt}</div>
+            </div>
+          </div>
+        </div>
+        
         <div style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-radius: 12px; padding: 20px; text-align: center; margin-bottom: 25px;">
           <h3 style="font-size: 16px; color: #1e3c72; margin: 0 0 10px;">📝 Amount in Words</h3>
           <p style="font-size: 20px; font-weight: 600; color: #2c3e50; margin: 0;">${numberToWords(deposit.amount)} Taka Only</p>
@@ -74,13 +100,15 @@ function generateMRReceipt(deposit, member, meta) {
           <div style="text-align: center; flex: 1;">
             <div style="width: 200px; height: 1px; background: #333; margin: 0 auto 10px;"></div>
             <p style="margin: 0; font-weight: 600;">Authorized Signature</p>
-            <p style="margin: 5px 0 0; font-size: 12px; color: #666;">${meta?.companyName || "Taqwa Properties BD"}</p>
+            <p style="margin: 5px 0 0; font-size: 12px; color: #666;">${approvedByName}</p>
+            <p style="margin: 2px 0 0; font-size: 10px; color: #999;">${approvedByEmail}</p>
           </div>
         </div>
         
         <div style="margin-top: 30px; font-size: 11px; text-align: center; color: #999; border-top: 1px solid #eee; padding-top: 20px;">
           <p style="margin: 0 0 5px;">*** This is a computer generated receipt. No signature required. ***</p>
           <p style="margin: 0;">Generated on: ${new Date().toLocaleString()}</p>
+          <p style="margin: 5px 0 0; font-size: 10px;">Document ID: ${deposit.mrId || deposit.id}</p>
         </div>
       </div>
     </div>
@@ -96,11 +124,17 @@ function generateMRReceipt(deposit, member, meta) {
 export function openMRReceiptModal(deposit, member, meta) {
   const receiptHTML = generateMRReceipt(deposit, member, meta);
   
+  // Get approver info for display in modal header
+  const approvedByName = deposit.approvedByName || 'Admin';
+  
   const modalHTML = `
     <div class="panel" style="max-width: 750px; margin: 0 auto;">
       <div style="text-align: center; margin-bottom: 20px;">
         <h3>🧾 Money Receipt</h3>
         <p class="small">${deposit.mrId || deposit.id} | ${member?.name || 'N/A'}</p>
+        <p class="small" style="color: #27ae60; margin-top: 5px;">
+          ✓ Approved by: ${approvedByName}
+        </p>
       </div>
       
       <div style="background: #f8f9fa; border-radius: 12px; padding: 20px; margin-bottom: 20px; max-height: 500px; overflow-y: auto;">
@@ -149,6 +183,9 @@ export function printMRReceipt(deposit, member, meta) {
             background: white; 
             padding: 0;
             display: block;
+          }
+          .receipt {
+            box-shadow: none;
           }
         }
       </style>

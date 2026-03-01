@@ -279,9 +279,9 @@ export function loadModalModules() {
     'viewer',
     'deposit-confirm',
     'mr-receipt',
-    'company-info',
-    'member-profile',
-    'investment-details'
+    'company-info'
+    // 'member-profile', // commented out as it doesn't exist
+    // 'investment-details' // commented out as it doesn't exist
   ];
 
   modals.forEach(modalName => {
@@ -300,9 +300,12 @@ export function loadModalModules() {
 
 async function loadModal(modalName) {
   try {
-    const module = await import(`./${modalName}.js`);
+    const module = await import(`./${modalName}.js`).catch(err => {
+      console.warn(`⚠️ Modal ${modalName} not found, using fallback`);
+      return null;
+    });
     
-    if (module.initializeModal) {
+    if (module && module.initializeModal) {
       module.initializeModal();
       modalInstances.set(modalName, {
         name: modalName,
@@ -310,15 +313,66 @@ async function loadModal(modalName) {
         module: module
       });
       console.log(`✅ Modal loaded: ${modalName}`);
-    } else {
+    } else if (module) {
       console.warn(`⚠️ Modal ${modalName} has no initializeModal function`);
+      // Still create a basic modal structure if needed
+      createBasicModal(modalName);
+    } else {
+      // Create fallback modal for missing modules
+      createFallbackModal(modalName);
     }
     
   } catch (error) {
-    console.error(`❌ Error loading ${modalName} modal:`, error);
-    
+    console.warn(`❌ Error loading ${modalName} modal:`, error.message);
     // Create fallback modal for missing modules
     createFallbackModal(modalName);
+  }
+}
+
+
+// ============================================================
+// 🎯 CREATE BASIC MODAL (for modules without initializeModal)
+// ============================================================
+
+function createBasicModal(modalName) {
+  const container = document.getElementById('modalsContainer');
+  if (!container) return;
+
+  const modalId = `modal${modalName.split('-').map(word => 
+    word.charAt(0).toUpperCase() + word.slice(1)
+  ).join('')}`;
+
+  // Check if modal already exists
+  if (document.getElementById(modalId)) return;
+
+  const html = `
+    <div class="modalWrap" id="${modalId}">
+      <div class="modal medium">
+        <div class="modalHead">
+          <div>
+            <h2>${modalName.replace('-', ' ').toUpperCase()}</h2>
+            <p>Modal content</p>
+          </div>
+          <button class="closeX">✕</button>
+        </div>
+        <div class="modalBody" style="text-align: center; padding: 40px;">
+          <div style="font-size: 48px; margin-bottom: 20px;">📦</div>
+          <h3 style="color: var(--text-primary); margin-bottom: 10px;">${modalName.replace('-', ' ').toUpperCase()}</h3>
+          <p style="color: var(--text-secondary);">Modal content goes here.</p>
+        </div>
+        <div class="modalFooter">
+          <button class="btn btn-secondary" onclick="closeModal('${modalId}')">Close</button>
+        </div>
+      </div>
+    </div>
+  `;
+
+  container.insertAdjacentHTML('beforeend', html);
+  
+  // Add close button listener
+  const modal = document.getElementById(modalId);
+  if (modal) {
+    modal.querySelector('.closeX')?.addEventListener('click', () => closeModal(modalId));
   }
 }
 
@@ -334,6 +388,9 @@ function createFallbackModal(modalName) {
   const modalId = `modal${modalName.split('-').map(word => 
     word.charAt(0).toUpperCase() + word.slice(1)
   ).join('')}`;
+
+  // Check if modal already exists
+  if (document.getElementById(modalId)) return;
 
   const html = `
     <div class="modalWrap" id="${modalId}">

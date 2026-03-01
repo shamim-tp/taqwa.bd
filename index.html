@@ -374,5 +374,81 @@
 
   <!-- মডাল কন্টেইনার -->
   <div id="modalsContainer"></div>
+
+
+
+  <script>
+  // Mobile menu functionality (added separately to keep main script.js unchanged)
+  (function() {
+    function initMobileMenu() {
+      const menuBtn = document.getElementById('mobileMenuBtn');
+      const sidebar = document.getElementById('sidebar');
+      if (!menuBtn || !sidebar) return;
+
+      // Create overlay if not exists
+      let overlay = document.querySelector('.sidebar-overlay');
+      if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.className = 'sidebar-overlay';
+        document.body.appendChild(overlay);
+      }
+
+      // Toggle menu function
+      function toggleMenu() {
+        if (sidebar.classList.contains('show')) {
+          sidebar.classList.remove('show');
+          overlay.classList.remove('show');
+          document.body.style.overflow = '';
+        } else {
+          sidebar.classList.add('show');
+          overlay.classList.add('show');
+          document.body.style.overflow = 'hidden';
+        }
+      }
+
+      // Event listeners
+      menuBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        toggleMenu();
+      });
+
+      overlay.addEventListener('click', toggleMenu);
+
+      // Close menu when clicking any nav button (mobile only)
+      sidebar.querySelectorAll('button, .nav-item, .logoutBtn').forEach(item => {
+        item.addEventListener('click', function() {
+          if (window.innerWidth <= 768) {
+            sidebar.classList.remove('show');
+            overlay.classList.remove('show');
+            document.body.style.overflow = '';
+          }
+        });
+      });
+
+      // Handle window resize
+      window.addEventListener('resize', function() {
+        if (window.innerWidth > 768) {
+          sidebar.classList.remove('show');
+          overlay.classList.remove('show');
+          document.body.style.overflow = '';
+        }
+      });
+
+      // Handle escape key
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && sidebar.classList.contains('show')) {
+          toggleMenu();
+        }
+      });
+    }
+
+    // Run after DOM is ready
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initMobileMenu);
+    } else {
+      initMobileMenu();
+    }
+  })();
+</script>
 </body>
 </html>

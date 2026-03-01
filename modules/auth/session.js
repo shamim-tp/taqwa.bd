@@ -130,7 +130,7 @@ function formatPageName(page) {
 
 
 // ============================================================
-:// 📝 ACTIVITY LOGGING
+// 📝 ACTIVITY LOGGING
 // ============================================================
 
 export async function logActivity(action, details) {
@@ -159,7 +159,7 @@ export async function logActivity(action, details) {
 
 
 // ============================================================
-:// 🚀 START APPLICATION
+// 🚀 START APPLICATION
 // ============================================================
 
 export function startApp() {
@@ -210,7 +210,7 @@ export function startApp() {
 
 
 // ============================================================
-:// 👤 UPDATE USER INFO
+// 👤 UPDATE USER INFO
 // ============================================================
 
 function updateUserInfo(user, role) {
@@ -229,7 +229,7 @@ function updateUserInfo(user, role) {
 
 
 // ============================================================
-:// 🛠️ SETUP ADMIN TOOLS
+// 🛠️ SETUP ADMIN TOOLS
 // ============================================================
 
 function setupAdminTools(role) {
@@ -277,7 +277,7 @@ function setupAdminTools(role) {
 
 
 // ============================================================
-:// 🚪 SETUP LOGOUT BUTTON
+// 🚪 SETUP LOGOUT BUTTON
 // ============================================================
 
 function setupLogoutButton() {
@@ -293,7 +293,7 @@ function setupLogoutButton() {
 
 
 // ============================================================
-:// 🏗️ BUILD SIDEBAR
+// 🏗️ BUILD SIDEBAR
 // ============================================================
 
 export function buildSidebar() {
@@ -376,7 +376,7 @@ export function buildSidebar() {
 
 
 // ============================================================
-:// 🧭 NAVIGATE TO PAGE
+// 🧭 NAVIGATE TO PAGE
 // ============================================================
 
 export function navigateTo(page) {
@@ -413,7 +413,7 @@ export function navigateTo(page) {
 
 
 // ============================================================
-:// 📥 LOAD PAGE MODULE
+// 📥 LOAD PAGE MODULE
 // ============================================================
 
 async function loadPageModule(page) {
@@ -476,7 +476,7 @@ async function loadPageModule(page) {
 
 
 // ============================================================
-:// 📌 SET PAGE TITLE
+// 📌 SET PAGE TITLE
 // ============================================================
 
 export function setPageTitle(title, subtitle = '') {
@@ -489,7 +489,7 @@ export function setPageTitle(title, subtitle = '') {
 
 
 // ============================================================
-:// 🚪 HANDLE LOGOUT
+// 🚪 HANDLE LOGOUT
 // ============================================================
 
 async function handleLogout() {
@@ -531,7 +531,7 @@ async function handleLogout() {
 
 
 // ============================================================
-:// 🔄 CLEAR CACHE
+// 🔄 CLEAR CACHE
 // ============================================================
 
 export function clearPageCache() {
@@ -541,7 +541,7 @@ export function clearPageCache() {
 
 
 // ============================================================
-:// 🌍 GLOBAL EXPORTS
+// 🌍 GLOBAL EXPORTS
 // ============================================================
 
 window.navigateTo = navigateTo;
@@ -552,7 +552,7 @@ window.buildSidebar = buildSidebar;
 
 
 // ============================================================
-:// 📤 EXPORTS
+// 📤 EXPORTS
 // ============================================================
 
 export default {

@@ -1369,15 +1369,14 @@ tr:hover td {
   .btn { font-size: 14px; padding: 12px 16px; }
 }
 
-/* ===== সাইডবার স্ক্রল ঠিক করার জন্য ===== */
+/* ===== সাইডবার স্ক্রল ফিক্স ===== */
 .sidebar {
-  height: 100vh;               /* সাইডবার পুরো উচ্চতা নেবে */
-  overflow-y: auto !important; /* সবসময় উল্লম্ব স্ক্রল সক্রিয় */
-  max-height: 100vh;           /* ভিউপোর্টের বেশি না হওয়া */
-  scrollbar-width: thin;       /* ফায়ারফক্সে সরু স্ক্রলবার */
+  max-height: 100vh;                /* পুরো উচ্চতা */
+  overflow-y: auto !important;       /* সবসময় উল্লম্ব স্ক্রল সক্রিয় */
+  -webkit-overflow-scrolling: touch; /* মোবাইলে মসৃণ স্ক্রল */
 }
 
-/* ওয়েবকিট ব্রাউজারে স্ক্রলবার কাস্টমাইজ */
+/* ওয়েবকিট ব্রাউজারে স্ক্রলবার কাস্টমাইজ (ঐচ্ছিক) */
 .sidebar::-webkit-scrollbar {
   width: 6px;
 }
@@ -1389,22 +1388,37 @@ tr:hover td {
   border-radius: 10px;
 }
 
-/* ===== ফন্ট কালার কালো করার জন্য ===== */
-/* সমস্ত টেক্সট এলিমেন্ট কালো করুন */
-body, p, h1, h2, h3, h4, h5, h6, span, div, label,
-.card, .card .title, .card .value, .card .sub,
-.panel, .panelHeader h3, .panelHeader p,
-.nav button, .nav-item, .userBox .name, .userBox .role,
-.chip, .badge, .btn, .btn.primary, .btn.success,
-.topbar h1, .topbar p, .rightTop .btn,
-.loginLeft h1, .loginLeft p, .loginLeft .slogan,
-.loginRight label, .loginRight input,
-.tabs button, .tabs button.active,
-table th, table td, .status,
-.companyMission h3, .companyMission p,
-.toast .t1, .toast .t2, .toast .t3,
-.modalHead h2, .modalHead p,
-.footerNote, .small {
-  color: #800000 !important;
+/* ===== লেখার কনট্রাস্ট উন্নয়ন ===== */
+/* সাইডবারের টেক্সট আরও উজ্জ্বল করুন */
+.sidebar,
+.sidebar .nav button,
+.sidebar .userBox,
+.sidebar .brand,
+.sidebar .logoutBtn,
+.sidebar .chip,
+.sidebar .badge,
+.sidebar .navTitle {
+  color: #ffffff !important;        /* উজ্জ্বল সাদা */
+  text-shadow: 0 1px 2px rgba(0,0,0,0.2); /* ছায়া যোগ করে পড়তে সুবিধা */
 }
+
+/* মূল কন্টেন্টের টেক্সটও উজ্জ্বল করুন (যদি দরকার হয়) */
+.main, .panel, .card, .topbar, #pageContent {
+  color: #f0f4fa !important;        /* হালকা সাদা */
+}
+
+/* বাটন ও অন্যান্য এলিমেন্টে বিদ্যমান কালার অক্ষুণ্ন রাখতে চাইলে উপরের স্টাইলগুলি যথেষ্ট */
+
+/* ===== মোবাইলে সাইডবার খোলার সময় পেজ স্ক্রল বন্ধ ===== */
+body.sidebar-open {
+  overflow: hidden;
+}
+
+/* মোবাইল মেনু বাটন সক্রিয় থাকলে body-তে ক্লাস যোগ করার জন্য আপনার JavaScript এ নিচের কোড যোগ করতে পারেন:
+   document.getElementById('mobileMenuBtn').addEventListener('click', function() {
+     document.body.classList.toggle('sidebar-open');
+   });
+   এবং সাইডবার বন্ধ করার সময় ক্লাস সরিয়ে দিন।
+*/
+
 

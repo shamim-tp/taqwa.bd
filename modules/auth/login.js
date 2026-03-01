@@ -490,7 +490,7 @@ export function loadLoginModule() {
 
 
 // ============================================================
-:// 🔄 SWITCH LOGIN TAB
+// 🔄 SWITCH LOGIN TAB
 // ============================================================
 
 function switchLoginTab(mode) {
@@ -536,7 +536,7 @@ function switchLoginTab(mode) {
 
 
 // ============================================================
-:// 🔑 HANDLE LOGIN
+// 🔑 HANDLE LOGIN
 // ============================================================
 
 async function handleLogin() {
@@ -620,7 +620,7 @@ async function handleLogin() {
 
 
 // ============================================================
-:// 🔐 PASSWORD TOGGLE
+// 🔐 PASSWORD TOGGLE
 // ============================================================
 
 function addPasswordToggle() {
@@ -647,7 +647,7 @@ function addPasswordToggle() {
 
 
 // ============================================================
-:// 💾 REMEMBER ME
+// 💾 REMEMBER ME
 // ============================================================
 
 const CREDENTIALS_KEY = 'ims_saved_credentials';
@@ -697,7 +697,7 @@ function clearSavedCredentials() {
 
 
 // ============================================================
-:// 📋 DEMO CREDENTIALS
+// 📋 DEMO CREDENTIALS
 // ============================================================
 
 function updateDemoCredentials(mode) {
@@ -741,7 +741,7 @@ function updateDemoCredentials(mode) {
 
 
 // ============================================================
-:// ❌ ERROR MESSAGE
+// ❌ ERROR MESSAGE
 // ============================================================
 
 function showError(message) {
@@ -758,7 +758,7 @@ function showError(message) {
 
 
 // ============================================================
-:// 📤 EXPORTS
+// 📤 EXPORTS
 // ============================================================
 
 export default {

@@ -1369,5 +1369,56 @@ tr:hover td {
   .btn { font-size: 14px; padding: 12px 16px; }
 }
 
+/* ===== সাইডবার স্ক্রল ঠিক করার জন্য ===== */
+.sidebar {
+  height: 100vh;               /* সাইডবার পুরো উচ্চতা নেবে */
+  overflow-y: auto !important; /* সবসময় উল্লম্ব স্ক্রল সক্রিয় */
+  max-height: 100vh;           /* ভিউপোর্টের বেশি না হওয়া */
+  scrollbar-width: thin;       /* ফায়ারফক্সে সরু স্ক্রলবার */
+}
 
+/* ওয়েবকিট ব্রাউজারে স্ক্রলবার কাস্টমাইজ */
+.sidebar::-webkit-scrollbar {
+  width: 6px;
+}
+.sidebar::-webkit-scrollbar-track {
+  background: rgba(255,255,255,0.1);
+}
+.sidebar::-webkit-scrollbar-thumb {
+  background: var(--accent, #3b82f6);
+  border-radius: 10px;
+}
+
+/* ===== ফন্ট কালার কালো করার জন্য ===== */
+/* সমস্ত টেক্সট এলিমেন্ট কালো করুন */
+body, p, h1, h2, h3, h4, h5, h6, span, div, label,
+.card, .card .title, .card .value, .card .sub,
+.panel, .panelHeader h3, .panelHeader p,
+.nav button, .nav-item, .userBox .name, .userBox .role,
+.chip, .badge, .btn, .btn.primary, .btn.success,
+.topbar h1, .topbar p, .rightTop .btn,
+.loginLeft h1, .loginLeft p, .loginLeft .slogan,
+.loginRight label, .loginRight input,
+.tabs button, .tabs button.active,
+table th, table td, .status,
+.companyMission h3, .companyMission p,
+.toast .t1, .toast .t2, .toast .t3,
+.modalHead h2, .modalHead p,
+.footerNote, .small {
+  color: #000000 !important;
+}
+
+/* ব্যাকগ্রাউন্ড হালকা করুন (যাতে কালো টেক্সট পড়া যায়) */
+body, .sidebar, .main, .panel, .card, .loginWrap,
+.loginCard, .loginLeft, .loginRight, .modal,
+.brand, .userBox, .nav button, .btn, .logoutBtn,
+.topbar, .panelHeader, .modalHead, .toast {
+  background-color: #ffffff !important;  /* সাদা ব্যাকগ্রাউন্ড */
+  border-color: #dddddd !important;      /* বর্ডার হালকা ধূসর */
+}
+
+/* ছায়া ও অন্যান্য ইফেক্ট হালকা করুন (ঐচ্ছিক) */
+.card, .panel, .loginCard {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1) !important;
+}
 

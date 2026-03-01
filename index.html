@@ -4,9 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes" />
   <title>TAQWA PROPERTIES BD - ERP</title>
-  <!-- সমস্ত স্টাইল এখন style.css‑এ রাখা হয়েছে (কোনো ইনলাইন ব্লক নেই) -->
+  <!-- সমস্ত স্টাইল এখন style.css‑এ রাখা হয়েছে -->
   <link rel="stylesheet" href="style.css">
-  <!-- Firebase SDK (প্রয়োজন অনুযায়ী) -->
+  <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
   <!-- মূল অ্যাপ্লিকেশন স্ক্রিপ্ট (মডিউল) -->
@@ -25,7 +25,7 @@
   <!-- টোস্ট বার্তা প্রদর্শনের এলাকা -->
   <div class="toastWrap" id="toastWrap"></div>
 
-  <!-- লগইন পৃষ্ঠা (ডিফল্টরূপে মেম্বার ট্যাব সক্রিয়) -->
+  <!-- লগইন পৃষ্ঠা (ডিফল্ট মেম্বার ট্যাব সক্রিয়) -->
   <div id="loginPage" class="loginWrap">
     <div class="loginCard">
       <div class="loginGrid">
@@ -36,7 +36,6 @@
         </div>
         <div class="loginRight">
           <div class="tabs">
-            <!-- ডিফল্ট মেম্বার ট্যাব active করা হয়েছে -->
             <button id="tabAdmin">Admin Login</button>
             <button id="tabMember" class="active">Member Login</button>
           </div>
@@ -44,7 +43,6 @@
           <form id="loginForm" onsubmit="event.preventDefault();">
             <div class="row">
               <div>
-                <!-- লেবেলটি ডিফল্ট মেম্বার অনুযায়ী সেট করা হয়েছে -->
                 <label id="loginIdLabel">Member ID</label>
                 <input id="loginId" placeholder="Enter Member ID" autocomplete="username" />
               </div>
@@ -98,7 +96,7 @@
     </div>
   </div>
 
-  <!-- মডাল গুলো এখানে যুক্ত হবে (ডায়নামিক) -->
+  <!-- মডাল কন্টেইনার -->
   <div id="modalsContainer"></div>
 </body>
 </html>

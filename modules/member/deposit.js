@@ -769,12 +769,15 @@ function toggleBankFields() {
 // ✅ VALIDATION BEFORE SUBMIT
 // ============================================================
 
+// member-deposit.js এর validateDeposit ফাংশন আপডেট করুন:
+
 async function validateDeposit(member, meta, required) {
   const year = document.getElementById('d_year')?.value;
   const monthKey = document.getElementById('d_month')?.value;
   const method = document.getElementById('d_method')?.value;
   const trxId = document.getElementById('d_trx')?.value.trim();
   const date = document.getElementById('d_date')?.value;
+  const slipFile = document.getElementById('d_slip')?.files?.[0]; // Get the slip file
 
   if (!year || !monthKey || !method || !trxId || !date || method === 'Select Method') {
     showToast('Validation Error', 'Please fill all required fields (*)', 'error');
@@ -818,6 +821,7 @@ async function validateDeposit(member, meta, required) {
     </div>
   `;
 
+  // Pass the slip file to the modal
   openDepositConfirmModal(confirmHTML, async () => {
     await confirmDepositSubmit(
       member,
@@ -827,10 +831,8 @@ async function validateDeposit(member, meta, required) {
       trxId,
       date
     );
-  });
+  }, slipFile); // Pass the slip file here
 }
-
-
 
 // ============================================================
 // 💾 CONFIRM & SAVE DEPOSIT

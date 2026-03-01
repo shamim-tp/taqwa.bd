@@ -74,11 +74,6 @@ const profileStyles = `
       transition: all 0.3s ease;
     }
 
-    .profile-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 25px 50px rgba(0,0,0,0.15);
-    }
-
     /* Header Section */
     .profile-header {
       padding: clamp(20px, 4vw, 35px);
@@ -127,7 +122,7 @@ const profileStyles = `
       font-size: 13px;
       font-weight: 700;
       margin-top: 15px;
-      background: ${m => m.profileUpdatedOnce ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.2)'};
+      background: rgba(255,255,255,0.2);
       color: var(--text-white);
       border: 1px solid rgba(255,255,255,0.3);
     }
@@ -245,7 +240,7 @@ const profileStyles = `
       opacity: 0.7;
     }
 
-    /* Image Upload Section */
+    /* Image Upload Section - Optimized */
     .image-upload {
       background: var(--bg-secondary);
       border-radius: var(--border-radius-lg);
@@ -254,27 +249,25 @@ const profileStyles = `
       transition: all 0.3s;
     }
 
-    .image-upload:hover {
-      border-color: var(--accent-2);
-      background: var(--bg-accent);
-    }
-
     .image-preview {
-      width: 100px;
-      height: 100px;
+      width: 80px;
+      height: 80px;
       border-radius: var(--border-radius-md);
       object-fit: cover;
       border: 3px solid var(--accent-1);
       box-shadow: var(--shadow-md);
       margin-bottom: 10px;
+      background: var(--bg-tertiary);
+      transition: opacity 0.3s;
     }
 
     .image-preview-sm {
-      width: 60px;
-      height: 60px;
+      width: 50px;
+      height: 50px;
       border-radius: var(--border-radius-sm);
       object-fit: cover;
       border: 2px solid var(--accent-1);
+      background: var(--bg-tertiary);
     }
 
     /* File Input Styling */
@@ -284,37 +277,34 @@ const profileStyles = `
     }
 
     .file-input-wrapper input[type="file"] {
-      padding: 12px;
+      padding: 10px;
       background: var(--bg-primary);
       border: 2px dashed var(--accent-1);
       cursor: pointer;
       color: var(--text-primary);
+      font-size: 13px;
     }
 
     .file-input-wrapper input[type="file"]::-webkit-file-upload-button {
-      padding: 8px 16px;
+      padding: 6px 12px;
       background: var(--primary-gradient);
       color: var(--text-white);
       border: none;
-      border-radius: 8px;
+      border-radius: 6px;
       cursor: pointer;
-      margin-right: 10px;
+      margin-right: 8px;
       font-weight: 600;
+      font-size: 12px;
       transition: all 0.3s;
-    }
-
-    .file-input-wrapper input[type="file"]::-webkit-file-upload-button:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 5px 15px rgba(65,88,208,0.3);
     }
 
     /* Button Styles */
     .profile-btn {
       width: 100%;
-      padding: clamp(16px, 3vw, 18px);
+      padding: clamp(14px, 3vw, 16px);
       border: none;
       border-radius: var(--border-radius-xxl);
-      font-size: clamp(16px, 2.5vw, 18px);
+      font-size: clamp(15px, 2.5vw, 17px);
       font-weight: 700;
       cursor: pointer;
       transition: all 0.3s ease;
@@ -328,29 +318,14 @@ const profileStyles = `
       box-shadow: 0 10px 20px rgba(65,88,208,0.3);
     }
 
-    .profile-btn.primary:hover:not(:disabled) {
-      transform: translateY(-3px);
-      box-shadow: 0 15px 30px rgba(65,88,208,0.4);
-    }
-
     .profile-btn.success {
       background: var(--success-gradient);
       box-shadow: 0 10px 20px rgba(17,153,142,0.3);
     }
 
-    .profile-btn.success:hover:not(:disabled) {
-      transform: translateY(-3px);
-      box-shadow: 0 15px 30px rgba(17,153,142,0.4);
-    }
-
     .profile-btn:disabled {
       opacity: 0.6;
       cursor: not-allowed;
-      transform: none !important;
-    }
-
-    .profile-btn:active:not(:disabled) {
-      transform: translateY(0);
     }
 
     /* Password Section */
@@ -388,15 +363,17 @@ const profileStyles = `
       font-weight: 500;
     }
 
-    /* Warning Box */
-    .warning-box {
-      background: var(--bg-warning);
-      border-radius: var(--border-radius-md);
-      padding: 15px;
-      margin: 20px 0;
-      border-left: 5px solid var(--accent-warning);
-      color: #856404;
-      font-weight: 500;
+    /* Loading Skeleton */
+    .skeleton {
+      background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+      background-size: 200% 100%;
+      animation: loading 1.5s infinite;
+      border-radius: 8px;
+    }
+
+    @keyframes loading {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
     }
 
     /* Responsive Adjustments */
@@ -412,49 +389,20 @@ const profileStyles = `
       }
       
       .image-preview {
-        width: 80px;
-        height: 80px;
-      }
-    }
-
-    @media (min-width: 1920px) {
-      .profile-container {
-        max-width: 1600px;
+        width: 60px;
+        height: 60px;
       }
       
-      .form-field label {
-        font-size: 15px;
+      .image-preview-sm {
+        width: 40px;
+        height: 40px;
       }
-      
-      .form-field input,
-      .form-field select {
-        font-size: 16px;
-      }
-    }
-
-    /* Loading State */
-    .loading-overlay {
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(255,255,255,0.8);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      border-radius: var(--border-radius-lg);
     }
 
     /* Touch Optimizations */
     @media (hover: none) and (pointer: coarse) {
       .profile-btn:active {
         transform: scale(0.98);
-      }
-      
-      .form-field input,
-      .form-field select {
-        font-size: 16px; /* Prevent zoom on iOS */
       }
     }
 
@@ -479,256 +427,315 @@ const profileStyles = `
 // =====================================================
 export async function renderMemberProfile() {
 
-  // ✅ ১. বর্তমান ইউজার এবং ডাটাবেস চেক করা
-  const user = getCurrentUser();
-  if (!user) return;
-
-  const db = getDatabase();
-  const m = await db.get('members', user.id);
-  if (!m) return;
-
-  // ✅ ২. পুরানো রেকর্ডের জন্য ডিফল্ট ভ্যালু সেট করা
-  if (m.profileUpdatedOnce === undefined) {
-    m.profileUpdatedOnce = false;
-    await db.update('members', m.id, m);
+  // Show loading immediately
+  const pageContent = document.getElementById('pageContent');
+  if (pageContent) {
+    pageContent.innerHTML = `
+      <div class="profile-container">
+        <div class="profile-card">
+          <div class="profile-header">
+            <h2>👤 Loading Profile...</h2>
+            <p>Please wait while we load your information</p>
+          </div>
+          <div class="profile-form">
+            <div style="padding: 40px; text-align: center;">
+              <div class="loading-spinner" style="width: 50px; height: 50px; border: 4px solid #f3f3f3; border-top: 4px solid #4158D0; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 20px;"></div>
+              <p style="color: #666;">Loading profile data...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <style>
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+      </style>
+    `;
   }
 
-  // ✅ পেজ টাইটেল সেট করা
-  setPageTitle('My Profile', 'View and update your profile information.');
+  // Load data asynchronously
+  setTimeout(async () => {
+    try {
+      const user = getCurrentUser();
+      if (!user) return;
 
-  // ✅ ৩. লক স্ট্যাটাস চেক করা
-  const isLocked = m.profileUpdatedOnce ? 'disabled' : '';
-  const lockMessage = m.profileUpdatedOnce
-    ? '🔒 Profile already updated once. Contact admin to unlock.'
-    : '🔓 You can update profile only one time.';
+      const db = getDatabase();
+      const m = await db.get('members', user.id);
+      if (!m) return;
 
-  // =====================================================
-  // 🧾 HTML UI STRUCTURE - Fully Responsive
-  // =====================================================
-  const html = `
-  ${profileStyles}
-  <div class="profile-container">
-    <div class="profile-card">
+      // Set default values for old records
+      if (m.profileUpdatedOnce === undefined) {
+        m.profileUpdatedOnce = false;
+        await db.update('members', m.id, m);
+      }
+
+      // Set page title
+      setPageTitle('My Profile', 'View and update your profile information.');
+
+      // Check lock status
+      const isLocked = m.profileUpdatedOnce ? 'disabled' : '';
+      const lockMessage = m.profileUpdatedOnce
+        ? '🔒 Profile already updated once. Contact admin to unlock.'
+        : '🔓 You can update profile only one time.';
+
+      // Generate the HTML
+      const html = generateProfileHTML(m, isLocked, lockMessage);
       
-      <!-- Header -->
-      <div class="profile-header">
-        <h2>👤 Member Profile</h2>
-        <p>${lockMessage}</p>
-        <div class="lock-status">
-          ${m.profileUpdatedOnce ? '🔒 Profile Locked' : '🔓 Profile Editable'}
-        </div>
-      </div>
+      // Update the page content
+      if (pageContent) {
+        pageContent.innerHTML = html;
+      }
 
-      <!-- Form Section -->
-      <div class="profile-form">
-        
-        <!-- Personal Information -->
-        <div class="section-title">Personal Information</div>
-        
-        <div class="profile-grid">
-          <div class="form-field">
-            <label>Member ID</label>
-            <input value="${m.id}" disabled />
-          </div>
+      // Add event listeners
+      addProfileEventListeners(m);
 
-          <div class="form-field">
-            <label>Profile Photo</label>
-            <div style="display:flex; align-items:center; gap:15px; flex-wrap:wrap;">
-              ${m.photo ? `<img src="${m.photo}" class="image-preview">` : ''}
-              <div class="file-input-wrapper" style="flex:1;">
-                <input id="up_photo" type="file" accept="image/*" ${isLocked}/>
+    } catch (error) {
+      console.error('Error loading profile:', error);
+      if (pageContent) {
+        pageContent.innerHTML = `
+          <div class="profile-container">
+            <div class="profile-card">
+              <div class="profile-header">
+                <h2>❌ Error Loading Profile</h2>
+                <p>Please try again later</p>
+              </div>
+              <div class="profile-form" style="text-align: center; padding: 40px;">
+                <p style="color: #dc3545; margin-bottom: 20px;">${error.message || 'Failed to load profile'}</p>
+                <button class="profile-btn primary" onclick="window.location.reload()">🔄 Try Again</button>
               </div>
             </div>
           </div>
+        `;
+      }
+    }
+  }, 100); // Small delay to show loading state
+}
 
-          <div class="form-field">
-            <label>Full Name</label>
-            <input id="up_name" value="${m.name || ''}" placeholder="Enter full name" ${isLocked} />
-          </div>
-
-          <div class="form-field">
-            <label>Father's Name</label>
-            <input id="up_fatherName" value="${m.fatherName || ''}" placeholder="Enter father's name" ${isLocked} />
-          </div>
-
-          <div class="form-field">
-            <label>Mother's Name</label>
-            <input id="up_motherName" value="${m.motherName || ''}" placeholder="Enter mother's name" ${isLocked} />
-          </div>
-
-          <div class="form-field">
-            <label>NID Number</label>
-            <input id="up_nid" value="${m.nid || ''}" placeholder="Enter NID number" ${isLocked} />
-          </div>
-        </div>
-
-        <!-- Contact Information -->
-        <div class="section-title">Contact Information</div>
+// =====================================================
+// 🏗️ GENERATE PROFILE HTML
+// =====================================================
+function generateProfileHTML(m, isLocked, lockMessage) {
+  return `
+    ${profileStyles}
+    <div class="profile-container">
+      <div class="profile-card">
         
-        <div class="profile-grid">
-          <div class="form-field">
-            <label>Phone Number</label>
-            <input id="up_phone" value="${m.phone || ''}" placeholder="Enter phone number" ${isLocked}/>
-          </div>
-          
-          <div class="form-field">
-            <label>Email Address</label>
-            <input id="up_email" value="${m.email || ''}" placeholder="Enter email address" ${isLocked}/>
-          </div>
-          
-          <div class="form-field">
-            <label>Address</label>
-            <input id="up_address" value="${m.address || ''}" placeholder="Enter address" ${isLocked}/>
-          </div>
-          
-          <div class="form-field">
-            <label>Shares</label>
-            <input value="${m.shares || 0}" disabled />
+        <!-- Header -->
+        <div class="profile-header">
+          <h2>👤 Member Profile</h2>
+          <p>${lockMessage}</p>
+          <div class="lock-status">
+            ${m.profileUpdatedOnce ? '🔒 Profile Locked' : '🔓 Profile Editable'}
           </div>
         </div>
 
-        <!-- NID Documents -->
-        <div class="section-title">NID Documents</div>
-        
-        <div class="profile-grid">
-          <div class="form-field">
-            <label>NID Front</label>
-            <div style="display:flex; align-items:center; gap:15px; flex-wrap:wrap;">
-              ${m.nidFront ? `<img src="${m.nidFront}" class="image-preview-sm">` : ''}
-              <div class="file-input-wrapper" style="flex:1;">
-                <input id="up_nidFront" type="file" accept="image/*" ${isLocked}/>
-              </div>
-            </div>
-          </div>
+        <!-- Form Section -->
+        <div class="profile-form">
           
-          <div class="form-field">
-            <label>NID Back</label>
-            <div style="display:flex; align-items:center; gap:15px; flex-wrap:wrap;">
-              ${m.nidBack ? `<img src="${m.nidBack}" class="image-preview-sm">` : ''}
-              <div class="file-input-wrapper" style="flex:1;">
-                <input id="up_nidBack" type="file" accept="image/*" ${isLocked}/>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Nominee Information -->
-        <div class="section-title">Nominee Information</div>
-        
-        <div class="profile-grid">
-          <div class="form-field">
-            <label>Nominee Name</label>
-            <input id="up_nomineeName" value="${m.nomineeName || ''}" placeholder="Enter nominee name" ${isLocked} />
-          </div>
-
-          <div class="form-field">
-            <label>Nominee Relation</label>
-            <select id="up_nomineeRelation" ${isLocked}>
-              <option value="Father" ${m.nomineeRelation === "Father" ? "selected" : ""}>Father</option>
-              <option value="Mother" ${m.nomineeRelation === "Mother" ? "selected" : ""}>Mother</option>
-              <option value="Husband" ${m.nomineeRelation === "Husband" ? "selected" : ""}>Husband</option>
-              <option value="Wife" ${m.nomineeRelation === "Wife" ? "selected" : ""}>Wife</option>
-              <option value="Brother" ${m.nomineeRelation === "Brother" ? "selected" : ""}>Brother</option>
-              <option value="Sister" ${m.nomineeRelation === "Sister" ? "selected" : ""}>Sister</option>
-              <option value="Son" ${m.nomineeRelation === "Son" ? "selected" : ""}>Son</option>
-              <option value="Daughter" ${m.nomineeRelation === "Daughter" ? "selected" : ""}>Daughter</option>
-              <option value="Other" ${m.nomineeRelation === "Other" ? "selected" : ""}>Other</option>
-            </select>
-          </div>
-
-          <div class="form-field">
-            <label>Nominee NID</label>
-            <input id="up_nomineeNid" value="${m.nomineeNid || ''}" placeholder="Enter nominee NID" ${isLocked} />
-          </div>
-
-          <div class="form-field">
-            <label>Nominee Phone</label>
-            <input id="up_nomineePhone" value="${m.nomineePhone || ''}" placeholder="Enter nominee phone" ${isLocked} />
-          </div>
-        </div>
-
-        <!-- Nominee Documents -->
-        <div class="profile-grid">
-          <div class="form-field">
-            <label>Nominee Photo</label>
-            <div style="display:flex; align-items:center; gap:15px; flex-wrap:wrap;">
-              ${m.nomineePhoto ? `<img src="${m.nomineePhoto}" class="image-preview-sm">` : ''}
-              <div class="file-input-wrapper" style="flex:1;">
-                <input id="up_nomineePhoto" type="file" accept="image/*" ${isLocked}/>
-              </div>
-            </div>
-          </div>
+          <!-- Personal Information -->
+          <div class="section-title">Personal Information</div>
           
-          <div class="form-field">
-            <label>Nominee NID Front</label>
-            <div style="display:flex; align-items:center; gap:15px; flex-wrap:wrap;">
-              ${m.nomineeNidFront ? `<img src="${m.nomineeNidFront}" class="image-preview-sm">` : ''}
-              <div class="file-input-wrapper" style="flex:1;">
-                <input id="up_nomineeNidFront" type="file" accept="image/*" ${isLocked}/>
+          <div class="profile-grid">
+            <div class="form-field">
+              <label>Member ID</label>
+              <input value="${escapeHtml(m.id)}" disabled />
+            </div>
+
+            <div class="form-field">
+              <label>Profile Photo</label>
+              <div style="display:flex; align-items:center; gap:15px; flex-wrap:wrap;">
+                ${m.photo ? `<img src="${m.photo}" class="image-preview" loading="lazy">` : ''}
+                <div class="file-input-wrapper" style="flex:1;">
+                  <input id="up_photo" type="file" accept="image/*" ${isLocked}/>
+                </div>
               </div>
             </div>
-          </div>
-          
-          <div class="form-field">
-            <label>Nominee NID Back</label>
-            <div style="display:flex; align-items:center; gap:15px; flex-wrap:wrap;">
-              ${m.nomineeNidBack ? `<img src="${m.nomineeNidBack}" class="image-preview-sm">` : ''}
-              <div class="file-input-wrapper" style="flex:1;">
-                <input id="up_nomineeNidBack" type="file" accept="image/*" ${isLocked}/>
-              </div>
+
+            <div class="form-field">
+              <label>Full Name</label>
+              <input id="up_name" value="${escapeHtml(m.name || '')}" placeholder="Enter full name" ${isLocked} />
+            </div>
+
+            <div class="form-field">
+              <label>Father's Name</label>
+              <input id="up_fatherName" value="${escapeHtml(m.fatherName || '')}" placeholder="Enter father's name" ${isLocked} />
+            </div>
+
+            <div class="form-field">
+              <label>Mother's Name</label>
+              <input id="up_motherName" value="${escapeHtml(m.motherName || '')}" placeholder="Enter mother's name" ${isLocked} />
+            </div>
+
+            <div class="form-field">
+              <label>NID Number</label>
+              <input id="up_nid" value="${escapeHtml(m.nid || '')}" placeholder="Enter NID number" ${isLocked} />
             </div>
           </div>
-        </div>
 
-        <!-- Update Button -->
-        <div class="info-box">
-          ⚠️ You can update your profile only <strong>ONE time</strong>. After update, it will be locked.
-        </div>
-        
-        <button class="profile-btn primary" id="updateProfileBtn" ${isLocked}>
-          ${m.profileUpdatedOnce ? '🔒 Profile Locked' : '📝 Update Profile'}
-        </button>
-
-        <!-- Password Update Section -->
-        <div class="password-section">
-          <h3>Change Password</h3>
+          <!-- Contact Information -->
+          <div class="section-title">Contact Information</div>
           
-          <form id="passwordUpdateForm" onsubmit="event.preventDefault();">
-            <input type="hidden" name="username" value="${m.id}" autocomplete="username">
+          <div class="profile-grid">
+            <div class="form-field">
+              <label>Phone Number</label>
+              <input id="up_phone" value="${escapeHtml(m.phone || '')}" placeholder="Enter phone number" ${isLocked}/>
+            </div>
             
-            <div class="profile-grid">
-              <div class="form-field">
-                <label>New Password</label>
-                <input id="up_pass" type="password" placeholder="Enter new password" autocomplete="new-password"/>
-              </div>
-              <div class="form-field">
-                <label>Confirm Password</label>
-                <input id="up_pass2" type="password" placeholder="Confirm new password" autocomplete="new-password"/>
+            <div class="form-field">
+              <label>Email Address</label>
+              <input id="up_email" value="${escapeHtml(m.email || '')}" placeholder="Enter email address" ${isLocked}/>
+            </div>
+            
+            <div class="form-field">
+              <label>Address</label>
+              <input id="up_address" value="${escapeHtml(m.address || '')}" placeholder="Enter address" ${isLocked}/>
+            </div>
+            
+            <div class="form-field">
+              <label>Shares</label>
+              <input value="${m.shares || 0}" disabled />
+            </div>
+          </div>
+
+          <!-- NID Documents -->
+          <div class="section-title">NID Documents</div>
+          
+          <div class="profile-grid">
+            <div class="form-field">
+              <label>NID Front</label>
+              <div style="display:flex; align-items:center; gap:15px; flex-wrap:wrap;">
+                ${m.nidFront ? `<img src="${m.nidFront}" class="image-preview-sm" loading="lazy">` : ''}
+                <div class="file-input-wrapper" style="flex:1;">
+                  <input id="up_nidFront" type="file" accept="image/*" ${isLocked}/>
+                </div>
               </div>
             </div>
             
-            <button type="submit" class="profile-btn success" id="updatePasswordBtn">
-              🔐 Update Password
-            </button>
-          </form>
-        </div>
+            <div class="form-field">
+              <label>NID Back</label>
+              <div style="display:flex; align-items:center; gap:15px; flex-wrap:wrap;">
+                ${m.nidBack ? `<img src="${m.nidBack}" class="image-preview-sm" loading="lazy">` : ''}
+                <div class="file-input-wrapper" style="flex:1;">
+                  <input id="up_nidBack" type="file" accept="image/*" ${isLocked}/>
+                </div>
+              </div>
+            </div>
+          </div>
 
+          <!-- Nominee Information -->
+          <div class="section-title">Nominee Information</div>
+          
+          <div class="profile-grid">
+            <div class="form-field">
+              <label>Nominee Name</label>
+              <input id="up_nomineeName" value="${escapeHtml(m.nomineeName || '')}" placeholder="Enter nominee name" ${isLocked} />
+            </div>
+
+            <div class="form-field">
+              <label>Nominee Relation</label>
+              <select id="up_nomineeRelation" ${isLocked}>
+                <option value="Father" ${m.nomineeRelation === "Father" ? "selected" : ""}>Father</option>
+                <option value="Mother" ${m.nomineeRelation === "Mother" ? "selected" : ""}>Mother</option>
+                <option value="Husband" ${m.nomineeRelation === "Husband" ? "selected" : ""}>Husband</option>
+                <option value="Wife" ${m.nomineeRelation === "Wife" ? "selected" : ""}>Wife</option>
+                <option value="Brother" ${m.nomineeRelation === "Brother" ? "selected" : ""}>Brother</option>
+                <option value="Sister" ${m.nomineeRelation === "Sister" ? "selected" : ""}>Sister</option>
+                <option value="Son" ${m.nomineeRelation === "Son" ? "selected" : ""}>Son</option>
+                <option value="Daughter" ${m.nomineeRelation === "Daughter" ? "selected" : ""}>Daughter</option>
+                <option value="Other" ${m.nomineeRelation === "Other" ? "selected" : ""}>Other</option>
+              </select>
+            </div>
+
+            <div class="form-field">
+              <label>Nominee NID</label>
+              <input id="up_nomineeNid" value="${escapeHtml(m.nomineeNid || '')}" placeholder="Enter nominee NID" ${isLocked} />
+            </div>
+
+            <div class="form-field">
+              <label>Nominee Phone</label>
+              <input id="up_nomineePhone" value="${escapeHtml(m.nomineePhone || '')}" placeholder="Enter nominee phone" ${isLocked} />
+            </div>
+          </div>
+
+          <!-- Nominee Documents -->
+          <div class="profile-grid">
+            <div class="form-field">
+              <label>Nominee Photo</label>
+              <div style="display:flex; align-items:center; gap:15px; flex-wrap:wrap;">
+                ${m.nomineePhoto ? `<img src="${m.nomineePhoto}" class="image-preview-sm" loading="lazy">` : ''}
+                <div class="file-input-wrapper" style="flex:1;">
+                  <input id="up_nomineePhoto" type="file" accept="image/*" ${isLocked}/>
+                </div>
+              </div>
+            </div>
+            
+            <div class="form-field">
+              <label>Nominee NID Front</label>
+              <div style="display:flex; align-items:center; gap:15px; flex-wrap:wrap;">
+                ${m.nomineeNidFront ? `<img src="${m.nomineeNidFront}" class="image-preview-sm" loading="lazy">` : ''}
+                <div class="file-input-wrapper" style="flex:1;">
+                  <input id="up_nomineeNidFront" type="file" accept="image/*" ${isLocked}/>
+                </div>
+              </div>
+            </div>
+            
+            <div class="form-field">
+              <label>Nominee NID Back</label>
+              <div style="display:flex; align-items:center; gap:15px; flex-wrap:wrap;">
+                ${m.nomineeNidBack ? `<img src="${m.nomineeNidBack}" class="image-preview-sm" loading="lazy">` : ''}
+                <div class="file-input-wrapper" style="flex:1;">
+                  <input id="up_nomineeNidBack" type="file" accept="image/*" ${isLocked}/>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Update Button -->
+          <div class="info-box">
+            ⚠️ You can update your profile only <strong>ONE time</strong>. After update, it will be locked.
+          </div>
+          
+          <button class="profile-btn primary" id="updateProfileBtn" ${isLocked}>
+            ${m.profileUpdatedOnce ? '🔒 Profile Locked' : '📝 Update Profile'}
+          </button>
+
+          <!-- Password Update Section -->
+          <div class="password-section">
+            <h3>Change Password</h3>
+            
+            <form id="passwordUpdateForm" onsubmit="event.preventDefault();">
+              <input type="hidden" name="username" value="${escapeHtml(m.id)}" autocomplete="username">
+              
+              <div class="profile-grid">
+                <div class="form-field">
+                  <label>New Password</label>
+                  <input id="up_pass" type="password" placeholder="Enter new password" autocomplete="new-password"/>
+                </div>
+                <div class="form-field">
+                  <label>Confirm Password</label>
+                  <input id="up_pass2" type="password" placeholder="Confirm new password" autocomplete="new-password"/>
+                </div>
+              </div>
+              
+              <button type="submit" class="profile-btn success" id="updatePasswordBtn">
+                🔐 Update Password
+              </button>
+            </form>
+          </div>
+
+        </div>
       </div>
     </div>
-  </div>
   `;
+}
 
-  // ✅ HTML লোড
-  document.getElementById('pageContent').innerHTML = html;
-
-
-  // =====================================================
-  // 🎯 EVENT LISTENERS
-  // =====================================================
-
-  // ✅ Profile Update Button
+// =====================================================
+// 🎯 ADD EVENT LISTENERS
+// =====================================================
+function addProfileEventListeners(m) {
+  // Profile Update Button
   document.getElementById('updateProfileBtn')?.addEventListener('click', async () => {
-
     if (m.profileUpdatedOnce) {
       showToast('Locked', 'You cannot update profile again.', 'warning');
       return;
@@ -743,35 +750,36 @@ export async function renderMemberProfile() {
     await memberUpdateProfile(m);
   });
 
-
-  // ✅ Password Update Form (সাবমিট ইভেন্ট)
+  // Password Update Form
   document.getElementById('passwordUpdateForm')?.addEventListener('submit', async (e) => {
-    e.preventDefault(); // পৃষ্ঠা রিলোড বন্ধ করতে
+    e.preventDefault();
     await memberUpdatePassword(m);
   });
 }
 
-
-
 // =====================================================
-// 🔄 PROFILE UPDATE FUNCTION (ONLY PROFILE)
+// 🔄 PROFILE UPDATE FUNCTION
 // =====================================================
 async function memberUpdateProfile(m) {
-
   try {
     const db = getDatabase();
     const user = getCurrentUser();
     if (!user) return;
 
-    // ✅ Profile already updated হলে prevent করবে
     if (m.profileUpdatedOnce) {
       showToast('Not Allowed', 'You can update profile only once.', 'warning');
       return;
     }
 
-    // =====================================================
-    // 📝 TEXT FIELD UPDATE
-    // =====================================================
+    // Show loading state
+    const updateBtn = document.getElementById('updateProfileBtn');
+    const originalText = updateBtn?.textContent;
+    if (updateBtn) {
+      updateBtn.disabled = true;
+      updateBtn.textContent = '⏳ Updating...';
+    }
+
+    // Update text fields
     m.name = document.getElementById('up_name')?.value.trim() || m.name;
     m.fatherName = document.getElementById('up_fatherName')?.value.trim() || m.fatherName;
     m.motherName = document.getElementById('up_motherName')?.value.trim() || m.motherName;
@@ -780,63 +788,61 @@ async function memberUpdateProfile(m) {
     m.email = document.getElementById('up_email')?.value.trim() || m.email;
     m.address = document.getElementById('up_address')?.value.trim() || m.address;
 
-    // =====================================================
-    // 👤 NOMINEE INFO UPDATE
-    // =====================================================
+    // Update nominee info
     m.nomineeName = document.getElementById('up_nomineeName')?.value.trim() || m.nomineeName;
     m.nomineeRelation = document.getElementById('up_nomineeRelation')?.value || m.nomineeRelation;
     m.nomineeNid = document.getElementById('up_nomineeNid')?.value.trim() || m.nomineeNid;
     m.nomineePhone = document.getElementById('up_nomineePhone')?.value.trim() || m.nomineePhone;
 
-    // =====================================================
-    // 🖼 IMAGE UPLOAD + COMPRESSION
-    // =====================================================
+    // Process images one by one with smaller delay
     const files = [
-      ['up_photo', 'photo', 800, 0.7],
-      ['up_nidFront', 'nidFront', 1000, 0.75],
-      ['up_nidBack', 'nidBack', 1000, 0.75],
-      ['up_nomineePhoto', 'nomineePhoto', 800, 0.7],
-      ['up_nomineeNidFront', 'nomineeNidFront', 1000, 0.75],
-      ['up_nomineeNidBack', 'nomineeNidBack', 1000, 0.75],
+      ['up_photo', 'photo'],
+      ['up_nidFront', 'nidFront'],
+      ['up_nidBack', 'nidBack'],
+      ['up_nomineePhoto', 'nomineePhoto'],
+      ['up_nomineeNidFront', 'nomineeNidFront'],
+      ['up_nomineeNidBack', 'nomineeNidBack'],
     ];
 
-    for (const [inputId, field, width, quality] of files) {
+    for (const [inputId, field] of files) {
       const fileInput = document.getElementById(inputId);
-
       if (fileInput?.files?.[0]) {
         const file = fileInput.files[0];
-        m[field] = await compressImage(file, width, quality);
+        showToast('Processing', `Compressing ${field}...`, 'info');
+        m[field] = await compressImage(file, 800, 0.7);
       }
     }
 
-    // =====================================================
-    // 🔒 PROFILE LOCK AFTER FIRST UPDATE
-    // =====================================================
+    // Lock profile
     m.profileUpdatedOnce = true;
     m.updatedAt = new Date().toISOString();
 
-    // ✅ Save DB
+    // Save to database
     await db.update('members', m.id, m);
     await logActivity('MEMBER_PROFILE_UPDATE', `Member updated profile ${m.id}`);
 
     showToast('Success', 'Profile updated successfully.', 'success');
-
-    // ✅ Re-render to show lock status
+    
+    // Re-render profile
     renderMemberProfile();
 
   } catch (error) {
     console.error(error);
     showToast('Error', 'প্রোফাইল আপডেট করতে সমস্যা হয়েছে।', 'error');
+    
+    // Reset button
+    const updateBtn = document.getElementById('updateProfileBtn');
+    if (updateBtn) {
+      updateBtn.disabled = false;
+      updateBtn.textContent = '📝 Update Profile';
+    }
   }
 }
 
-
-
 // =====================================================
-// 🔐 PASSWORD UPDATE FUNCTION (ONLY PASSWORD)
+// 🔐 PASSWORD UPDATE FUNCTION
 // =====================================================
 async function memberUpdatePassword(m) {
-
   try {
     const db = getDatabase();
     const user = getCurrentUser();
@@ -845,25 +851,29 @@ async function memberUpdatePassword(m) {
     const pass = document.getElementById('up_pass')?.value.trim();
     const pass2 = document.getElementById('up_pass2')?.value.trim();
 
-    // ✅ Empty check
     if (!pass || !pass2) {
       showToast('Error', 'Please enter password and confirm password.', 'error');
       return;
     }
 
-    // ✅ Match check
     if (pass !== pass2) {
       showToast('Password Error', 'Password confirmation mismatch.', 'error');
       return;
     }
 
-    // ✅ Password strength check (optional)
     if (pass.length < 4) {
       showToast('Error', 'Password must be at least 4 characters.', 'error');
       return;
     }
 
-    // ✅ Save new password
+    // Show loading
+    const updateBtn = document.getElementById('updatePasswordBtn');
+    const originalText = updateBtn?.textContent;
+    if (updateBtn) {
+      updateBtn.disabled = true;
+      updateBtn.textContent = '⏳ Updating...';
+    }
+
     m.pass = pass;
     m.updatedAt = new Date().toISOString();
 
@@ -872,12 +882,38 @@ async function memberUpdatePassword(m) {
 
     showToast('Success', 'Password updated successfully.', 'success');
 
-    // ✅ Clear input
+    // Clear inputs
     document.getElementById('up_pass').value = '';
     document.getElementById('up_pass2').value = '';
+
+    // Reset button
+    if (updateBtn) {
+      updateBtn.disabled = false;
+      updateBtn.textContent = '🔐 Update Password';
+    }
 
   } catch (error) {
     console.error(error);
     showToast('Error', 'Password update failed.', 'error');
+    
+    // Reset button
+    const updateBtn = document.getElementById('updatePasswordBtn');
+    if (updateBtn) {
+      updateBtn.disabled = false;
+      updateBtn.textContent = '🔐 Update Password';
+    }
   }
+}
+
+// =====================================================
+// 🔒 ESCAPE HTML TO PREVENT XSS
+// =====================================================
+function escapeHtml(unsafe) {
+  if (!unsafe) return '';
+  return unsafe
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
 }

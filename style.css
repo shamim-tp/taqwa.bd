@@ -1408,17 +1408,3 @@ table th, table td, .status,
   color: #000000 !important;
 }
 
-/* ব্যাকগ্রাউন্ড হালকা করুন (যাতে কালো টেক্সট পড়া যায়) */
-body, .sidebar, .main, .panel, .card, .loginWrap,
-.loginCard, .loginLeft, .loginRight, .modal,
-.brand, .userBox, .nav button, .btn, .logoutBtn,
-.topbar, .panelHeader, .modalHead, .toast {
-  background-color: #ffffff !important;  /* সাদা ব্যাকগ্রাউন্ড */
-  border-color: #dddddd !important;      /* বর্ডার হালকা ধূসর */
-}
-
-/* ছায়া ও অন্যান্য ইফেক্ট হালকা করুন (ঐচ্ছিক) */
-.card, .panel, .loginCard {
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1) !important;
-}
-

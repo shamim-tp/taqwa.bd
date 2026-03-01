@@ -824,6 +824,7 @@ async function validateDeposit(member, meta, required) {
   // Pass the slip file to the modal
   openDepositConfirmModal(confirmHTML, async () => {
     await confirmDepositSubmit(
+      member_id,
       member,
       required,
       monthKey,

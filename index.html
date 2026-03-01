@@ -4,90 +4,14 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes" />
   <title>TAQWA PROPERTIES BD - ERP</title>
-  <!-- Original style.css (আমরা উপরে আপডেট করেছি, তাই এখানে লিংক রাখছি) -->
+  <!-- সমস্ত স্টাইল এখন style.css‑এ রাখা হয়েছে (কোনো ইনলাইন ব্লক নেই) -->
   <link rel="stylesheet" href="style.css">
-  <!-- Firebase SDK -->
+  <!-- Firebase SDK (প্রয়োজন অনুযায়ী) -->
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-  <!-- Main script module (আমরা নিচে আপডেট করেছি) -->
+  <!-- মূল অ্যাপ্লিকেশন স্ক্রিপ্ট (মডিউল) -->
   <script type="module" src="script.js"></script>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏢</text></svg>">
-  
-  <!-- ===== আপনার দেওয়া ইনলাইন স্টাইল (অপরিবর্তিত) ===== -->
-  <style>
-    /* আপনার দেওয়া সমস্ত ইনলাইন স্টাইল এখানে থাকবে, আমি সেগুলো সরাইনি। */
-    /* সংক্ষেপে এখানে সেগুলো না লিখে বরং আপনি যেভাবে দিয়েছিলেন সেভাবেই রাখুন। */
-    /* তবে জায়গা বাঁচাতে আমি এখানে সেগুলো আবার লিখছি না। */
-  </style>
-  
-  <!-- ===== নতুন ডিজাইন এনহ্যান্সমেন্ট (আপনার মূল কোডের সাথে যুক্ত) ===== -->
-  <style>
-    /* নিচের অংশ আপনার মূল ইনলাইন স্টাইলের পর যুক্ত হবে। এতে আপনার কোনও স্টাইল নষ্ট হবে না। */
-    
-    /* ১. স্মুথ স্ক্রলিং ও ভালো ফন্ট রেন্ডারিং */
-    html {
-      scroll-behavior: smooth;
-    }
-    
-    /* ২. লগইন পৃষ্ঠায় সূক্ষ্ম ব্যাকগ্রাউন্ড অ্যানিমেশন */
-    .loginWrap {
-      background: radial-gradient(circle at 20% 30%, rgba(79,110,247,0.15), transparent 40%),
-                  radial-gradient(circle at 80% 70%, rgba(155,77,255,0.12), transparent 40%),
-                  #0b1220;
-    }
-    
-    /* ৩. কার্ডের ভেতরে গ্লো ইফেক্ট */
-    .card::after {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: radial-gradient(circle at 50% 0%, rgba(255,255,255,0.1), transparent 70%);
-      pointer-events: none;
-    }
-    
-    /* ৪. বাটন ও নেভ আইটেমে আইকনের স্পেসিং */
-    .btn span, .nav-item span {
-      margin-right: 8px;
-    }
-    
-    /* ৫. মোবাইল মেনু বাটনের অ্যানিমেশন */
-    .mobile-menu-btn {
-      transition: all 0.3s ease;
-    }
-    .mobile-menu-btn:active {
-      transform: scale(0.95);
-    }
-    
-    /* ৬. ফোকাস আউটলাইন (অ্যাক্সেসিবিলিটি) */
-    :focus-visible {
-      outline: 3px solid #4f6ef7;
-      outline-offset: 2px;
-    }
-    
-    /* ৭. কাস্টম স্ক্রলবার (ইতিমধ্যে style.css-এ আছে, তবে নিশ্চিত করতে) */
-    ::-webkit-scrollbar {
-      width: 8px;
-      height: 8px;
-    }
-    ::-webkit-scrollbar-track {
-      background: rgba(255,255,255,0.05);
-    }
-    ::-webkit-scrollbar-thumb {
-      background: linear-gradient(135deg, #4f6ef7, #9b4dff);
-      border-radius: 10px;
-    }
-    
-    /* ৮. প্রিন্ট স্টাইল (আগে থেকেই আছে) */
-    @media print {
-      body { background: white; color: black; }
-      .sidebar, .mobile-menu-btn, .rightTop, .logoutBtn { display: none !important; }
-      .main { margin-left: 0 !important; padding: 20px !important; }
-      .card, .panel { border: 1px solid #ccc; box-shadow: none; }
-    }
-  </style>
 </head>
 <body>
   <!-- লোডিং ওভারলে -->
@@ -98,10 +22,10 @@
     </div>
   </div>
 
-  <!-- টোস্ট বার্তা -->
+  <!-- টোস্ট বার্তা প্রদর্শনের এলাকা -->
   <div class="toastWrap" id="toastWrap"></div>
 
-  <!-- লগইন পৃষ্ঠা -->
+  <!-- লগইন পৃষ্ঠা (ডিফল্টরূপে মেম্বার ট্যাব সক্রিয়) -->
   <div id="loginPage" class="loginWrap">
     <div class="loginCard">
       <div class="loginGrid">
@@ -112,15 +36,17 @@
         </div>
         <div class="loginRight">
           <div class="tabs">
-            <button id="tabAdmin" class="active">Admin Login</button>
-            <button id="tabMember">Member Login</button>
+            <!-- ডিফল্ট মেম্বার ট্যাব active করা হয়েছে -->
+            <button id="tabAdmin">Admin Login</button>
+            <button id="tabMember" class="active">Member Login</button>
           </div>
           <!-- লগইন ফর্ম -->
           <form id="loginForm" onsubmit="event.preventDefault();">
             <div class="row">
               <div>
-                <label id="loginIdLabel">Admin ID</label>
-                <input id="loginId" placeholder="Enter ID" autocomplete="username" />
+                <!-- লেবেলটি ডিফল্ট মেম্বার অনুযায়ী সেট করা হয়েছে -->
+                <label id="loginIdLabel">Member ID</label>
+                <input id="loginId" placeholder="Enter Member ID" autocomplete="username" />
               </div>
               <div>
                 <label>Password</label>
@@ -134,7 +60,7 @@
     </div>
   </div>
 
-  <!-- অ্যাপ পৃষ্ঠা -->
+  <!-- অ্যাপ পৃষ্ঠা (লগইন সফল হলে দেখা যাবে) -->
   <div id="appPage" class="app" style="display: none;">
     <button class="mobile-menu-btn" id="mobileMenuBtn">☰ Menu</button>
     <div class="sidebar" id="sidebar">
@@ -172,74 +98,7 @@
     </div>
   </div>
 
-  <!-- মডাল কন্টেইনার -->
+  <!-- মডাল গুলো এখানে যুক্ত হবে (ডায়নামিক) -->
   <div id="modalsContainer"></div>
-
-  <!-- ===== আপনার দেওয়া মোবাইল মেনু স্ক্রিপ্ট (অপরিবর্তিত) ===== -->
-  <script>
-  (function() {
-    function initMobileMenu() {
-      const menuBtn = document.getElementById('mobileMenuBtn');
-      const sidebar = document.getElementById('sidebar');
-      if (!menuBtn || !sidebar) return;
-
-      let overlay = document.querySelector('.sidebar-overlay');
-      if (!overlay) {
-        overlay = document.createElement('div');
-        overlay.className = 'sidebar-overlay';
-        document.body.appendChild(overlay);
-      }
-
-      function toggleMenu() {
-        if (sidebar.classList.contains('show')) {
-          sidebar.classList.remove('show');
-          overlay.classList.remove('show');
-          document.body.style.overflow = '';
-        } else {
-          sidebar.classList.add('show');
-          overlay.classList.add('show');
-          document.body.style.overflow = 'hidden';
-        }
-      }
-
-      menuBtn.addEventListener('click', function(e) {
-        e.stopPropagation();
-        toggleMenu();
-      });
-
-      overlay.addEventListener('click', toggleMenu);
-
-      sidebar.querySelectorAll('button, .nav-item, .logoutBtn').forEach(item => {
-        item.addEventListener('click', function() {
-          if (window.innerWidth <= 768) {
-            sidebar.classList.remove('show');
-            overlay.classList.remove('show');
-            document.body.style.overflow = '';
-          }
-        });
-      });
-
-      window.addEventListener('resize', function() {
-        if (window.innerWidth > 768) {
-          sidebar.classList.remove('show');
-          overlay.classList.remove('show');
-          document.body.style.overflow = '';
-        }
-      });
-
-      document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape' && sidebar.classList.contains('show')) {
-          toggleMenu();
-        }
-      });
-    }
-
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', initMobileMenu);
-    } else {
-      initMobileMenu();
-    }
-  })();
-  </script>
 </body>
 </html>

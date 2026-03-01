@@ -20,7 +20,7 @@ import { openViewerModal } from '../modals/viewer.js';
 
 
 // ============================================================
-// 🎨 FULLY RESPONSIVE STYLES
+// 🎨 FULLY RESPONSIVE STYLES - MOBILE OPTIMIZED
 // ============================================================
 
 const historyStyles = `
@@ -157,7 +157,7 @@ const historyStyles = `
     }
 
     .summary-value {
-      font-size: clamp(28px, 4vw, 36px);
+      font-size: clamp(24px, 4vw, 36px);
       font-weight: 800;
       margin-bottom: 8px;
       position: relative;
@@ -190,17 +190,17 @@ const historyStyles = `
     }
 
     .filter-btn {
-      padding: clamp(10px, 2vw, 12px) clamp(16px, 3vw, 24px);
+      padding: clamp(8px, 2vw, 12px) clamp(12px, 3vw, 24px);
       border: 2px solid var(--bg-tertiary);
       background: var(--bg-primary);
       color: var(--text-primary);
       border-radius: var(--border-radius-xxl);
       font-weight: 600;
-      font-size: clamp(13px, 2vw, 15px);
+      font-size: clamp(12px, 2vw, 15px);
       cursor: pointer;
       transition: all 0.3s ease;
-      flex: 1;
-      min-width: 100px;
+      flex: 1 1 auto;
+      min-width: 80px;
     }
 
     .filter-btn:hover {
@@ -275,52 +275,116 @@ const historyStyles = `
       color: var(--text-muted);
     }
 
-    /* Table Container - Responsive */
-    .table-responsive {
-      overflow-x: auto;
-      -webkit-overflow-scrolling: touch;
-      margin: 0;
-      padding: 0;
-    }
-
-    /* Table Styles */
-    .deposit-table {
-      width: 100%;
-      border-collapse: collapse;
-      min-width: 800px;
-    }
-
-    @media (max-width: 640px) {
-      .deposit-table {
-        min-width: 600px;
+    /* Mobile Card View (for very small screens) */
+    @media (max-width: 600px) {
+      .table-responsive {
+        overflow-x: visible;
+      }
+      
+      .deposit-table,
+      .deposit-table thead,
+      .deposit-table tbody,
+      .deposit-table tr,
+      .deposit-table td {
+        display: block;
+      }
+      
+      .deposit-table thead {
+        display: none; /* Hide table headers on mobile */
+      }
+      
+      .deposit-table tr {
+        margin-bottom: 20px;
+        border: 1px solid var(--bg-tertiary);
+        border-radius: var(--border-radius-lg);
+        padding: 15px;
+        background: var(--bg-primary);
+        box-shadow: var(--shadow-sm);
+      }
+      
+      .deposit-table td {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 0;
+        border-bottom: 1px dashed var(--bg-tertiary);
+        border-bottom-width: 1px !important;
+        text-align: right;
+      }
+      
+      .deposit-table td:last-child {
+        border-bottom: none;
+      }
+      
+      .deposit-table td::before {
+        content: attr(data-label);
+        font-weight: 700;
+        color: var(--text-primary);
+        text-align: left;
+        padding-right: 10px;
+        width: 40%;
+      }
+      
+      .amount-cell {
+        text-align: right;
+      }
+      
+      .method-badge,
+      .status-badge,
+      .mr-badge {
+        display: inline-block;
+        margin: 0;
+      }
+      
+      .action-btn {
+        padding: 8px 16px;
+        font-size: 13px;
       }
     }
 
-    .deposit-table th {
-      padding: clamp(12px, 2vw, 16px) clamp(10px, 1.5vw, 14px);
-      background: var(--bg-secondary);
-      color: var(--text-primary);
-      font-weight: 700;
-      font-size: clamp(12px, 1.8vw, 14px);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      text-align: left;
-      border-bottom: 2px solid var(--bg-tertiary);
-    }
+    /* Tablet and Desktop Table Styles */
+    @media (min-width: 601px) {
+      /* Table Container - Responsive */
+      .table-responsive {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        margin: 0;
+        padding: 0;
+      }
 
-    .deposit-table td {
-      padding: clamp(12px, 2vw, 16px) clamp(10px, 1.5vw, 14px);
-      border-bottom: 1px solid var(--bg-tertiary);
-      color: var(--text-secondary);
-      font-size: clamp(13px, 1.8vw, 15px);
-    }
+      /* Table Styles */
+      .deposit-table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 700px;
+      }
 
-    .deposit-row {
-      transition: background-color 0.2s ease;
-    }
+      .deposit-table th {
+        padding: clamp(12px, 2vw, 16px) clamp(10px, 1.5vw, 14px);
+        background: var(--bg-secondary);
+        color: var(--text-primary);
+        font-weight: 700;
+        font-size: clamp(12px, 1.8vw, 14px);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        text-align: left;
+        border-bottom: 2px solid var(--bg-tertiary);
+      }
 
-    .deposit-row:hover {
-      background-color: var(--bg-accent);
+      .deposit-table td {
+        padding: clamp(12px, 2vw, 16px) clamp(10px, 1.5vw, 14px);
+        border-bottom: 1px solid var(--bg-tertiary);
+        color: var(--text-secondary);
+        font-size: clamp(13px, 1.8vw, 15px);
+      }
+
+      .deposit-row {
+        transition: background-color 0.2s ease;
+      }
+
+      .deposit-row:hover {
+        background-color: var(--bg-accent);
+      }
     }
 
     /* Amount Cell */
@@ -465,18 +529,18 @@ const historyStyles = `
     /* Responsive Typography */
     @media (max-width: 480px) {
       .summary-value {
-        font-size: 24px;
+        font-size: 22px;
       }
       
       .filter-btn {
-        font-size: 12px;
-        padding: 8px 12px;
+        font-size: 11px;
+        padding: 8px 10px;
+        min-width: 70px;
       }
       
-      .deposit-table th,
-      .deposit-table td {
-        padding: 10px 8px;
-        font-size: 12px;
+      .action-btn {
+        padding: 6px 10px;
+        font-size: 11px;
       }
     }
 
@@ -584,7 +648,7 @@ export async function renderMemberDepositHistory() {
       }
 
       // Bind events
-      bindEvents(deposits);
+      bindEvents();
 
     } catch (error) {
       console.error('Error loading deposit history:', error);
@@ -736,22 +800,22 @@ function generateTableRows(deposits) {
     
     return `
       <tr class="deposit-row" data-status="${d.status}">
-        <td><strong>${escapeHtml(d.id)}</strong></td>
-        <td>${escapeHtml(d.month)} ${d.year || ''}</td>
-        <td class="amount-cell">${formatMoney(d.amount)}</td>
-        <td>
+        <td data-label="Deposit ID"><strong>${escapeHtml(d.id)}</strong></td>
+        <td data-label="Month">${escapeHtml(d.month)} ${d.year || ''}</td>
+        <td data-label="Amount" class="amount-cell">${formatMoney(d.amount)}</td>
+        <td data-label="Method">
           <span class="method-badge">${escapeHtml(d.paymentMethod || 'Cash')}</span>
         </td>
-        <td>
+        <td data-label="Status">
           <span class="status-badge ${statusClass}">${d.status}</span>
         </td>
-        <td>
+        <td data-label="MR ID">
           ${d.mrId ? 
             `<span class="mr-badge">${escapeHtml(d.mrId)}</span>` : 
             '<span class="mr-placeholder">—</span>'}
         </td>
-        <td>${formattedDate}</td>
-        <td>
+        <td data-label="Date">${formattedDate}</td>
+        <td data-label="Actions" style="text-align: right;">
           ${d.status == 'APPROVED' && d.mrId
             ? `<button class="action-btn view-mr" data-id="${d.id}">👁️ View MR</button>`
             : `<button class="action-btn view-slip" data-id="${d.id}">👁️ Slip</button>`
@@ -769,7 +833,7 @@ function generateTableRows(deposits) {
 // 🎯 BIND EVENTS
 // ============================================================
 
-function bindEvents(deposits) {
+function bindEvents() {
   
   // Filter buttons
   document.querySelectorAll('.filter-btn').forEach(btn => {

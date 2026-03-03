@@ -71,7 +71,7 @@ input, select, textarea {
   border-radius: 16px;
   border: 1.5px solid var(--line);
   background: rgba(0,0,0,0.4);   /* গাঢ় ব্যাকগ্রাউন্ড */
-  color: black;                  /* white সাদা লেখা */
+  color: white;                  /* white সাদা লেখা */
   outline: none;
   font-size: 16px;
   -webkit-appearance: none;
@@ -90,7 +90,7 @@ input::placeholder {
 
 label {
   font-size: 13px;
-  color: #e0e88f;   /* উজ্জ্বল নীলাভ সাদা */
+  color: #e0e8ff;   /* উজ্জ্বল নীলাভ সাদা */
   display: block;
   margin-bottom: 8px;
   font-weight: 500;

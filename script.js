@@ -52,131 +52,41 @@ document.addEventListener('DOMContentLoaded', async function() {
 // ========== সেশন রিস্টোর ফাংশন ==========
 function checkAndRestoreSession() {
   try {
-    const savedSession = localStorage.getItem('taqwa_session');
+    // auth.js এ সংরক্ষিত সেশন চেক করুন
+    const authUser = localStorage.getItem('ims_current_user');
+    const authRole = localStorage.getItem('ims_current_role');
+    const authExpiry = localStorage.getItem('ims_session_expiry');
     
-    if (savedSession) {
-      const sessionData = JSON.parse(savedSession);
-      
-      // সেশন ভ্যালিডিটি চেক (২৪ ঘন্টা)
-      const sessionTime = sessionData.timestamp || 0;
+    if (authUser && authRole && authExpiry) {
+      const expiryTime = parseInt(authExpiry);
       const currentTime = new Date().getTime();
-      const twentyFourHours = 24 * 60 * 60 * 1000;
       
-      if (currentTime - sessionTime < twentyFourHours) {
-        // সেশন রিস্টোর করুন
-        window.SESSION.user = sessionData.user;
-        window.SESSION.mode = sessionData.mode || 'member';
-        window.SESSION.page = sessionData.page || null;
+      if (currentTime < expiryTime) {
+        // সেশন ভালো আছে
+        const userData = JSON.parse(authUser);
         
-        // লগইন পেজ লুকিয়ে অ্যাপ পেজ দেখান
-        showAppPage();
+        window.SESSION.user = userData;
+        window.SESSION.mode = authRole === 'admin' ? 'admin' : 'member';
+        
+        // অ্যাপ পেজ দেখান
+        document.getElementById('loginPage').style.display = 'none';
+        document.getElementById('appPage').style.display = 'grid';
         
         // ইউজার ইনফো আপডেট করুন
-        updateUserInfo(sessionData.user, sessionData.mode);
+        updateUserInfo(userData, window.SESSION.mode);
         
-        console.log('Session restored successfully');
+        console.log('Session restored successfully from auth.js');
       } else {
-        // এক্সপায়ার্ড সেশন ক্লিয়ার করুন
-        clearSession();
-        showLoginPage();
+        // সেশন expired
+        console.log('Session expired');
       }
     } else {
-      // কোন সেশন নেই, লগইন পেজ দেখান
-      showLoginPage();
+      console.log('No active session found');
     }
   } catch (error) {
     console.error('Session restore failed:', error);
-    clearSession();
-    showLoginPage();
   }
 }
-
-// ========== পেজ কন্ট্রোল ফাংশন ==========
-function showLoginPage() {
-  const loginPage = document.getElementById('loginPage');
-  const appPage = document.getElementById('appPage');
-  
-  if (loginPage) {
-    loginPage.style.display = 'flex';
-  }
-  
-  if (appPage) {
-    appPage.style.display = 'none';
-  }
-  
-  // মোবাইল মেনু বন্ধ করুন
-  document.body.classList.remove('sidebar-open');
-}
-
-function showAppPage() {
-  const loginPage = document.getElementById('loginPage');
-  const appPage = document.getElementById('appPage');
-  
-  if (loginPage) {
-    loginPage.style.display = 'none';
-  }
-  
-  if (appPage) {
-    appPage.style.display = 'grid';
-  }
-}
-
-// ========== সেশন সেভ ফাংশন ==========
-function saveSession(userData, mode, page = null) {
-  try {
-    const sessionData = {
-      user: {
-        id: userData.id || 'N/A',
-        name: userData.name || 'Unknown User',
-        email: userData.email || '',
-        role: userData.role || mode
-      },
-      mode: mode || 'member',
-      page: page || window.SESSION.page,
-      timestamp: new Date().getTime()
-    };
-    
-    localStorage.setItem('taqwa_session', JSON.stringify(sessionData));
-    
-    // গ্লোবাল সেশন আপডেট
-    window.SESSION.user = sessionData.user;
-    window.SESSION.mode = mode;
-    window.SESSION.page = sessionData.page;
-    
-    console.log('Session saved successfully');
-  } catch (error) {
-    console.error('Session save failed:', error);
-  }
-}
-
-// ========== সেশন ক্লিয়ার ফাংশন ==========
-function clearSession() {
-  localStorage.removeItem('taqwa_session');
-  window.SESSION.user = null;
-  window.SESSION.mode = 'member';
-  window.SESSION.page = null;
-}
-
-// ========== লগইন ফাংশন ==========
-window.performLogin = function(userData, mode) {
-  try {
-    // সেশন সেভ করুন
-    saveSession(userData, mode);
-    
-    // অ্যাপ পেজ দেখান
-    showAppPage();
-    
-    // ইউজার ইনফো আপডেট
-    updateUserInfo(userData, mode);
-    
-    // সাকসেস মেসেজ
-    showToast('Success', 'লগইন সফল হয়েছে');
-    
-  } catch (error) {
-    console.error('Login failed:', error);
-    showToast('Error', 'লগইন করতে সমস্যা হয়েছে');
-  }
-};
 
 // ========== ইউজার ইনফো আপডেট ==========
 function updateUserInfo(userData, mode) {
@@ -191,7 +101,7 @@ function updateUserInfo(userData, mode) {
   }
   
   if (userRoleEl) {
-    userRoleEl.textContent = mode === 'admin' ? 'Administrator' : 'Member';
+    userRoleEl.textContent = mode === 'admin' ? (userData?.role || 'Administrator') : 'Member';
   }
   
   if (chipIdEl) {
@@ -217,11 +127,12 @@ function updateUIForSession() {
 // ========== লগআউট ফাংশন ==========
 window.logout = function() {
   try {
-    // সেশন ক্লিয়ার
-    clearSession();
+    // auth.js এর logout ফাংশন কল করবে
+    // কিন্তু এখানে শুধু UI আপডেট
     
     // লগইন পেজ দেখান
-    showLoginPage();
+    document.getElementById('loginPage').style.display = 'flex';
+    document.getElementById('appPage').style.display = 'none';
     
     // ফর্ম রিসেট
     const loginForm = document.getElementById('loginForm');
@@ -337,9 +248,7 @@ function setupMobileMenu() {
     if (!item.classList.contains('logoutBtn')) {
       item.addEventListener('click', () => {
         if (window.innerWidth <= 768) {
-          sidebar.classList.remove('active');
-          overlay.classList.remove('active');
-          document.body.classList.remove('sidebar-open');
+          toggleMenu();
         }
       });
     }
@@ -392,31 +301,6 @@ function setupLoginTabs() {
 
   // ডিফল্ট মেম্বার সক্রিয়
   setActiveTab(tabMember);
-
-  // লগইন বাটন ক্লিক হ্যান্ডলার
-  loginBtn.addEventListener('click', function(e) {
-    e.preventDefault();
-    
-    const loginIdValue = document.getElementById('loginId')?.value;
-    const loginPassValue = document.getElementById('loginPass')?.value;
-    
-    if (!loginIdValue || !loginPassValue) {
-      showToast('Warning', 'আইডি এবং পাসওয়ার্ড দিন');
-      return;
-    }
-    
-    // এখানে আপনার অ্যাকচুয়াল লগইন লজিক কল হবে
-    // login.js মডিউল ইতিমধ্যে লোড হয়েছে এবং SESSION.mode ব্যবহার করবে
-    
-    // ডেমো লগইন - সব কিছু দিলেই ঢুকবে
-    const userData = {
-      id: loginIdValue,
-      name: loginIdValue.includes('@') ? loginIdValue.split('@')[0] : loginIdValue,
-      email: loginIdValue.includes('@') ? loginIdValue : `${loginIdValue}@demo.com`
-    };
-    
-    window.performLogin(userData, window.SESSION.mode);
-  });
 }
 
 /** ৩. বাটন ও নেভ আইটেমে রিপল ইফেক্ট */
@@ -493,3 +377,4 @@ window.showLoading = showLoading;
 window.hideLoading = hideLoading;
 window.showToast = showToast;
 window.getDatabase = getDatabase;
+window.updateUserInfo = updateUserInfo; // session.js এর জন্য

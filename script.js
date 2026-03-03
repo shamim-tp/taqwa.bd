@@ -4,7 +4,7 @@ import { loadLoginModule } from './modules/auth/login.js';
 import { loadModalModules } from './modules/modals/modals.js';
 
 window.SESSION = {
-  mode: 'admin',
+  mode: 'member',          // ডিফল্ট মোড 'member' রাখা হলো (Admin নয়)
   user: null,
   page: null
 };
@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     
     // ========== নতুন এনহ্যান্সমেন্টসমূহ ==========
     setupMobileMenu();            // মোবাইল মেনু টগল ও ওভারলে
-    setupLoginTabs();             // লগইন ট্যাব (ডিফল্ট মেম্বার)
+    setupLoginTabs();             // লগইন ট্যাব (ডিফল্ট মেম্বার) ও মোড আপডেট
     setupRippleEffect();          // বাটনে রিপল ইফেক্ট
     setupClickOutsideSidebar();   // সাইডবারের বাইরে ক্লিলে বন্ধ
     setupHashScroll();            // পৃষ্ঠা লোডে হ্যাশ স্ক্রল
@@ -114,7 +114,9 @@ function setupMobileMenu() {
   sidebar.querySelectorAll('button, .nav-item, .logoutBtn').forEach(item => {
     item.addEventListener('click', () => {
       if (window.innerWidth <= 768) {
-        toggleMenu();
+        sidebar.classList.remove('active');
+        overlay.classList.remove('active');
+        document.body.classList.remove('sidebar-open');
       }
     });
   });
@@ -136,14 +138,15 @@ function setupMobileMenu() {
   });
 }
 
-/** ২. লগইন ট্যাব স্যুইচ (ডিফল্ট মেম্বার) */
+/** ২. লগইন ট্যাব স্যুইচ ও মোড সেট করা */
 function setupLoginTabs() {
   const tabAdmin = document.getElementById('tabAdmin');
   const tabMember = document.getElementById('tabMember');
   const loginIdLabel = document.getElementById('loginIdLabel');
   const loginId = document.getElementById('loginId');
+  const loginBtn = document.getElementById('loginBtn');
 
-  if (!tabAdmin || !tabMember || !loginIdLabel || !loginId) return;
+  if (!tabAdmin || !tabMember || !loginIdLabel || !loginId || !loginBtn) return;
 
   function setActiveTab(tab) {
     tabAdmin.classList.remove('active');
@@ -152,17 +155,25 @@ function setupLoginTabs() {
     if (tab === tabAdmin) {
       loginIdLabel.textContent = 'Admin ID';
       loginId.placeholder = 'Enter Admin ID';
+      window.SESSION.mode = 'admin';     // সেশন মোড আপডেট
     } else {
       loginIdLabel.textContent = 'Member ID';
       loginId.placeholder = 'Enter Member ID';
+      window.SESSION.mode = 'member';    // সেশন মোড আপডেট
     }
   }
 
   tabAdmin.addEventListener('click', () => setActiveTab(tabAdmin));
   tabMember.addEventListener('click', () => setActiveTab(tabMember));
 
-  // ডিফল্ট মেম্বার সক্রিয় (HTML-এ ইতিমধ্যে active দেওয়া আছে, তবুও নিশ্চিত করা)
+  // ডিফল্ট মেম্বার সক্রিয়
   setActiveTab(tabMember);
+
+  // লগইন বাটন ক্লিক করার সময় নিশ্চিত করা যে সেশন মোড সঠিক আছে
+  // (login.js ইতিমধ্যে SESSION.mode ব্যবহার করবে বলে ধরে নিচ্ছি)
+  loginBtn.addEventListener('click', function(e) {
+    // অতিরিক্ত কোনো কাজ না করলেও চলবে, কারণ SESSION.mode ইতিমধ্যে সেট
+  });
 }
 
 /** ৩. বাটন ও নেভ আইটেমে রিপল ইফেক্ট */

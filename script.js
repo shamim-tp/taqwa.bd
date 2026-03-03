@@ -6,8 +6,7 @@ import { loadModalModules } from './modules/modals/modals.js';
 window.SESSION = {
   mode: 'member',          // ডিফল্ট মোড 'member' রাখা হলো (Admin নয়)
   user: null,
-  page: 'dashboard',       // ডিফল্ট পেজ
-  isAuthenticated: false   // অথেনটিকেশন স্ট্যাটাস ট্র্যাক করার জন্য
+  page: null
 };
 
 // ========== অ্যাপ্লিকেশন আরম্ভ ==========
@@ -26,7 +25,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     }
     
     // লোকাল স্টোরেজ থেকে সেশন চেক করুন (পেজ রিফ্রেশের জন্য)
-    await checkAndRestoreSession();
+    checkAndRestoreSession();
     
     // লগইন ও মডাল মডিউল লোড
     loadLoginModule();
@@ -39,7 +38,6 @@ document.addEventListener('DOMContentLoaded', async function() {
     setupClickOutsideSidebar();   // সাইডবারের বাইরে ক্লিলে বন্ধ
     setupHashScroll();            // পৃষ্ঠা লোডে হ্যাশ স্ক্রল
     setupLogoutHandler();         // লগআউট হ্যান্ডলার
-    setupNavigationHandlers();    // নেভিগেশন হ্যান্ডলার
     
     // UI আপডেট করুন সেশন অনুযায়ী
     updateUIForSession();
@@ -48,12 +46,11 @@ document.addEventListener('DOMContentLoaded', async function() {
   } catch (error) {
     console.error('Application initialization failed:', error);
     showToast('Error', 'অ্যাপ্লিকেশন লোড করতে সমস্যা হয়েছে');
-    hideLoading();
   }
 });
 
 // ========== সেশন রিস্টোর ফাংশন ==========
-async function checkAndRestoreSession() {
+function checkAndRestoreSession() {
   try {
     const savedSession = localStorage.getItem('taqwa_session');
     
@@ -69,8 +66,7 @@ async function checkAndRestoreSession() {
         // সেশন রিস্টোর করুন
         window.SESSION.user = sessionData.user;
         window.SESSION.mode = sessionData.mode || 'member';
-        window.SESSION.isAuthenticated = true;
-        window.SESSION.page = sessionData.page || 'dashboard';
+        window.SESSION.page = sessionData.page || null;
         
         // লগইন পেজ লুকিয়ে অ্যাপ পেজ দেখান
         showAppPage();
@@ -78,20 +74,15 @@ async function checkAndRestoreSession() {
         // ইউজার ইনফো আপডেট করুন
         updateUserInfo(sessionData.user, sessionData.mode);
         
-        // আগের পেজ লোড করুন
-        await loadPage(window.SESSION.page);
-        
-        console.log('Session restored successfully. Current page:', window.SESSION.page);
+        console.log('Session restored successfully');
       } else {
         // এক্সপায়ার্ড সেশন ক্লিয়ার করুন
         clearSession();
         showLoginPage();
-        await loadPage('login'); // লগইন পেজ লোড
       }
     } else {
       // কোন সেশন নেই, লগইন পেজ দেখান
       showLoginPage();
-      await loadPage('login'); // লগইন পেজ লোড
     }
   } catch (error) {
     console.error('Session restore failed:', error);
@@ -130,285 +121,8 @@ function showAppPage() {
   }
 }
 
-// ========== পেজ লোড ফাংশন ==========
-async function loadPage(pageName) {
-  try {
-    showLoading(`${pageName} পেজ লোড হচ্ছে...`);
-    
-    // পেজ টাইটেল আপডেট
-    updatePageTitle(pageName);
-    
-    // সক্রিয় নেভ আইটেম আপডেট
-    updateActiveNavItem(pageName);
-    
-    // এখানে আপনার পেজ কন্টেন্ট লোড করার লজিক যোগ করুন
-    // যেমন: dynamic import, AJAX call, ইত্যাদি
-    
-    // উদাহরণ: পেজ অনুযায়ী কন্টেন্ট লোড
-    const pageContent = document.getElementById('pageContent');
-    if (pageContent) {
-      switch(pageName) {
-        case 'dashboard':
-          pageContent.innerHTML = await loadDashboardContent();
-          break;
-        case 'members':
-          pageContent.innerHTML = await loadMembersContent();
-          break;
-        case 'projects':
-          pageContent.innerHTML = await loadProjectsContent();
-          break;
-        case 'reports':
-          pageContent.innerHTML = await loadReportsContent();
-          break;
-        case 'settings':
-          pageContent.innerHTML = await loadSettingsContent();
-          break;
-        default:
-          pageContent.innerHTML = await loadDashboardContent();
-      }
-    }
-    
-    // সেশন আপডেট করুন
-    if (window.SESSION.isAuthenticated) {
-      window.SESSION.page = pageName;
-      updateSessionPage(pageName);
-    }
-    
-    hideLoading();
-    console.log(`Page '${pageName}' loaded successfully`);
-    
-  } catch (error) {
-    console.error(`Failed to load page '${pageName}':`, error);
-    showToast('Error', `পেজ লোড করতে সমস্যা হয়েছে: ${pageName}`);
-    hideLoading();
-  }
-}
-
-// ========== পেজ কন্টেন্ট লোডার ফাংশন (ডেমো) ==========
-async function loadDashboardContent() {
-  // এখানে আপনার অ্যাকচুয়াল ড্যাশবোর্ড কন্টেন্ট লোড করুন
-  return `
-    <div class="gridCards">
-      <div class="card">
-        <div class="title">মোট সদস্য</div>
-        <div class="value">১৫০</div>
-        <div class="sub">গত মাসে +১২% বৃদ্ধি</div>
-      </div>
-      <div class="card">
-        <div class="title">সক্রিয় প্রকল্প</div>
-        <div class="value">৮</div>
-        <div class="sub">চলমান ৫, সম্পন্ন ৩</div>
-      </div>
-      <div class="card">
-        <div class="title">মোট বিনিয়োগ</div>
-        <div class="value">৳ ২.৫কোটি</div>
-        <div class="sub">এই মাসে ৳ ২৫লাখ</div>
-      </div>
-      <div class="card">
-        <div class="title">রিটার্ন</div>
-        <div class="value">১৫%</div>
-        <div class="sub">গড় বার্ষিক রিটার্ন</div>
-      </div>
-    </div>
-    <div class="panel">
-      <div class="panelHeader">
-        <div>
-          <h3>সাম্প্রতিক কার্যক্রম</h3>
-          <p>গত ৭ দিনের লেনদেন</p>
-        </div>
-      </div>
-      <div class="table-responsive">
-        <table>
-          <thead>
-            <tr>
-              <th>তারিখ</th>
-              <th>বিবরণ</th>
-              <th>পরিমাণ</th>
-              <th>স্ট্যাটাস</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr><td>০৪ মার্চ</td><td>মাসিক রিটার্ন</td><td>৳ ৫,০০০</td><td><span class="status approved">পরিশোধিত</span></td></tr>
-            <tr><td>০৩ মার্চ</td><td>নতুন বিনিয়োগ</td><td>৳ ৫০,০০০</td><td><span class="status pending">বিচারাধীন</span></td></tr>
-            <tr><td>০২ মার্চ</td><td>প্রজেক্ট ফান্ড</td><td>৳ ২৫,০০০</td><td><span class="status approved">পরিশোধিত</span></td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-  `;
-}
-
-async function loadMembersContent() {
-  return `
-    <div class="panel">
-      <div class="panelHeader">
-        <div>
-          <h3>সদস্য তালিকা</h3>
-          <p>সমস্ত সদস্যের তথ্য</p>
-        </div>
-        <div class="panelTools">
-          <button class="btn primary" onclick="window.addNewMember()">+ নতুন সদস্য</button>
-        </div>
-      </div>
-      <div class="table-responsive">
-        <table>
-          <thead>
-            <tr>
-              <th>আইডি</th>
-              <th>নাম</th>
-              <th>ইমেইল</th>
-              <th>মোবাইল</th>
-              <th>জয়েন তারিখ</th>
-              <th>স্ট্যাটাস</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr><td>M001</td><td>রহিম মিয়া</td><td>rahim@email.com</td><td>০১৭১২৩৪৫৬৭৮</td><td>০১-০১-২০২৪</td><td><span class="status approved">সক্রিয়</span></td></tr>
-            <tr><td>M002</td><td>করিম হাসান</td><td>karim@email.com</td><td>০১৮১২৩৪৫৬৭৮</td><td>১৫-০১-২০২৪</td><td><span class="status approved">সক্রিয়</span></td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-  `;
-}
-
-async function loadProjectsContent() {
-  return `
-    <div class="panel">
-      <div class="panelHeader">
-        <div>
-          <h3>প্রকল্প তালিকা</h3>
-          <p>চলমান ও সম্পন্ন প্রকল্প</p>
-        </div>
-        <div class="panelTools">
-          <button class="btn primary" onclick="window.addNewProject()">+ নতুন প্রকল্প</button>
-        </div>
-      </div>
-      <div class="grid grid-cols-2">
-        <div class="card">
-          <div class="title">আবাসিক প্রকল্প</div>
-          <div class="value">মিরপুর</div>
-          <div class="sub">অগ্রগতি: ৭৫% • বিনিয়োগ: ৳ ১.২কোটি</div>
-        </div>
-        <div class="card">
-          <div class="title">বাণিজ্যিক প্রকল্প</div>
-          <div class="value">গুলশান</div>
-          <div class="sub">অগ্রগতি: ৪০% • বিনিয়োগ: ৳ ৮০লাখ</div>
-        </div>
-      </div>
-    </div>
-  `;
-}
-
-async function loadReportsContent() {
-  return `
-    <div class="panel">
-      <div class="panelHeader">
-        <div>
-          <h3>রিপোর্ট</h3>
-          <p>বিভিন্ন রিপোর্ট দেখুন</p>
-        </div>
-      </div>
-      <div class="grid grid-cols-3">
-        <div class="card">
-          <div class="title">মাসিক রিপোর্ট</div>
-          <div class="value">মার্চ ২০২৪</div>
-          <button class="btn success w-full mt-4">ডাউনলোড</button>
-        </div>
-        <div class="card">
-          <div class="title">বার্ষিক রিপোর্ট</div>
-          <div class="value">২০২৩-২০২৪</div>
-          <button class="btn success w-full mt-4">ডাউনলোড</button>
-        </div>
-        <div class="card">
-          <div class="title">বিনিয়োগ রিপোর্ট</div>
-          <div class="value">সকল বিনিয়োগ</div>
-          <button class="btn success w-full mt-4">ডাউনলোড</button>
-        </div>
-      </div>
-    </div>
-  `;
-}
-
-async function loadSettingsContent() {
-  return `
-    <div class="panel">
-      <div class="panelHeader">
-        <div>
-          <h3>সেটিংস</h3>
-          <p>আপনার অ্যাকাউন্ট সেটিংস</p>
-        </div>
-      </div>
-      <div class="grid grid-cols-2">
-        <div class="card">
-          <div class="title">প্রোফাইল সেটিংস</div>
-          <div class="value">${window.SESSION.user?.name || 'ইউজার'}</div>
-          <button class="btn primary w-full mt-4">এডিট প্রোফাইল</button>
-        </div>
-        <div class="card">
-          <div class="title">পাসওয়ার্ড পরিবর্তন</div>
-          <div class="value">নিরাপত্তা</div>
-          <button class="btn warning w-full mt-4">পাসওয়ার্ড পরিবর্তন</button>
-        </div>
-      </div>
-    </div>
-  `;
-}
-
-// ========== পেজ টাইটেল আপডেট ==========
-function updatePageTitle(pageName) {
-  const titleElement = document.getElementById('pageTitle');
-  const subtitleElement = document.getElementById('pageSubtitle');
-  
-  if (titleElement) {
-    const titles = {
-      'dashboard': 'ড্যাশবোর্ড',
-      'members': 'সদস্য তালিকা',
-      'projects': 'প্রকল্প সমূহ',
-      'reports': 'রিপোর্ট',
-      'settings': 'সেটিংস',
-      'login': 'লগইন'
-    };
-    titleElement.textContent = titles[pageName] || 'ড্যাশবোর্ড';
-  }
-  
-  if (subtitleElement && pageName !== 'login') {
-    const currentDate = new Date().toLocaleDateString('bn-BD', { 
-      weekday: 'long', 
-      year: 'numeric', 
-      month: 'long', 
-      day: 'numeric' 
-    });
-    subtitleElement.textContent = `${currentDate} - স্বাগতম ${window.SESSION.user?.name || ''}`;
-  }
-}
-
-// ========== অ্যাক্টিভ নেভ আইটেম আপডেট ==========
-function updateActiveNavItem(pageName) {
-  document.querySelectorAll('.nav-item').forEach(item => {
-    item.classList.remove('active');
-    if (item.dataset.page === pageName) {
-      item.classList.add('active');
-    }
-  });
-}
-
-// ========== সেশন পেজ আপডেট ==========
-function updateSessionPage(pageName) {
-  try {
-    const savedSession = localStorage.getItem('taqwa_session');
-    if (savedSession) {
-      const sessionData = JSON.parse(savedSession);
-      sessionData.page = pageName;
-      localStorage.setItem('taqwa_session', JSON.stringify(sessionData));
-    }
-  } catch (error) {
-    console.error('Failed to update session page:', error);
-  }
-}
-
 // ========== সেশন সেভ ফাংশন ==========
-function saveSession(userData, mode, page = 'dashboard') {
+function saveSession(userData, mode, page = null) {
   try {
     const sessionData = {
       user: {
@@ -418,7 +132,7 @@ function saveSession(userData, mode, page = 'dashboard') {
         role: userData.role || mode
       },
       mode: mode || 'member',
-      page: page,
+      page: page || window.SESSION.page,
       timestamp: new Date().getTime()
     };
     
@@ -427,10 +141,9 @@ function saveSession(userData, mode, page = 'dashboard') {
     // গ্লোবাল সেশন আপডেট
     window.SESSION.user = sessionData.user;
     window.SESSION.mode = mode;
-    window.SESSION.isAuthenticated = true;
-    window.SESSION.page = page;
+    window.SESSION.page = sessionData.page;
     
-    console.log('Session saved successfully. Current page:', page);
+    console.log('Session saved successfully');
   } catch (error) {
     console.error('Session save failed:', error);
   }
@@ -441,15 +154,14 @@ function clearSession() {
   localStorage.removeItem('taqwa_session');
   window.SESSION.user = null;
   window.SESSION.mode = 'member';
-  window.SESSION.isAuthenticated = false;
-  window.SESSION.page = 'dashboard';
+  window.SESSION.page = null;
 }
 
 // ========== লগইন ফাংশন ==========
-window.performLogin = async function(userData, mode) {
+window.performLogin = function(userData, mode) {
   try {
     // সেশন সেভ করুন
-    saveSession(userData, mode, 'dashboard');
+    saveSession(userData, mode);
     
     // অ্যাপ পেজ দেখান
     showAppPage();
@@ -457,15 +169,12 @@ window.performLogin = async function(userData, mode) {
     // ইউজার ইনফো আপডেট
     updateUserInfo(userData, mode);
     
-    // ড্যাশবোর্ড পেজ লোড করুন
-    await loadPage('dashboard');
-    
     // সাকসেস মেসেজ
-    showToast('সফল', 'লগইন সফল হয়েছে', 'success');
+    showToast('Success', 'লগইন সফল হয়েছে');
     
   } catch (error) {
     console.error('Login failed:', error);
-    showToast('Error', 'লগইন করতে সমস্যা হয়েছে', 'error');
+    showToast('Error', 'লগইন করতে সমস্যা হয়েছে');
   }
 };
 
@@ -500,48 +209,13 @@ function updateUserInfo(userData, mode) {
 
 // ========== UI আপডেট ==========
 function updateUIForSession() {
-  if (window.SESSION.isAuthenticated && window.SESSION.user) {
+  if (window.SESSION.user) {
     updateUserInfo(window.SESSION.user, window.SESSION.mode);
   }
 }
 
-// ========== নেভিগেশন হ্যান্ডলার সেটআপ ==========
-function setupNavigationHandlers() {
-  // নেভ আইটেমগুলোতে ক্লিক হ্যান্ডলার যোগ করুন
-  const navItems = document.querySelectorAll('.nav-item');
-  
-  navItems.forEach(item => {
-    item.addEventListener('click', async (e) => {
-      e.preventDefault();
-      const page = item.dataset.page;
-      if (page) {
-        await loadPage(page);
-      }
-    });
-  });
-  
-  // ডায়নামিকভাবে যোগ হওয়া নেভ আইটেমের জন্য
-  const observer = new MutationObserver(() => {
-    document.querySelectorAll('.nav-item:not([data-handler])').forEach(item => {
-      item.setAttribute('data-handler', 'true');
-      item.addEventListener('click', async (e) => {
-        e.preventDefault();
-        const page = item.dataset.page;
-        if (page) {
-          await loadPage(page);
-        }
-      });
-    });
-  });
-  
-  observer.observe(document.body, {
-    childList: true,
-    subtree: true
-  });
-}
-
 // ========== লগআউট ফাংশন ==========
-window.logout = async function() {
+window.logout = function() {
   try {
     // সেশন ক্লিয়ার
     clearSession();
@@ -563,28 +237,32 @@ window.logout = async function() {
     document.body.classList.remove('sidebar-open');
     
     // সাকসেস মেসেজ
-    showToast('সফল', 'লগআউট সফল হয়েছে', 'success');
+    showToast('Success', 'লগআউট সফল হয়েছে');
     
     console.log('Logout successful');
     
   } catch (error) {
     console.error('Logout failed:', error);
-    showToast('Error', 'লগআউট করতে সমস্যা হয়েছে', 'error');
+    showToast('Error', 'লগআউট করতে সমস্যা হয়েছে');
   }
 };
 
 // ========== লগআউট হ্যান্ডলার সেটআপ ==========
 function setupLogoutHandler() {
+  // লগআউট বাটন খুঁজে ইভেন্ট লিসেনার যোগ
   const setupButtons = () => {
     const logoutButtons = document.querySelectorAll('.logoutBtn, #logoutBtn');
     logoutButtons.forEach(button => {
+      // পুরনো লিসেনার রিমুভ
       button.removeEventListener('click', window.logout);
       button.addEventListener('click', window.logout);
     });
   };
   
+  // প্রথমবার সেটআপ
   setupButtons();
   
+  // ডায়নামিক কন্টেন্টের জন্য পর্যবেক্ষণ
   const observer = new MutationObserver(setupButtons);
   observer.observe(document.body, {
     childList: true,
@@ -592,7 +270,99 @@ function setupLogoutHandler() {
   });
 }
 
-// ========== লগইন ট্যাব সেটআপ ==========
+// ========== ইউটিলিটি ফাংশন ==========
+function showLoading(message) {
+  const overlay = document.getElementById('loadingOverlay');
+  if (overlay) {
+    overlay.querySelector('p').textContent = message;
+    overlay.classList.add('show');
+  }
+}
+
+function hideLoading() {
+  const overlay = document.getElementById('loadingOverlay');
+  if (overlay) {
+    overlay.classList.remove('show');
+  }
+}
+
+function showToast(title, message) {
+  const wrap = document.getElementById('toastWrap');
+  const div = document.createElement('div');
+  div.className = 'toast';
+  div.innerHTML = `
+    <div class="t1">${title}</div>
+    <div class="t2">${message}</div>
+    <div class="t3">${new Date().toLocaleString()}</div>
+  `;
+  wrap.appendChild(div);
+  setTimeout(() => div.remove(), 3500);
+}
+
+// ========== নতুন ফিচারসমূহ ==========
+
+/** ১. মোবাইল মেনু টগল ও ওভারলে তৈরি */
+function setupMobileMenu() {
+  const menuBtn = document.getElementById('mobileMenuBtn');
+  const sidebar = document.getElementById('sidebar');
+  if (!menuBtn || !sidebar) return;
+
+  // ওভারলে তৈরি (যদি না থাকে)
+  let overlay = document.querySelector('.sidebar-overlay');
+  if (!overlay) {
+    overlay = document.createElement('div');
+    overlay.className = 'sidebar-overlay';
+    document.body.appendChild(overlay);
+  }
+
+  function toggleMenu() {
+    sidebar.classList.toggle('active');
+    overlay.classList.toggle('active');
+    if (sidebar.classList.contains('active')) {
+      document.body.classList.add('sidebar-open');   // পৃষ্ঠা স্ক্রল বন্ধ
+    } else {
+      document.body.classList.remove('sidebar-open');
+    }
+  }
+
+  menuBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    toggleMenu();
+  });
+
+  overlay.addEventListener('click', toggleMenu);
+
+  // সাইডবারের ভেতরের আইটেম ক্লিক করলে মেনু বন্ধ (লগআউট ছাড়া)
+  sidebar.querySelectorAll('button, .nav-item').forEach(item => {
+    if (!item.classList.contains('logoutBtn')) {
+      item.addEventListener('click', () => {
+        if (window.innerWidth <= 768) {
+          sidebar.classList.remove('active');
+          overlay.classList.remove('active');
+          document.body.classList.remove('sidebar-open');
+        }
+      });
+    }
+  });
+
+  // রিসাইজে মেনু বন্ধ
+  window.addEventListener('resize', () => {
+    if (window.innerWidth > 768) {
+      sidebar.classList.remove('active');
+      overlay.classList.remove('active');
+      document.body.classList.remove('sidebar-open');
+    }
+  });
+
+  // Escape কী চাপলে মেনু বন্ধ
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && sidebar.classList.contains('active')) {
+      toggleMenu();
+    }
+  });
+}
+
+/** ২. লগইন ট্যাব স্যুইচ ও মোড সেট করা */
 function setupLoginTabs() {
   const tabAdmin = document.getElementById('tabAdmin');
   const tabMember = document.getElementById('tabMember');
@@ -606,22 +376,24 @@ function setupLoginTabs() {
     tabAdmin.classList.remove('active');
     tabMember.classList.remove('active');
     tab.classList.add('active');
-    
     if (tab === tabAdmin) {
       loginIdLabel.textContent = 'Admin ID';
       loginId.placeholder = 'Enter Admin ID';
-      window.SESSION.mode = 'admin';
+      window.SESSION.mode = 'admin';     // সেশন মোড আপডেট
     } else {
       loginIdLabel.textContent = 'Member ID';
       loginId.placeholder = 'Enter Member ID';
-      window.SESSION.mode = 'member';
+      window.SESSION.mode = 'member';    // সেশন মোড আপডেট
     }
   }
 
   tabAdmin.addEventListener('click', () => setActiveTab(tabAdmin));
   tabMember.addEventListener('click', () => setActiveTab(tabMember));
+
+  // ডিফল্ট মেম্বার সক্রিয়
   setActiveTab(tabMember);
 
+  // লগইন বাটন ক্লিক হ্যান্ডলার
   loginBtn.addEventListener('click', function(e) {
     e.preventDefault();
     
@@ -629,167 +401,82 @@ function setupLoginTabs() {
     const loginPassValue = document.getElementById('loginPass')?.value;
     
     if (!loginIdValue || !loginPassValue) {
-      showToast('Warning', 'আইডি এবং পাসওয়ার্ড দিন', 'warning');
+      showToast('Warning', 'আইডি এবং পাসওয়ার্ড দিন');
       return;
     }
     
+    // এখানে আপনার অ্যাকচুয়াল লগইন লজিক কল হবে
+    // login.js মডিউল ইতিমধ্যে লোড হয়েছে এবং SESSION.mode ব্যবহার করবে
+    
+    // ডেমো লগইন - সব কিছু দিলেই ঢুকবে
     const userData = {
       id: loginIdValue,
       name: loginIdValue.includes('@') ? loginIdValue.split('@')[0] : loginIdValue,
-      email: loginIdValue.includes('@') ? loginIdValue : `${loginIdValue}@demo.com`,
-      role: window.SESSION.mode
+      email: loginIdValue.includes('@') ? loginIdValue : `${loginIdValue}@demo.com`
     };
     
     window.performLogin(userData, window.SESSION.mode);
   });
 }
 
-// ========== ইউটিলিটি ফাংশন ==========
-function showLoading(message) {
-  const overlay = document.getElementById('loadingOverlay');
-  if (overlay) {
-    const msgEl = overlay.querySelector('p');
-    if (msgEl) msgEl.textContent = message;
-    overlay.classList.add('show');
-  }
-}
-
-function hideLoading() {
-  const overlay = document.getElementById('loadingOverlay');
-  if (overlay) {
-    overlay.classList.remove('show');
-  }
-}
-
-function showToast(title, message, type = 'info') {
-  const wrap = document.getElementById('toastWrap');
-  if (!wrap) return;
-  
-  const div = document.createElement('div');
-  div.className = `toast ${type}`;
-  div.innerHTML = `
-    <div class="t1">${title}</div>
-    <div class="t2">${message}</div>
-    <div class="t3">${new Date().toLocaleString('bn-BD')}</div>
-  `;
-  
-  wrap.appendChild(div);
-  
-  setTimeout(() => {
-    if (div.parentNode) {
-      div.style.animation = 'fadeOut 0.3s ease';
-      setTimeout(() => {
-        if (div.parentNode) div.remove();
-      }, 300);
-    }
-  }, 3500);
-}
-
-// ========== মোবাইল মেনু সেটআপ ==========
-function setupMobileMenu() {
-  const menuBtn = document.getElementById('mobileMenuBtn');
-  const sidebar = document.getElementById('sidebar');
-  if (!menuBtn || !sidebar) return;
-
-  let overlay = document.querySelector('.sidebar-overlay');
-  if (!overlay) {
-    overlay = document.createElement('div');
-    overlay.className = 'sidebar-overlay';
-    document.body.appendChild(overlay);
-  }
-
-  function toggleMenu() {
-    sidebar.classList.toggle('active');
-    overlay.classList.toggle('active');
-    document.body.classList.toggle('sidebar-open');
-  }
-
-  menuBtn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    toggleMenu();
-  });
-
-  overlay.addEventListener('click', toggleMenu);
-
-  sidebar.querySelectorAll('button, .nav-item').forEach(item => {
-    if (!item.classList.contains('logoutBtn')) {
-      item.addEventListener('click', () => {
-        if (window.innerWidth <= 768) {
-          toggleMenu();
-        }
-      });
-    }
-  });
-
-  window.addEventListener('resize', () => {
-    if (window.innerWidth > 768) {
-      sidebar.classList.remove('active');
-      overlay.classList.remove('active');
-      document.body.classList.remove('sidebar-open');
-    }
-  });
-
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && sidebar.classList.contains('active')) {
-      toggleMenu();
-    }
-  });
-}
-
-// ========== রিপল ইফেক্ট ==========
+/** ৩. বাটন ও নেভ আইটেমে রিপল ইফেক্ট */
 function setupRippleEffect() {
+  const rippleStyle = document.createElement('style');
+  rippleStyle.textContent = `
+    .ripple {
+      position: absolute;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.6);
+      transform: scale(0);
+      animation: ripple-animation 0.6s ease-out;
+      pointer-events: none;
+      width: 100px;
+      height: 100px;
+      margin-left: -50px;
+      margin-top: -50px;
+    }
+    @keyframes ripple-animation {
+      to { transform: scale(4); opacity: 0; }
+    }
+  `;
+  document.head.appendChild(rippleStyle);
+
   document.querySelectorAll('.btn, .nav-item').forEach(btn => {
     btn.addEventListener('click', function(e) {
-      if (e.clientX === 0 && e.clientY === 0) return;
-      
+      if (e.clientX === 0 && e.clientY === 0) return; // কিবোর্ড ক্লিক ইগনোর
       const rect = this.getBoundingClientRect();
       const ripple = document.createElement('span');
       ripple.className = 'ripple';
-      
+      this.appendChild(ripple);
       const x = e.clientX - rect.left;
       const y = e.clientY - rect.top;
-      
       ripple.style.left = `${x}px`;
       ripple.style.top = `${y}px`;
-      
-      this.appendChild(ripple);
-      
-      setTimeout(() => {
-        if (ripple.parentNode) ripple.remove();
-      }, 600);
+      setTimeout(() => ripple.remove(), 600);
     });
   });
 }
 
-// ========== ক্লিক আউটসাইড সাইডবার ==========
+/** ৪. সাইডবারের বাইরে ক্লিক করলে মোবাইলে বন্ধ */
 function setupClickOutsideSidebar() {
   document.addEventListener('click', function(e) {
     const sidebar = document.getElementById('sidebar');
     const menuBtn = document.getElementById('mobileMenuBtn');
-    const overlay = document.querySelector('.sidebar-overlay');
-    
-    if (window.innerWidth <= 768 && 
-        sidebar && 
-        sidebar.classList.contains('active') && 
-        !sidebar.contains(e.target) && 
-        !menuBtn?.contains(e.target)) {
-      
+    if (window.innerWidth <= 768 && sidebar && sidebar.classList.contains('active') && 
+        !sidebar.contains(e.target) && !menuBtn?.contains(e.target)) {
       sidebar.classList.remove('active');
-      if (overlay) overlay.classList.remove('active');
+      document.querySelector('.sidebar-overlay')?.classList.remove('active');
       document.body.classList.remove('sidebar-open');
     }
   });
 }
 
-// ========== হ্যাশ স্ক্রল ==========
+/** ৫. পৃষ্ঠা লোডে হ্যাশ থাকলে স্মুথ স্ক্রল */
 function setupHashScroll() {
   window.addEventListener('load', function() {
-    if (window.location.hash && window.location.hash !== '#login' && window.location.hash !== '#dashboard') {
+    if (window.location.hash) {
       setTimeout(() => {
-        const element = document.getElementById(window.location.hash.substring(1));
-        if (element) {
-          element.scrollIntoView({ behavior: 'smooth' });
-        }
+        document.getElementById(window.location.hash.substring(1))?.scrollIntoView({ behavior: 'smooth' });
       }, 100);
     }
   });
@@ -798,12 +485,7 @@ function setupHashScroll() {
 // ========== গ্লোবাল এরর হ্যান্ডলার ==========
 window.addEventListener('error', function(event) {
   console.error('Global Error:', event.error);
-  showToast('Error', 'একটি ত্রুটি ঘটেছে। দয়া করে আবার চেষ্টা করুন।', 'error');
-});
-
-window.addEventListener('unhandledrejection', function(event) {
-  console.error('Unhandled Rejection:', event.reason);
-  showToast('Error', 'একটি ত্রুটি ঘটেছে। দয়া করে আবার চেষ্টা করুন।', 'error');
+  showToast('Error', 'একটি ত্রুটি ঘটেছে। দয়া আবার চেষ্টা করুন।');
 });
 
 // গ্লোবাল এক্সপোর্ট
@@ -811,4 +493,3 @@ window.showLoading = showLoading;
 window.hideLoading = hideLoading;
 window.showToast = showToast;
 window.getDatabase = getDatabase;
-window.loadPage = loadPage; // পেজ লোড ফাংশন এক্সপোর্ট

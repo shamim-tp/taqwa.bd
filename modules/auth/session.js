@@ -185,8 +185,10 @@ export function startApp() {
   if (loginPage) loginPage.style.display = 'none';
   if (appPage) appPage.style.display = 'grid';
 
-  // Update user info in UI
-  updateUserInfo(user, role);
+  // Update user info in UI using script.js function
+  if (typeof window.updateUserInfo === 'function') {
+    window.updateUserInfo(user, role);
+  }
 
   // Setup admin tools if needed
   setupAdminTools(role);
@@ -206,25 +208,6 @@ export function startApp() {
 
   isAppInitialized = true;
   console.log('✅ App started successfully');
-}
-
-
-// ============================================================
-// 👤 UPDATE USER INFO
-// ============================================================
-
-function updateUserInfo(user, role) {
-  const userNameEl = document.getElementById('currentUserName');
-  const userRoleEl = document.getElementById('currentUserRole');
-  const chipIdEl = document.getElementById('chipId');
-  const chipStatusEl = document.getElementById('chipStatus');
-  const systemModeEl = document.getElementById('systemMode');
-
-  if (userNameEl) userNameEl.textContent = user.name || 'User';
-  if (userRoleEl) userRoleEl.textContent = user.role || role;
-  if (chipIdEl) chipIdEl.textContent = `ID: ${user.id || 'N/A'}`;
-  if (chipStatusEl) chipStatusEl.textContent = user.status || 'Active';
-  if (systemModeEl) systemModeEl.textContent = role?.toUpperCase() || 'USER';
 }
 
 
@@ -396,7 +379,9 @@ export function navigateTo(page) {
   // Close mobile sidebar if open
   const sidebar = document.getElementById('sidebar');
   if (sidebar && window.innerWidth <= 768) {
-    sidebar.classList.remove('show');
+    sidebar.classList.remove('active');
+    document.querySelector('.sidebar-overlay')?.classList.remove('active');
+    document.body.classList.remove('sidebar-open');
   }
 
   // Set page title

@@ -1255,3 +1255,232 @@ label {
     padding-bottom: max(var(--space-4), var(--safe-area-inset-bottom));
   }
 }
+
+
+/* ========== member-dashboard.js নির্দিষ্ট ক্লাস ========== */
+
+/* ওয়েলকাম সেকশন */
+.member-welcome {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: clamp(20px, 4vw, 30px);
+  border-radius: var(--radius-2xl);
+  margin-bottom: var(--space-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  box-shadow: 0 20px 40px rgba(102,126,234,0.3);
+  position: relative;
+  overflow: hidden;
+}
+.member-welcome::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -50%;
+  width: 200px;
+  height: 200px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 50%;
+  transform: rotate(25deg);
+}
+.member-welcome::after {
+  content: '';
+  position: absolute;
+  bottom: -50%;
+  left: -50%;
+  width: 200px;
+  height: 200px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 50%;
+  transform: rotate(-25deg);
+}
+@media (min-width: 640px) {
+  .member-welcome {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding: 30px 35px;
+  }
+}
+
+.welcome-title {
+  font-size: 24px;
+  font-weight: 800;
+  margin-bottom: 8px;
+  letter-spacing: -0.5px;
+  position: relative;
+  z-index: 1;
+}
+@media (min-width: 640px) {
+  .welcome-title { font-size: 28px; }
+}
+
+.welcome-subtitle {
+  font-size: 14px;
+  opacity: 0.95;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  position: relative;
+  z-index: 1;
+}
+.welcome-subtitle::before {
+  content: '📅';
+  margin-right: 5px;
+}
+
+.member-badge {
+  background: rgba(255,255,255,0.2);
+  padding: 16px 24px;
+  border-radius: 60px;
+  backdrop-filter: blur(10px);
+  text-align: center;
+  border: 2px solid rgba(255,255,255,0.3);
+  position: relative;
+  z-index: 1;
+  min-width: 200px;
+}
+.member-badge .id {
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  color: white;
+}
+.member-badge .type {
+  font-size: 13px;
+  opacity: 0.9;
+  margin-top: 5px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: rgba(255,255,255,0.9);
+}
+
+/* কুইক স্ট্যাটস */
+.quick-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: var(--space-6);
+}
+@media (min-width: 640px) {
+  .quick-stats { gap: 20px; margin-bottom: var(--space-8); }
+}
+
+.stat-item {
+  background: var(--bg-primary);
+  padding: 16px 10px;
+  border-radius: 20px;
+  text-align: center;
+  box-shadow: var(--shadow-md);
+  border: 1px solid rgba(0,0,0,0.05);
+  transition: transform 0.2s;
+}
+.stat-item:active { transform: scale(0.95); }
+
+.stat-label {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.stat-value {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--text-primary);
+  word-break: break-word;
+}
+@media (min-width: 640px) {
+  .stat-value { font-size: 20px; }
+}
+
+/* স্ট্যাটাস ব্যাজ (ড্যাশবোর্ডের জন্য) */
+.status.st-approved,
+.status.st-pending,
+.status.st-rejected {
+  display: inline-block;
+  padding: 6px 16px;
+  border-radius: 40px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.status.st-approved {
+  background: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+.status.st-pending {
+  background: #fff3cd;
+  color: #856404;
+  border: 1px solid #ffeeba;
+}
+.status.st-rejected {
+  background: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+/* কম্পানি মিশন (ড্যাশবোর্ড) – ইতিমধ্যে .companyMission আছে, তবে নির্দিষ্ট স্টাইল */
+.companyMission {
+  background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+  color: white;
+  padding: 30px 25px;
+  border-radius: 28px;
+  text-align: center;
+  box-shadow: 0 20px 40px rgba(30,60,114,0.3);
+  position: relative;
+  overflow: hidden;
+}
+.companyMission::before {
+  content: '★';
+  position: absolute;
+  top: -30px;
+  right: -30px;
+  font-size: 150px;
+  opacity: 0.1;
+  color: white;
+  transform: rotate(20deg);
+}
+.companyMission h3 {
+  font-size: 24px;
+  margin-bottom: 15px;
+  font-weight: 800;
+  position: relative;
+  z-index: 1;
+}
+.companyMission p {
+  font-size: 15px;
+  opacity: 0.95;
+  line-height: 1.7;
+  max-width: 600px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 1;
+}
+.companyMission .btn {
+  padding: 14px 35px;
+  background: white;
+  color: #1e3c72;
+  border: none;
+  border-radius: 60px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 20px;
+  width: 100%;
+  max-width: 300px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+  transition: all 0.3s;
+}
+.companyMission .btn:active {
+  transform: scale(0.95);
+  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+@media (min-width: 640px) {
+  .companyMission .btn { width: auto; }
+}

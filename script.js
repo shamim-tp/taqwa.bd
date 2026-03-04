@@ -24,9 +24,6 @@ document.addEventListener('DOMContentLoaded', async function() {
       dbTypeElement.textContent = modeNames[dbMode] || dbMode;
     }
     
-    // লোকাল স্টোরেজ থেকে সেশন চেক করুন (পেজ রিফ্রেশের জন্য)
-    checkAndRestoreSession();
-    
     // লগইন ও মডাল মডিউল লোড
     loadLoginModule();
     loadModalModules();
@@ -37,10 +34,6 @@ document.addEventListener('DOMContentLoaded', async function() {
     setupRippleEffect();          // বাটনে রিপল ইফেক্ট
     setupClickOutsideSidebar();   // সাইডবারের বাইরে ক্লিলে বন্ধ
     setupHashScroll();            // পৃষ্ঠা লোডে হ্যাশ স্ক্রল
-    setupLogoutHandler();         // লগআউট হ্যান্ডলার
-    
-    // UI আপডেট করুন সেশন অনুযায়ী
-    updateUIForSession();
     
     hideLoading();
   } catch (error) {
@@ -48,138 +41,6 @@ document.addEventListener('DOMContentLoaded', async function() {
     showToast('Error', 'অ্যাপ্লিকেশন লোড করতে সমস্যা হয়েছে');
   }
 });
-
-// ========== সেশন রিস্টোর ফাংশন ==========
-function checkAndRestoreSession() {
-  try {
-    // auth.js এ সংরক্ষিত সেশন চেক করুন
-    const authUser = localStorage.getItem('ims_current_user');
-    const authRole = localStorage.getItem('ims_current_role');
-    const authExpiry = localStorage.getItem('ims_session_expiry');
-    
-    if (authUser && authRole && authExpiry) {
-      const expiryTime = parseInt(authExpiry);
-      const currentTime = new Date().getTime();
-      
-      if (currentTime < expiryTime) {
-        // সেশন ভালো আছে
-        const userData = JSON.parse(authUser);
-        
-        window.SESSION.user = userData;
-        window.SESSION.mode = authRole === 'admin' ? 'admin' : 'member';
-        
-        // অ্যাপ পেজ দেখান
-        document.getElementById('loginPage').style.display = 'none';
-        document.getElementById('appPage').style.display = 'grid';
-        
-        // ইউজার ইনফো আপডেট করুন
-        updateUserInfo(userData, window.SESSION.mode);
-        
-        console.log('Session restored successfully from auth.js');
-      } else {
-        // সেশন expired
-        console.log('Session expired');
-      }
-    } else {
-      console.log('No active session found');
-    }
-  } catch (error) {
-    console.error('Session restore failed:', error);
-  }
-}
-
-// ========== ইউজার ইনফো আপডেট ==========
-function updateUserInfo(userData, mode) {
-  const userNameEl = document.getElementById('currentUserName');
-  const userRoleEl = document.getElementById('currentUserRole');
-  const chipIdEl = document.getElementById('chipId');
-  const chipStatusEl = document.getElementById('chipStatus');
-  const systemModeEl = document.getElementById('systemMode');
-  
-  if (userNameEl) {
-    userNameEl.textContent = userData?.name || 'Unknown User';
-  }
-  
-  if (userRoleEl) {
-    userRoleEl.textContent = mode === 'admin' ? (userData?.role || 'Administrator') : 'Member';
-  }
-  
-  if (chipIdEl) {
-    chipIdEl.textContent = `ID: ${userData?.id || 'N/A'}`;
-  }
-  
-  if (chipStatusEl) {
-    chipStatusEl.textContent = 'Active';
-  }
-  
-  if (systemModeEl) {
-    systemModeEl.textContent = mode?.toUpperCase() || 'MEMBER';
-  }
-}
-
-// ========== UI আপডেট ==========
-function updateUIForSession() {
-  if (window.SESSION.user) {
-    updateUserInfo(window.SESSION.user, window.SESSION.mode);
-  }
-}
-
-// ========== লগআউট ফাংশন ==========
-window.logout = function() {
-  try {
-    // auth.js এর logout ফাংশন কল করবে
-    // কিন্তু এখানে শুধু UI আপডেট
-    
-    // লগইন পেজ দেখান
-    document.getElementById('loginPage').style.display = 'flex';
-    document.getElementById('appPage').style.display = 'none';
-    
-    // ফর্ম রিসেট
-    const loginForm = document.getElementById('loginForm');
-    if (loginForm) {
-      loginForm.reset();
-    }
-    
-    // মোবাইল মেনু বন্ধ
-    const sidebar = document.getElementById('sidebar');
-    const overlay = document.querySelector('.sidebar-overlay');
-    if (sidebar) sidebar.classList.remove('active');
-    if (overlay) overlay.classList.remove('active');
-    document.body.classList.remove('sidebar-open');
-    
-    // সাকসেস মেসেজ
-    showToast('Success', 'লগআউট সফল হয়েছে');
-    
-    console.log('Logout successful');
-    
-  } catch (error) {
-    console.error('Logout failed:', error);
-    showToast('Error', 'লগআউট করতে সমস্যা হয়েছে');
-  }
-};
-
-// ========== লগআউট হ্যান্ডলার সেটআপ ==========
-function setupLogoutHandler() {
-  // লগআউট বাটন খুঁজে ইভেন্ট লিসেনার যোগ
-  const setupButtons = () => {
-    const logoutButtons = document.querySelectorAll('.logoutBtn, #logoutBtn');
-    logoutButtons.forEach(button => {
-      // পুরনো লিসেনার রিমুভ
-      button.removeEventListener('click', window.logout);
-      button.addEventListener('click', window.logout);
-    });
-  };
-  
-  // প্রথমবার সেটআপ
-  setupButtons();
-  
-  // ডায়নামিক কন্টেন্টের জন্য পর্যবেক্ষণ
-  const observer = new MutationObserver(setupButtons);
-  observer.observe(document.body, {
-    childList: true,
-    subtree: true
-  });
-}
 
 // ========== ইউটিলিটি ফাংশন ==========
 function showLoading(message) {
@@ -209,6 +70,12 @@ function showToast(title, message) {
   wrap.appendChild(div);
   setTimeout(() => div.remove(), 3500);
 }
+
+// গ্লোবাল এক্সপোর্ট
+window.showLoading = showLoading;
+window.hideLoading = hideLoading;
+window.showToast = showToast;
+window.getDatabase = getDatabase;
 
 // ========== নতুন ফিচারসমূহ ==========
 
@@ -243,15 +110,15 @@ function setupMobileMenu() {
 
   overlay.addEventListener('click', toggleMenu);
 
-  // সাইডবারের ভেতরের আইটেম ক্লিক করলে মেনু বন্ধ (লগআউট ছাড়া)
-  sidebar.querySelectorAll('button, .nav-item').forEach(item => {
-    if (!item.classList.contains('logoutBtn')) {
-      item.addEventListener('click', () => {
-        if (window.innerWidth <= 768) {
-          toggleMenu();
-        }
-      });
-    }
+  // সাইডবারের ভেতরের আইটেম ক্লিক করলে মেনু বন্ধ
+  sidebar.querySelectorAll('button, .nav-item, .logoutBtn').forEach(item => {
+    item.addEventListener('click', () => {
+      if (window.innerWidth <= 768) {
+        sidebar.classList.remove('active');
+        overlay.classList.remove('active');
+        document.body.classList.remove('sidebar-open');
+      }
+    });
   });
 
   // রিসাইজে মেনু বন্ধ
@@ -301,6 +168,12 @@ function setupLoginTabs() {
 
   // ডিফল্ট মেম্বার সক্রিয়
   setActiveTab(tabMember);
+
+  // লগইন বাটন ক্লিক করার সময় নিশ্চিত করা যে সেশন মোড সঠিক আছে
+  // (login.js ইতিমধ্যে SESSION.mode ব্যবহার করবে বলে ধরে নিচ্ছি)
+  loginBtn.addEventListener('click', function(e) {
+    // অতিরিক্ত কোনো কাজ না করলেও চলবে, কারণ SESSION.mode ইতিমধ্যে সেট
+  });
 }
 
 /** ৩. বাটন ও নেভ আইটেমে রিপল ইফেক্ট */
@@ -371,10 +244,3 @@ window.addEventListener('error', function(event) {
   console.error('Global Error:', event.error);
   showToast('Error', 'একটি ত্রুটি ঘটেছে। দয়া আবার চেষ্টা করুন।');
 });
-
-// গ্লোবাল এক্সপোর্ট
-window.showLoading = showLoading;
-window.hideLoading = hideLoading;
-window.showToast = showToast;
-window.getDatabase = getDatabase;
-window.updateUserInfo = updateUserInfo; // session.js এর জন্য

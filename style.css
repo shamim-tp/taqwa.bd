@@ -1481,6 +1481,231 @@ label {
   transform: scale(0.95);
   box-shadow: 0 5px 15px rgba(0,0,0,0.2);
 }
+
+
+/* ========== সাইডবার ========== */
+.sidebar {
+  background: linear-gradient(180deg, var(--bg-dark) 0%, #0f172a 100%);
+  border-right: 1px solid rgba(255,255,255,0.1);
+  padding: var(--space-4) var(--space-3);
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--accent-1) transparent;
+  z-index: 40;
+  transition: transform var(--transition-base, 0.3s ease);
+  color: var(--text-white);
+}
+
+.sidebar::-webkit-scrollbar {
+  width: 4px;
+}
+.sidebar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.sidebar::-webkit-scrollbar-thumb {
+  background: var(--accent-1);
+  border-radius: var(--radius-full);
+}
+
+/* মোবাইলে সাইডবার */
+@media (max-width: 768px) {
+  .sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    transform: translateX(-100%);
+    width: 85%;
+    max-width: 320px;
+    box-shadow: var(--shadow-2xl);
+    padding-top: calc(var(--space-4) + var(--safe-area-inset-top));
+    padding-bottom: calc(var(--space-4) + var(--safe-area-inset-bottom));
+    transition: transform 0.3s ease;
+    z-index: 1001;
+  }
+  .sidebar.active {
+    transform: translateX(0);
+  }
+}
+
+/* সাইডবার ওভারলে */
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(4px);
+  z-index: 1000;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.sidebar-overlay.active {
+  display: block;
+  opacity: 1;
+}
+
+/* ব্র্যান্ড সেকশন */
+.brand {
+  padding: var(--space-4);
+  background: rgba(255,255,255,0.05);
+  border-radius: var(--radius-xl);
+  margin-bottom: var(--space-4);
+  border: 1px solid rgba(255,255,255,0.1);
+  backdrop-filter: blur(10px);
+}
+.brand h2 {
+  font-size: 1rem;
+  background: linear-gradient(135deg, white, var(--accent-2));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: var(--space-1);
+}
+.brand .badge {
+  display: inline-block;
+  padding: var(--space-1) var(--space-2);
+  background: var(--accent-1);
+  border-radius: var(--radius-full);
+  font-size: 0.6rem;
+  font-weight: 600;
+  color: white;
+  text-transform: uppercase;
+}
+
+/* ইউজার বক্স */
+.userBox {
+  padding: var(--space-4);
+  background: rgba(255,255,255,0.05);
+  border-radius: var(--radius-xl);
+  margin-bottom: var(--space-4);
+  border: 1px solid rgba(255,255,255,0.1);
+}
+.userBox .name {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: white;
+  margin-bottom: var(--space-1);
+}
+.userBox .role {
+  font-size: 0.7rem;
+  color: var(--accent-2);
+  font-weight: 500;
+  margin-bottom: var(--space-2);
+  text-transform: uppercase;
+}
+.userBox .mini {
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+.userBox .chip {
+  padding: var(--space-1) var(--space-2);
+  background: rgba(255,255,255,0.1);
+  border-radius: var(--radius-full);
+  font-size: 0.6rem;
+  color: var(--text-muted);
+  border: 1px solid rgba(255,255,255,0.2);
+}
+
+/* নেভিগেশন */
+.navTitle {
+  font-size: 0.6rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  padding: var(--space-2) var(--space-3);
+  margin-top: var(--space-2);
+}
+.nav {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+.nav-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-lg);
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.nav-item:hover {
+  background: rgba(255,255,255,0.1);
+  color: white;
+}
+.nav-item.active {
+  background: linear-gradient(90deg, var(--accent-1) 0%, transparent 150%);
+  color: white;
+  border-left: 3px solid var(--accent-2);
+}
+.nav-item .count {
+  padding: 2px 6px;
+  background: rgba(255,255,255,0.1);
+  border-radius: var(--radius-full);
+  font-size: 0.6rem;
+  color: var(--text-muted);
+  min-width: 24px;
+  text-align: center;
+}
+
+/* লগআউট বাটন */
+.logoutBtn {
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+  margin-top: var(--space-4);
+  background: transparent;
+  border: 2px solid var(--accent-danger);
+  border-radius: var(--radius-lg);
+  color: var(--accent-danger);
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.logoutBtn:hover {
+  background: var(--accent-danger);
+  color: white;
+}
+
+/* মোবাইল মেনু বাটন */
+.mobile-menu-btn {
+  display: none;
+  position: fixed;
+  top: max(12px, var(--safe-area-inset-top));
+  left: max(12px, var(--safe-area-inset-left));
+  z-index: 1002;
+  padding: var(--space-2) var(--space-3);
+  background: var(--bg-dark);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: var(--radius-lg);
+  color: white;
+  font-size: 1.2rem;
+  font-weight: 600;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+  box-shadow: var(--shadow-lg);
+}
+@media (max-width: 768px) {
+  .mobile-menu-btn {
+    display: block;
+  }
+}
+
+/* body স্ক্রল বন্ধ */
+body.sidebar-open {
+  overflow: hidden;
+}
 @media (min-width: 640px) {
   .companyMission .btn { width: auto; }
 }

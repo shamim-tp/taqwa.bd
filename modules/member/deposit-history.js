@@ -3,8 +3,8 @@
 // IMS ERP V5
 // Shows all deposits of logged-in member with enhanced UI
 // Fully Responsive - Mobile & PC Optimized
+// Uses global style.css (no inline styles)
 // ============================================================
-
 
 // ============================================================
 // 📦 IMPORTS
@@ -16,560 +16,6 @@ import { setPageTitle } from '../auth/session.js';
 import { showToast, formatMoney, formatDate } from '../utils/common.js';
 import { openMRReceiptModal } from '../modals/mr-receipt.js';
 import { openViewerModal } from '../modals/viewer.js';
-
-
-
-// ============================================================
-// 🎨 FULLY RESPONSIVE STYLES - MOBILE OPTIMIZED
-// ============================================================
-
-const historyStyles = `
-  <style>
-    /* CSS Variables for consistent theming */
-    :root {
-      --primary-gradient: linear-gradient(135deg, #4158D0 0%, #C850C0 46%, #FFCC70 100%);
-      --secondary-gradient: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
-      --success-gradient: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
-      --warning-gradient: linear-gradient(135deg, #f2994a 0%, #f2c94c 100%);
-      --danger-gradient: linear-gradient(135deg, #eb5757 0%, #f2994a 100%);
-      --shadow-sm: 0 5px 15px rgba(0,0,0,0.05);
-      --shadow-md: 0 10px 25px rgba(0,0,0,0.1);
-      --shadow-lg: 0 15px 35px rgba(0,0,0,0.15);
-      --border-radius-sm: 12px;
-      --border-radius-md: 16px;
-      --border-radius-lg: 20px;
-      --border-radius-xl: 24px;
-      --border-radius-xxl: 30px;
-      
-      /* Text Colors - High Contrast */
-      --text-primary: #1e293b;
-      --text-secondary: #334155;
-      --text-muted: #64748b;
-      --text-light: #f8fafc;
-      --text-white: #ffffff;
-      --text-dark: #0f172a;
-      
-      /* Background Colors */
-      --bg-primary: #ffffff;
-      --bg-secondary: #f8fafc;
-      --bg-tertiary: #f1f5f9;
-      --bg-accent: #eef2ff;
-      --bg-warning: #fff3cd;
-      --bg-danger: #f8d7da;
-      --bg-success: #d4edda;
-      
-      /* Accent Colors */
-      --accent-1: #4158D0;
-      --accent-2: #C850C0;
-      --accent-3: #FFCC70;
-      --accent-success: #11998e;
-      --accent-warning: #f2994a;
-      --accent-danger: #eb5757;
-    }
-
-    /* Container - Mobile First */
-    .history-container {
-      width: 100%;
-      max-width: 1400px;
-      margin: 0 auto;
-      padding: clamp(12px, 3vw, 25px);
-      background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
-      min-height: 100vh;
-    }
-
-    /* Summary Cards Grid - Mobile First */
-    .summary-grid {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: clamp(12px, 2vw, 20px);
-      margin-bottom: clamp(20px, 3vw, 30px);
-    }
-
-    @media (min-width: 640px) {
-      .summary-grid {
-        grid-template-columns: repeat(2, 1fr);
-      }
-    }
-
-    @media (min-width: 1024px) {
-      .summary-grid {
-        grid-template-columns: repeat(4, 1fr);
-      }
-    }
-
-    /* Summary Card */
-    .summary-card {
-      padding: clamp(18px, 3vw, 25px);
-      border-radius: var(--border-radius-lg);
-      color: var(--text-white);
-      position: relative;
-      overflow: hidden;
-      transition: all 0.3s ease;
-      box-shadow: var(--shadow-md);
-    }
-
-    .summary-card:hover {
-      transform: translateY(-5px);
-      box-shadow: var(--shadow-lg);
-    }
-
-    .summary-card::before {
-      content: '';
-      position: absolute;
-      top: -50%;
-      right: -50%;
-      width: 150px;
-      height: 150px;
-      background: rgba(255,255,255,0.1);
-      border-radius: 50%;
-      transform: rotate(25deg);
-      transition: all 0.5s;
-    }
-
-    .summary-card:hover::before {
-      transform: rotate(45deg) scale(1.2);
-    }
-
-    .summary-card.total {
-      background: linear-gradient(135deg, #4158D0 0%, #C850C0 100%);
-    }
-
-    .summary-card.amount {
-      background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
-    }
-
-    .summary-card.approved {
-      background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
-    }
-
-    .summary-card.pending {
-      background: linear-gradient(135deg, #f2994a 0%, #f2c94c 100%);
-    }
-
-    .summary-label {
-      font-size: clamp(13px, 2vw, 15px);
-      opacity: 0.9;
-      margin-bottom: 10px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      position: relative;
-      z-index: 1;
-    }
-
-    .summary-value {
-      font-size: clamp(24px, 4vw, 36px);
-      font-weight: 800;
-      margin-bottom: 8px;
-      position: relative;
-      z-index: 1;
-      text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
-    }
-
-    .summary-sub {
-      font-size: clamp(11px, 1.8vw, 13px);
-      opacity: 0.8;
-      position: relative;
-      z-index: 1;
-    }
-
-    .summary-icon {
-      position: absolute;
-      top: 15px;
-      right: 15px;
-      font-size: 48px;
-      opacity: 0.2;
-      color: var(--text-white);
-    }
-
-    /* Filter Buttons */
-    .filter-section {
-      display: flex;
-      gap: clamp(8px, 2vw, 12px);
-      margin-bottom: clamp(20px, 3vw, 25px);
-      flex-wrap: wrap;
-    }
-
-    .filter-btn {
-      padding: clamp(8px, 2vw, 12px) clamp(12px, 3vw, 24px);
-      border: 2px solid var(--bg-tertiary);
-      background: var(--bg-primary);
-      color: var(--text-primary);
-      border-radius: var(--border-radius-xxl);
-      font-weight: 600;
-      font-size: clamp(12px, 2vw, 15px);
-      cursor: pointer;
-      transition: all 0.3s ease;
-      flex: 1 1 auto;
-      min-width: 80px;
-    }
-
-    .filter-btn:hover {
-      border-color: var(--accent-1);
-      background: var(--bg-accent);
-    }
-
-    .filter-btn.active {
-      background: var(--primary-gradient);
-      color: var(--text-white);
-      border-color: transparent;
-      box-shadow: 0 5px 15px rgba(65,88,208,0.3);
-    }
-
-    /* Main Panel */
-    .history-panel {
-      background: var(--bg-primary);
-      border-radius: var(--border-radius-xl);
-      box-shadow: var(--shadow-lg);
-      overflow: hidden;
-      border: 1px solid rgba(0,0,0,0.05);
-    }
-
-    .panel-header {
-      padding: clamp(16px, 3vw, 22px);
-      border-bottom: 1px solid var(--bg-tertiary);
-      display: flex;
-      flex-direction: column;
-      gap: 15px;
-      background: linear-gradient(to right, var(--bg-secondary), var(--bg-primary));
-    }
-
-    @media (min-width: 640px) {
-      .panel-header {
-        flex-direction: row;
-        justify-content: space-between;
-        align-items: center;
-      }
-    }
-
-    .panel-header h3 {
-      color: var(--text-primary);
-      font-size: clamp(18px, 3vw, 22px);
-      font-weight: 800;
-      margin: 0;
-    }
-
-    .panel-header p {
-      color: var(--text-secondary);
-      font-size: clamp(13px, 2vw, 15px);
-      margin-top: 5px;
-    }
-
-    .search-box {
-      padding: clamp(10px, 2vw, 12px) clamp(14px, 2.5vw, 18px);
-      border: 2px solid var(--bg-tertiary);
-      border-radius: var(--border-radius-md);
-      font-size: clamp(14px, 2vw, 15px);
-      width: 100%;
-      max-width: 300px;
-      background: var(--bg-primary);
-      color: var(--text-primary);
-    }
-
-    .search-box:focus {
-      border-color: var(--accent-1);
-      outline: none;
-      box-shadow: 0 0 0 4px rgba(65,88,208,0.1);
-    }
-
-    .search-box::placeholder {
-      color: var(--text-muted);
-    }
-
-    /* Mobile Card View (for very small screens) */
-    @media (max-width: 600px) {
-      .table-responsive {
-        overflow-x: visible;
-      }
-      
-      .deposit-table,
-      .deposit-table thead,
-      .deposit-table tbody,
-      .deposit-table tr,
-      .deposit-table td {
-        display: block;
-      }
-      
-      .deposit-table thead {
-        display: none; /* Hide table headers on mobile */
-      }
-      
-      .deposit-table tr {
-        margin-bottom: 20px;
-        border: 1px solid var(--bg-tertiary);
-        border-radius: var(--border-radius-lg);
-        padding: 15px;
-        background: var(--bg-primary);
-        box-shadow: var(--shadow-sm);
-      }
-      
-      .deposit-table td {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 10px 0;
-        border-bottom: 1px dashed var(--bg-tertiary);
-        border-bottom-width: 1px !important;
-        text-align: right;
-      }
-      
-      .deposit-table td:last-child {
-        border-bottom: none;
-      }
-      
-      .deposit-table td::before {
-        content: attr(data-label);
-        font-weight: 700;
-        color: var(--text-primary);
-        text-align: left;
-        padding-right: 10px;
-        width: 40%;
-      }
-      
-      .amount-cell {
-        text-align: right;
-      }
-      
-      .method-badge,
-      .status-badge,
-      .mr-badge {
-        display: inline-block;
-        margin: 0;
-      }
-      
-      .action-btn {
-        padding: 8px 16px;
-        font-size: 13px;
-      }
-    }
-
-    /* Tablet and Desktop Table Styles */
-    @media (min-width: 601px) {
-      /* Table Container - Responsive */
-      .table-responsive {
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-        margin: 0;
-        padding: 0;
-      }
-
-      /* Table Styles */
-      .deposit-table {
-        width: 100%;
-        border-collapse: collapse;
-        min-width: 700px;
-      }
-
-      .deposit-table th {
-        padding: clamp(12px, 2vw, 16px) clamp(10px, 1.5vw, 14px);
-        background: var(--bg-secondary);
-        color: var(--text-primary);
-        font-weight: 700;
-        font-size: clamp(12px, 1.8vw, 14px);
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        text-align: left;
-        border-bottom: 2px solid var(--bg-tertiary);
-      }
-
-      .deposit-table td {
-        padding: clamp(12px, 2vw, 16px) clamp(10px, 1.5vw, 14px);
-        border-bottom: 1px solid var(--bg-tertiary);
-        color: var(--text-secondary);
-        font-size: clamp(13px, 1.8vw, 15px);
-      }
-
-      .deposit-row {
-        transition: background-color 0.2s ease;
-      }
-
-      .deposit-row:hover {
-        background-color: var(--bg-accent);
-      }
-    }
-
-    /* Amount Cell */
-    .amount-cell {
-      font-weight: 700;
-      color: var(--accent-success);
-      text-align: right;
-    }
-
-    /* Payment Method Badge */
-    .method-badge {
-      background: var(--bg-accent);
-      color: var(--accent-1);
-      padding: 4px 10px;
-      border-radius: 20px;
-      font-size: clamp(11px, 1.6vw, 13px);
-      font-weight: 600;
-      display: inline-block;
-    }
-
-    /* Status Badges */
-    .status-badge {
-      display: inline-block;
-      padding: 6px 14px;
-      border-radius: 30px;
-      font-size: clamp(11px, 1.6vw, 13px);
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-    }
-
-    .status-approved {
-      background: var(--bg-success);
-      color: #0a5c3b;
-      border: 1px solid #a3e4c5;
-    }
-
-    .status-pending {
-      background: var(--bg-warning);
-      color: #856404;
-      border: 1px solid #ffeeba;
-    }
-
-    .status-rejected {
-      background: var(--bg-danger);
-      color: #721c24;
-      border: 1px solid #f5c6cb;
-    }
-
-    /* MR ID Badge */
-    .mr-badge {
-      background: var(--accent-1);
-      color: var(--text-white);
-      padding: 4px 10px;
-      border-radius: 20px;
-      font-family: monospace;
-      font-size: clamp(11px, 1.6vw, 13px);
-      font-weight: 600;
-      display: inline-block;
-    }
-
-    .mr-placeholder {
-      color: var(--text-muted);
-      font-size: clamp(12px, 1.8vw, 14px);
-    }
-
-    /* Action Buttons */
-    .action-btn {
-      padding: 6px 12px;
-      border: none;
-      border-radius: 8px;
-      font-size: clamp(11px, 1.6vw, 13px);
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      margin: 2px;
-      color: var(--text-white);
-    }
-
-    .action-btn.view-mr {
-      background: var(--accent-1);
-    }
-
-    .action-btn.view-slip {
-      background: var(--text-secondary);
-    }
-
-    .action-btn.note {
-      background: var(--accent-danger);
-    }
-
-    .action-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 5px 10px rgba(0,0,0,0.1);
-    }
-
-    .action-btn:active {
-      transform: translateY(0);
-    }
-
-    /* No Results Message */
-    .no-results {
-      text-align: center;
-      padding: 40px;
-      color: var(--text-muted);
-    }
-
-    .no-results-icon {
-      font-size: 48px;
-      margin-bottom: 15px;
-      opacity: 0.5;
-    }
-
-    .no-results-title {
-      font-size: 18px;
-      font-weight: 600;
-      margin-bottom: 8px;
-      color: var(--text-primary);
-    }
-
-    .no-results-text {
-      font-size: 14px;
-    }
-
-    /* Loading State */
-    .loading-spinner {
-      width: 50px;
-      height: 50px;
-      border: 4px solid var(--bg-tertiary);
-      border-top: 4px solid var(--accent-1);
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-      margin: 0 auto 20px;
-    }
-
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-
-    /* Responsive Typography */
-    @media (max-width: 480px) {
-      .summary-value {
-        font-size: 22px;
-      }
-      
-      .filter-btn {
-        font-size: 11px;
-        padding: 8px 10px;
-        min-width: 70px;
-      }
-      
-      .action-btn {
-        padding: 6px 10px;
-        font-size: 11px;
-      }
-    }
-
-    /* Touch Device Optimizations */
-    @media (hover: none) and (pointer: coarse) {
-      .action-btn:active {
-        transform: scale(0.95);
-      }
-      
-      .filter-btn:active {
-        transform: scale(0.95);
-      }
-    }
-
-    /* Print Styles */
-    @media print {
-      .history-container {
-        background: white;
-        padding: 20px;
-      }
-      
-      .filter-section,
-      .action-btn {
-        display: none;
-      }
-    }
-  </style>
-`;
-
 
 // ============================================================
 // 🎯 MAIN RENDER FUNCTION
@@ -589,7 +35,6 @@ export async function renderMemberDepositHistory() {
   const pageContent = document.getElementById('pageContent');
   if (pageContent) {
     pageContent.innerHTML = `
-      ${historyStyles}
       <div class="history-container">
         <div style="text-align: center; padding: 60px;">
           <div class="loading-spinner"></div>
@@ -654,9 +99,8 @@ export async function renderMemberDepositHistory() {
       console.error('Error loading deposit history:', error);
       if (pageContent) {
         pageContent.innerHTML = `
-          ${historyStyles}
           <div class="history-container">
-            <div style="text-align: center; padding: 60px; background: var(--bg-danger); border-radius: var(--border-radius-lg);">
+            <div style="text-align: center; padding: 60px; background: var(--bg-danger); border-radius: var(--radius-lg);">
               <div style="font-size: 48px; margin-bottom: 20px;">❌</div>
               <h3 style="color: #721c24; margin-bottom: 10px;">Error Loading Data</h3>
               <p style="color: #721c24; margin-bottom: 20px;">${error.message || 'Failed to load deposit history'}</p>
@@ -668,7 +112,6 @@ export async function renderMemberDepositHistory() {
     }
   }, 100);
 }
-
 
 // ============================================================
 // 🏗️ GENERATE HISTORY HTML
@@ -684,7 +127,6 @@ function generateHistoryHTML(
   approvedAmount
 ) {
   return `
-    ${historyStyles}
     <div class="history-container">
 
       <!-- Summary Cards -->
@@ -769,7 +211,6 @@ function generateHistoryHTML(
   `;
 }
 
-
 // ============================================================
 // 📊 GENERATE TABLE ROWS
 // ============================================================
@@ -828,7 +269,6 @@ function generateTableRows(deposits) {
   }).join('');
 }
 
-
 // ============================================================
 // 🎯 BIND EVENTS
 // ============================================================
@@ -864,7 +304,6 @@ function bindEvents() {
     btn.addEventListener('click', () => viewRejectionNote(btn.dataset.id));
   });
 }
-
 
 // ============================================================
 // 🔍 FILTER FUNCTION
@@ -911,7 +350,6 @@ function filterDepositRows(filter) {
   }
 }
 
-
 // ============================================================
 // 🔍 SEARCH FUNCTION
 // ============================================================
@@ -952,7 +390,6 @@ function searchDeposits(searchTerm) {
   }
 }
 
-
 // ============================================================
 // 🧾 VIEW MR RECEIPT
 // ============================================================
@@ -977,7 +414,6 @@ async function viewMRReceipt(depositId) {
   }
 }
 
-
 // ============================================================
 // 🖼 VIEW DEPOSIT SLIP
 // ============================================================
@@ -991,7 +427,7 @@ async function viewSlip(depositId) {
 
     const html = `
       <div class="history-container" style="padding: 0;">
-        <div style="background: var(--bg-primary); border-radius: var(--border-radius-lg); padding: 25px;">
+        <div style="background: var(--bg-primary); border-radius: var(--radius-lg); padding: 25px;">
           <div style="text-align: center; margin-bottom: 20px;">
             <h3 style="color: var(--accent-1); font-size: 22px;">📎 Deposit Slip</h3>
             <p style="color: var(--text-secondary);">
@@ -1002,10 +438,10 @@ async function viewSlip(depositId) {
           <div style="text-align: center; padding: 20px;">
             ${deposit.slip
               ? `<img src="${deposit.slip}"
-                  style="max-width: 100%; max-height: 500px; border-radius: var(--border-radius-lg);
+                  style="max-width: 100%; max-height: 500px; border-radius: var(--radius-lg);
                          border: 2px solid var(--bg-tertiary); box-shadow: var(--shadow-lg);" />`
               : `
-                <div style="padding: 60px; background: var(--bg-secondary); border-radius: var(--border-radius-lg);">
+                <div style="padding: 60px; background: var(--bg-secondary); border-radius: var(--radius-lg);">
                   <div style="font-size: 64px; margin-bottom: 20px;">📭</div>
                   <div style="font-size: 18px; color: var(--text-muted);">No slip uploaded</div>
                 </div>
@@ -1021,7 +457,6 @@ async function viewSlip(depositId) {
     showToast('Error', 'Failed to load deposit slip', 'error');
   }
 }
-
 
 // ============================================================
 // 📝 VIEW REJECTION NOTE
@@ -1039,13 +474,13 @@ async function viewRejectionNote(depositId) {
 
     const html = `
       <div class="history-container" style="padding: 0;">
-        <div style="background: var(--bg-primary); border-radius: var(--border-radius-lg); padding: 25px; max-width: 500px;">
+        <div style="background: var(--bg-primary); border-radius: var(--radius-lg); padding: 25px; max-width: 500px;">
           <div style="text-align: center; margin-bottom: 20px;">
             <h3 style="color: var(--accent-danger); font-size: 22px;">📝 Rejection Note</h3>
             <p style="color: var(--text-secondary);">Deposit ID: ${deposit.id}</p>
           </div>
 
-          <div style="background: var(--bg-danger); padding: 25px; border-radius: var(--border-radius-lg); 
+          <div style="background: var(--bg-danger); padding: 25px; border-radius: var(--radius-lg); 
                       border-left: 5px solid var(--accent-danger);">
             <div style="font-size: 14px; color: #721c24; margin-bottom: 10px; font-weight: 600;">
               Reason for rejection:
@@ -1064,7 +499,6 @@ async function viewRejectionNote(depositId) {
     showToast('Error', 'Failed to load rejection note', 'error');
   }
 }
-
 
 // ============================================================
 // 🔒 ESCAPE HTML TO PREVENT XSS

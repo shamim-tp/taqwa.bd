@@ -41,8 +41,9 @@ const PAGE_TITLES = {
   member_notices: 'Notices'
 };
 
-// Module mapping with proper paths
+// ✅ সঠিক পাথ সহ মডিউল ম্যাপিং
 const MODULE_MAP = {
+  // অ্যাডমিন পৃষ্ঠাগুলো (admin ফোল্ডার থেকে)
   admin_dashboard: () => import('../admin/dashboard.js').then(m => m.renderAdminDashboard()),
   admin_members: () => import('../admin/members.js').then(m => m.renderAdminMembers()),
   admin_deposits: () => import('../admin/deposits.js').then(m => m.renderAdminDeposits()),
@@ -55,13 +56,15 @@ const MODULE_MAP = {
   admin_reports: () => import('../admin/reports.js').then(m => m.renderAdminReports()),
   admin_admins: () => import('../admin/admins.js').then(m => m.renderAdminAdmins()),
   admin_logs: () => import('../admin/logs.js').then(m => m.renderAdminLogs()),
-  member_dashboard: () => import('./dashboard.js').then(m => m.renderMemberDashboard()),
-  member_profile: () => import('./profile.js').then(m => m.renderMemberProfile()),
-  member_deposit: () => import('./deposit.js').then(m => m.renderMemberDeposit()),
-  member_deposit_history: () => import('./deposit-history.js').then(m => m.renderMemberDepositHistory()),
-  member_investments: () => import('./investments.js').then(m => m.renderMemberInvestments()),
-  member_profit: () => import('./profit.js').then(m => m.renderMemberProfit()),
-  member_notices: () => import('./notices.js').then(m => m.renderMemberNotices())
+
+  // ✅ মেম্বার পৃষ্ঠাগুলো (member ফোল্ডার থেকে)
+  member_dashboard: () => import('../member/dashboard.js').then(m => m.renderMemberDashboard()),
+  member_profile: () => import('../member/profile.js').then(m => m.renderMemberProfile()),
+  member_deposit: () => import('../member/deposit.js').then(m => m.renderMemberDeposit()),
+  member_deposit_history: () => import('../member/deposit-history.js').then(m => m.renderMemberDepositHistory()),
+  member_investments: () => import('../member/investments.js').then(m => m.renderMemberInvestments()),
+  member_profit: () => import('../member/profit.js').then(m => m.renderMemberProfit()),
+  member_notices: () => import('../member/notices.js').then(m => m.renderMemberNotices())
 };
 
 // ============================================================
@@ -283,7 +286,7 @@ async function handleLogout() {
 }
 
 // ============================================================
-// 🌍 GLOBAL EXPORTS (so that inline onclick works)
+// 🌍 GLOBAL EXPORTS
 // ============================================================
 
 window.navigateTo = navigateTo;

@@ -80,7 +80,7 @@ export async function renderMemberDashboard() {
 
     setPageTitle('Member Dashboard', 'Your deposit status, profit, shares and notices.');
 
-    // Mobile-First CSS Styles - Updated
+    // ========== Fully Responsive Styles (Mobile & Desktop Optimized) ==========
     const styles = `
       <style>
         /* Mobile-First Reset */
@@ -92,27 +92,21 @@ export async function renderMemberDashboard() {
 
         /* Dashboard Container */
         .member-dashboard {
-          padding: 16px;
+          width: 100%;
+          max-width: 1400px;
+          margin: 0 auto;
+          padding: clamp(12px, 3vw, 25px);
           background: linear-gradient(135deg, #f5f7fa 0%, #e9edf5 100%);
           min-height: 100vh;
-          width: 100%;
-          max-width: 100%;
-          overflow-x: hidden;
         }
 
-        @media (min-width: 1200px) {
-          .member-dashboard {
-            padding: 25px;
-          }
-        }
-
-        /* Welcome Section - Enhanced Mobile First */
+        /* Welcome Section – Mobile First */
         .member-welcome {
           background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
           color: white;
-          padding: 24px 20px;
-          border-radius: 28px;
-          margin-bottom: 24px;
+          padding: clamp(20px, 4vw, 35px);
+          border-radius: clamp(20px, 4vw, 30px);
+          margin-bottom: clamp(20px, 3vw, 30px);
           display: flex;
           flex-direction: column;
           gap: 20px;
@@ -150,85 +144,71 @@ export async function renderMemberDashboard() {
             flex-direction: row;
             justify-content: space-between;
             align-items: center;
-            padding: 30px 35px;
           }
         }
 
         .welcome-title {
-          font-size: 24px;
+          font-size: clamp(22px, 5vw, 32px);
           font-weight: 800;
           margin-bottom: 8px;
           letter-spacing: -0.5px;
           position: relative;
           z-index: 1;
-        }
-
-        @media (min-width: 640px) {
-          .welcome-title {
-            font-size: 28px;
-          }
+          color: white;
+          text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
         }
 
         .welcome-subtitle {
-          font-size: 14px;
+          font-size: clamp(13px, 3vw, 16px);
           opacity: 0.95;
           display: flex;
           align-items: center;
           gap: 5px;
           position: relative;
           z-index: 1;
-        }
-
-        .welcome-subtitle::before {
-          content: '📅';
-          margin-right: 5px;
+          color: rgba(255,255,255,0.95);
         }
 
         .member-badge {
           background: rgba(255,255,255,0.2);
-          padding: 16px 24px;
+          padding: clamp(12px, 3vw, 20px) clamp(16px, 4vw, 28px);
           border-radius: 60px;
           backdrop-filter: blur(10px);
           text-align: center;
           border: 2px solid rgba(255,255,255,0.3);
           position: relative;
           z-index: 1;
-          min-width: 200px;
+          min-width: 180px;
         }
 
         .member-badge .id {
-          font-size: 20px;
+          font-size: clamp(16px, 4vw, 22px);
           font-weight: 800;
           letter-spacing: 1px;
+          color: white;
         }
 
         .member-badge .type {
-          font-size: 13px;
+          font-size: clamp(11px, 2.5vw, 13px);
           opacity: 0.9;
           margin-top: 5px;
           text-transform: uppercase;
           letter-spacing: 1px;
+          color: rgba(255,255,255,0.9);
         }
 
-        /* Quick Stats Row - Enhanced */
+        /* Quick Stats Row */
         .quick-stats {
           display: grid;
           grid-template-columns: repeat(3, 1fr);
-          gap: 12px;
-          margin-bottom: 25px;
-        }
-
-        @media (min-width: 640px) {
-          .quick-stats {
-            gap: 20px;
-            margin-bottom: 30px;
-          }
+          gap: clamp(8px, 2vw, 16px);
+          margin-bottom: clamp(20px, 3vw, 30px);
         }
 
         .stat-item {
           background: white;
-          padding: 16px 10px;
-          border-radius: 20px;
+          padding: clamp(12px, 2.5vw, 18px) clamp(8px, 2vw, 12px);
+          border-radius: clamp(16px, 3vw, 24px);
           text-align: center;
           box-shadow: 0 10px 25px rgba(0,0,0,0.05);
           border: 1px solid rgba(0,0,0,0.05);
@@ -240,95 +220,67 @@ export async function renderMemberDashboard() {
         }
 
         .stat-label {
-          font-size: 11px;
-          color: #666;
-          margin-bottom: 8px;
+          font-size: clamp(10px, 2.2vw, 12px);
+          color: #4a5568;  /* গাঢ় ধূসর – ভালো কনট্রাস্ট */
+          margin-bottom: 6px;
           text-transform: uppercase;
           letter-spacing: 0.5px;
-          font-weight: 600;
+          font-weight: 700;
         }
 
         .stat-value {
-          font-size: 18px;
+          font-size: clamp(16px, 4vw, 22px);
           font-weight: 800;
-          color: #1e3c72;
+          color: #1e3c72;  /* গাঢ় নেভি */
           word-break: break-word;
         }
 
-        @media (min-width: 640px) {
-          .stat-value {
-            font-size: 20px;
-          }
-        }
-
-        /* Stats Cards Grid - Enhanced Mobile First */
+        /* Stats Cards Grid */
         .gridCards {
           display: grid;
           grid-template-columns: 1fr;
-          gap: 16px;
-          margin-bottom: 25px;
+          gap: clamp(12px, 2.5vw, 22px);
+          margin-bottom: clamp(20px, 3vw, 30px);
         }
 
         @media (min-width: 500px) {
           .gridCards {
             grid-template-columns: repeat(2, 1fr);
-            gap: 18px;
           }
         }
 
         @media (min-width: 1024px) {
           .gridCards {
             grid-template-columns: repeat(3, 1fr);
-            gap: 22px;
           }
         }
 
-        /* Card Styles - Enhanced */
+        /* Card Styles */
         .card {
-          border-radius: 24px;
-          padding: 20px;
+          border-radius: clamp(20px, 4vw, 28px);
+          padding: clamp(18px, 3.5vw, 25px);
           box-shadow: 0 15px 35px rgba(0,0,0,0.1);
           transition: all 0.3s ease;
           position: relative;
           overflow: hidden;
           border: none;
+          color: white; /* base white for gradient cards */
         }
 
         .card:active {
           transform: scale(0.98);
         }
 
-        /* Gradient backgrounds with animation */
-        .card:nth-child(1) { 
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-          color: white;
-        }
-        .card:nth-child(2) { 
-          background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-          color: white;
-        }
-        .card:nth-child(3) { 
-          background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-          color: white;
-        }
-        .card:nth-child(4) { 
-          background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
-          color: white;
-        }
-        .card:nth-child(5) { 
-          background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
-          color: white;
-        }
-        .card:nth-child(6) { 
-          background: linear-gradient(135deg, #30cfd0 0%, #330867 100%);
-          color: white;
-        }
-        .card:nth-child(7) { 
-          background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
-          color: #333;
-        }
+        /* Gradient backgrounds with high contrast text */
+        .card:nth-child(1) { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .card:nth-child(2) { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+        .card:nth-child(3) { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+        .card:nth-child(4) { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
+        .card:nth-child(5) { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); }
+        .card:nth-child(6) { background: linear-gradient(135deg, #30cfd0 0%, #330867 100%); }
+        .card:nth-child(7) { background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); color: #1e3c72; } /* darker text for light card */
 
-        /* Decorative elements */
+        /* Decorative circles */
         .card::before {
           content: '';
           position: absolute;
@@ -363,16 +315,16 @@ export async function renderMemberDashboard() {
           transform: rotate(-45deg) scale(1.2);
         }
 
-        /* Card Content */
+        /* Card content */
         .card .tag {
           display: inline-block;
-          padding: 6px 14px;
+          padding: 4px 12px;
           background: rgba(255,255,255,0.2);
           color: inherit;
           border-radius: 40px;
-          font-size: 11px;
+          font-size: clamp(10px, 2.2vw, 12px);
           font-weight: 700;
-          margin-bottom: 15px;
+          margin-bottom: 12px;
           letter-spacing: 0.5px;
           backdrop-filter: blur(5px);
           position: relative;
@@ -380,55 +332,47 @@ export async function renderMemberDashboard() {
         }
 
         .card .title {
-          font-size: 13px;
+          font-size: clamp(12px, 2.5vw, 14px);
           opacity: 0.9;
           margin-bottom: 8px;
           font-weight: 500;
           position: relative;
           z-index: 1;
+          color: inherit;
         }
 
         .card .value {
-          font-size: 26px;
+          font-size: clamp(22px, 5vw, 30px);
           font-weight: 800;
           margin-bottom: 12px;
           line-height: 1.2;
-          text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+          text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
           position: relative;
           z-index: 1;
           word-break: break-word;
-        }
-
-        @media (min-width: 640px) {
-          .card .value {
-            font-size: 28px;
-          }
+          color: inherit;
         }
 
         .card .sub {
-          font-size: 11px;
+          font-size: clamp(10px, 2.2vw, 12px);
           opacity: 0.8;
-          border-top: 1px solid rgba(255,255,255,0.2);
-          padding-top: 12px;
+          border-top: 1px solid rgba(255,255,255,0.3);
+          padding-top: 10px;
           line-height: 1.5;
           position: relative;
           z-index: 1;
+          color: inherit;
         }
 
-        /* Dark text for light card */
-        .card:nth-child(7) .tag {
-          background: rgba(0,0,0,0.1);
-          color: #333;
-        }
+        /* Dark text for light card (7th card) */
         .card:nth-child(7) .sub {
           border-top-color: rgba(0,0,0,0.1);
-          color: #555;
         }
 
-        /* Panel Styles - Enhanced */
+        /* Panel Styles */
         .panel {
           background: white;
-          border-radius: 24px;
+          border-radius: clamp(20px, 4vw, 28px);
           overflow: hidden;
           box-shadow: 0 15px 35px rgba(0,0,0,0.08);
           margin-bottom: 25px;
@@ -436,11 +380,11 @@ export async function renderMemberDashboard() {
         }
 
         .panelHeader {
-          padding: 20px;
+          padding: clamp(16px, 3vw, 22px);
           border-bottom: 1px solid #eee;
           display: flex;
           flex-direction: column;
-          gap: 15px;
+          gap: 12px;
           background: linear-gradient(to right, #f8f9fa, #ffffff);
         }
 
@@ -449,14 +393,13 @@ export async function renderMemberDashboard() {
             flex-direction: row;
             justify-content: space-between;
             align-items: center;
-            padding: 22px 25px;
           }
         }
 
         .panelHeader h3 {
           margin: 0;
           color: #1e3c72;
-          font-size: 18px;
+          font-size: clamp(16px, 3.5vw, 20px);
           font-weight: 800;
           display: flex;
           align-items: center;
@@ -464,19 +407,19 @@ export async function renderMemberDashboard() {
         }
 
         .panelHeader p {
-          margin: 8px 0 0;
-          color: #666;
-          font-size: 13px;
+          margin: 6px 0 0;
+          color: #4a5568;  /* গাঢ় ধূসর */
+          font-size: clamp(12px, 2.5vw, 14px);
           line-height: 1.5;
         }
 
         .panelHeader .btn.primary {
-          padding: 14px 28px;
+          padding: clamp(12px, 2.5vw, 14px) clamp(20px, 4vw, 28px);
           background: linear-gradient(135deg, #667eea, #764ba2);
           color: white;
           border: none;
           border-radius: 50px;
-          font-size: 15px;
+          font-size: clamp(14px, 3vw, 16px);
           font-weight: 700;
           cursor: pointer;
           width: 100%;
@@ -492,39 +435,37 @@ export async function renderMemberDashboard() {
         @media (min-width: 640px) {
           .panelHeader .btn.primary {
             width: auto;
-            padding: 12px 30px;
           }
         }
 
-        /* Table Styles - Enhanced */
+        /* Table Styles */
         .table-responsive {
           overflow-x: auto;
           -webkit-overflow-scrolling: touch;
-          padding: 5px 0;
         }
 
         table {
           width: 100%;
           border-collapse: collapse;
-          min-width: 300px;
+          min-width: 280px;
         }
 
         th {
           text-align: left;
-          padding: 16px 20px;
+          padding: 14px 16px;
           background: #f8f9fa;
           color: #1e3c72;
           font-weight: 700;
-          font-size: 13px;
+          font-size: clamp(12px, 2.5vw, 14px);
           text-transform: uppercase;
           letter-spacing: 0.5px;
         }
 
         td {
-          padding: 16px 20px;
+          padding: 14px 16px;
           border-bottom: 1px solid #eee;
-          color: #555;
-          font-size: 14px;
+          color: #2d3748;  /* গা৘ ধূসর */
+          font-size: clamp(13px, 2.8vw, 15px);
         }
 
         tr:last-child td {
@@ -535,12 +476,12 @@ export async function renderMemberDashboard() {
           background: #f0f7ff;
         }
 
-        /* Status Badges - Enhanced */
+        /* Status Badges */
         .status {
           display: inline-block;
-          padding: 6px 16px;
+          padding: 5px 14px;
           border-radius: 40px;
-          font-size: 12px;
+          font-size: clamp(11px, 2.4vw, 13px);
           font-weight: 700;
           text-transform: uppercase;
           letter-spacing: 0.5px;
@@ -562,12 +503,12 @@ export async function renderMemberDashboard() {
           border: 1px solid #f5c6cb;
         }
 
-        /* Company Mission - Enhanced */
+        /* Company Mission */
         .companyMission {
           background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
           color: white;
-          padding: 30px 25px;
-          border-radius: 28px;
+          padding: clamp(20px, 4vw, 30px);
+          border-radius: clamp(20px, 4vw, 28px);
           text-align: center;
           box-shadow: 0 20px 40px rgba(30,60,114,0.3);
           position: relative;
@@ -579,37 +520,39 @@ export async function renderMemberDashboard() {
           position: absolute;
           top: -30px;
           right: -30px;
-          font-size: 150px;
+          font-size: 120px;
           opacity: 0.1;
           color: white;
           transform: rotate(20deg);
         }
 
         .companyMission h3 {
-          font-size: 24px;
-          margin-bottom: 15px;
+          font-size: clamp(20px, 5vw, 28px);
+          margin-bottom: 12px;
           font-weight: 800;
           position: relative;
           z-index: 1;
+          color: white;
         }
 
         .companyMission p {
-          font-size: 15px;
+          font-size: clamp(13px, 3vw, 16px);
           opacity: 0.95;
           line-height: 1.7;
           max-width: 600px;
           margin: 0 auto;
           position: relative;
           z-index: 1;
+          color: rgba(255,255,255,0.95);
         }
 
         .companyMission .btn {
-          padding: 14px 35px;
+          padding: clamp(12px, 3vw, 16px) clamp(20px, 5vw, 35px);
           background: white;
           color: #1e3c72;
           border: none;
           border-radius: 60px;
-          font-size: 16px;
+          font-size: clamp(14px, 3vw, 16px);
           font-weight: 700;
           cursor: pointer;
           margin-top: 20px;
@@ -621,7 +564,6 @@ export async function renderMemberDashboard() {
 
         .companyMission .btn:active {
           transform: scale(0.95);
-          box-shadow: 0 5px 15px rgba(0,0,0,0.2);
         }
 
         @media (min-width: 640px) {
@@ -630,62 +572,27 @@ export async function renderMemberDashboard() {
           }
         }
 
-        /* Loading State */
-        .loading-skeleton {
-          background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-          background-size: 200% 100%;
-          animation: loading 1.5s infinite;
-          border-radius: 8px;
-        }
-
-        @keyframes loading {
-          0% { background-position: 200% 0; }
-          100% { background-position: -200% 0; }
-        }
-
-        /* Pull to Refresh */
-        .ptr-element {
-          text-align: center;
-          padding: 15px;
-          color: #667eea;
-          font-weight: 600;
-          display: none;
-        }
-
-        .ptr-element.show {
-          display: block;
-        }
-
-        /* Safe Area Support */
-        @supports (padding: max(0px)) {
-          .member-dashboard {
-            padding-left: max(16px, env(safe-area-inset-left));
-            padding-right: max(16px, env(safe-area-inset-right));
-          }
-        }
-
-        /* Touch Optimizations */
-        .btn, .card, .stat-item, .nav-item {
-          touch-action: manipulation;
-          -webkit-tap-highlight-color: transparent;
-        }
-
-        /* Prevent text selection */
-        .no-select {
-          user-select: none;
-          -webkit-user-select: none;
-        }
-
-        /* Bottom spacing for mobile */
+        /* Responsive bottom spacing */
         @media (max-width: 640px) {
           .member-dashboard {
             padding-bottom: 30px;
           }
         }
+
+        /* Touch optimizations */
+        .btn, .card, .stat-item, .nav-item {
+          touch-action: manipulation;
+          -webkit-tap-highlight-color: transparent;
+        }
+
+        /* High contrast text everywhere */
+        p, span, div, label {
+          color: inherit;
+        }
       </style>
     `;
 
-    // Welcome Section - Enhanced
+    // Welcome Section
     const welcomeHTML = `
       <div class="member-welcome">
         <div>
@@ -703,7 +610,7 @@ export async function renderMemberDashboard() {
       </div>
     `;
 
-    // Quick Stats - Enhanced
+    // Quick Stats
     const quickStatsHTML = `
       <div class="quick-stats">
         <div class="stat-item">
@@ -721,7 +628,7 @@ export async function renderMemberDashboard() {
       </div>
     `;
 
-    // Cards - Enhanced with emojis
+    // Cards
     const cardsHTML = `
       <div class="gridCards">
         <div class="card">
@@ -769,7 +676,7 @@ export async function renderMemberDashboard() {
       </div>
     `;
 
-    // Status Panel - Enhanced
+    // Status Panel
     const statusPanelHTML = `
       <div class="panel">
         <div class="panelHeader">
@@ -800,7 +707,7 @@ export async function renderMemberDashboard() {
       </div>
     `;
 
-    // Mission Section - Enhanced
+    // Mission Section
     const missionHTML = `
       <div class="companyMission">
         <h3>🚀 Our Vision</h3>

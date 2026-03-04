@@ -1148,7 +1148,7 @@ tr:hover td {
   padding: var(--space-6);
 }
 
-/* ========== কাস্টম প্রোফাইল ক্লাস (member-profile.js-এর জন্য) ========== */
+/* ========== প্রোফাইল পৃষ্ঠার জন্য কাস্টম ক্লাস (member-profile.js) ========== */
 
 /* প্রোফাইল কন্টেইনার */
 .profile-container {
@@ -1168,7 +1168,7 @@ tr:hover td {
   box-shadow: var(--shadow-2xl);
 }
 
-/* প্রোফাইল হেডার */
+/* প্রোফাইল হেডার – গ্রেডিয়েন্ট ব্যাকগ্রাউন্ড */
 .profile-header {
   background: linear-gradient(135deg, var(--primary-600), var(--primary-800));
   color: white;
@@ -1216,7 +1216,7 @@ tr:hover td {
   backdrop-filter: blur(5px);
 }
 
-/* ফর্ম ফিল্ড – .form-field ইতিমধ্যে আছে, তবে আমরা অতিরিক্ত স্টাইল যোগ করছি */
+/* ফর্ম ফিল্ড */
 .form-field {
   margin-bottom: 0; /* গ্রিড গ্যাপ হ্যান্ডেল করবে */
 }

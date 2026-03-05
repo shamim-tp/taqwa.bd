@@ -4,288 +4,14 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes" />
   <title>TAQWA PROPERTIES BD - ERP</title>
+  <!-- সমস্ত স্টাইল এখন style.css‑এ রাখা হয়েছে -->
   <link rel="stylesheet" href="style.css">
-  <!-- Firebase SDK (প্রয়োজনে) -->
+  <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <!-- মূল অ্যাপ্লিকেশন স্ক্রিপ্ট (মডিউল) -->
   <script type="module" src="script.js"></script>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏢</text></svg>">
-  
-  <!-- মোবাইল ফ্রেন্ডলি স্টাইল (সংযোজন) -->
-  <style>
-    /* মোবাইল ডিভাইসের জন্য স্টাইল */
-    @media (max-width: 768px) {
-      /* লগইন পৃষ্ঠা মোবাইল স্টাইল */
-      .loginGrid {
-        grid-template-columns: 1fr !important;
-      }
-      
-      .loginLeft {
-        padding: 30px 20px !important;
-        text-align: center;
-      }
-      
-      .loginLeft h1 {
-        font-size: 1.8rem !important;
-      }
-      
-      .loginLeft p {
-        font-size: 1rem !important;
-      }
-      
-      .loginRight {
-        padding: 30px 20px !important;
-      }
-      
-      .tabs button {
-        padding: 10px 15px !important;
-        font-size: 14px !important;
-      }
-      
-      .row > div {
-        margin-bottom: 15px;
-      }
-      
-      /* অ্যাপ পৃষ্ঠা মোবাইল স্টাইল */
-      .app {
-        grid-template-columns: 1fr !important;
-      }
-      
-      .sidebar {
-        position: fixed;
-        left: -280px;
-        top: 0;
-        bottom: 0;
-        width: 280px !important;
-        z-index: 1002;
-        transition: left 0.3s ease;
-        box-shadow: none;
-      }
-      
-      .sidebar.show {
-        left: 0;
-        box-shadow: 5px 0 30px rgba(0,0,0,0.2);
-      }
-      
-      .mobile-menu-btn {
-        display: block !important;
-        position: fixed;
-        top: 10px;
-        left: 10px;
-        z-index: 1001;
-        background: linear-gradient(135deg, #667eea, #764ba2);
-        color: white;
-        border: none;
-        border-radius: 8px;
-        padding: 10px 15px;
-        font-size: 16px;
-        cursor: pointer;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-      }
-      
-      .main {
-        margin-left: 0 !important;
-        padding-top: 60px !important;
-      }
-      
-      .topbar {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 10px;
-        padding: 15px !important;
-      }
-      
-      .topbar h1 {
-        font-size: 20px !important;
-      }
-      
-      .rightTop {
-        width: 100%;
-        justify-content: flex-start;
-      }
-      
-      .rightTop .btn {
-        flex: 1;
-        padding: 10px !important;
-        font-size: 13px !important;
-      }
-      
-      /* কার্ড ও গ্রিড মোবাইল স্টাইল */
-      .gridCards {
-        grid-template-columns: 1fr !important;
-      }
-      
-      .card {
-        padding: 15px !important;
-      }
-      
-      .card .value {
-        font-size: 24px !important;
-      }
-      
-      /* টেবিল মোবাইল স্টাইল */
-      table {
-        display: block;
-        overflow-x: auto;
-        white-space: nowrap;
-      }
-      
-      th, td {
-        padding: 10px !important;
-        font-size: 12px !important;
-      }
-      
-      /* ফর্ম মোবাইল স্টাইল */
-      .row-2, .row-3, .row-4 {
-        grid-template-columns: 1fr !important;
-      }
-      
-      input, select, textarea {
-        padding: 12px !important;
-      }
-      
-      /* মডাল মোবাইল স্টাইল */
-      .modalContent {
-        max-width: 95% !important;
-        padding: 15px !important;
-      }
-      
-      /* টোস্ট মোবাইল স্টাইল */
-      .toastWrap {
-        width: calc(100% - 30px) !important;
-        left: 15px !important;
-        right: 15px !important;
-        top: auto !important;
-        bottom: 20px !important;
-      }
-      
-      .toast {
-        padding: 12px 15px !important;
-      }
-      
-      /* নেভিগেশন মোবাইল স্টাইল */
-      .nav button {
-        padding: 12px !important;
-        font-size: 14px !important;
-      }
-      
-      .userBox {
-        padding: 15px !important;
-      }
-      
-      .brand h2 {
-        font-size: 16px !important;
-      }
-      
-      /* কোম্পানি মিশন মোবাইল স্টাইল */
-      .companyMission {
-        padding: 20px !important;
-      }
-      
-      .companyMission h3 {
-        font-size: 18px !important;
-      }
-      
-      /* দ্রুত অ্যাকশন বাটন */
-      .quick-actions {
-        grid-template-columns: repeat(2, 1fr) !important;
-      }
-      
-      .action-btn {
-        padding: 12px !important;
-        font-size: 13px !important;
-      }
-    }
-
-    /* খুব ছোট স্ক্রিনের জন্য (৪৮০px এর নিচে) */
-    @media (max-width: 480px) {
-      .loginLeft {
-        padding: 20px 15px !important;
-      }
-      
-      .loginLeft h1 {
-        font-size: 1.5rem !important;
-      }
-      
-      .tabs button {
-        padding: 8px 10px !important;
-        font-size: 12px !important;
-      }
-      
-      .btn.primary {
-        padding: 14px !important;
-        font-size: 16px !important;
-      }
-      
-      .card .value {
-        font-size: 20px !important;
-      }
-      
-      .card .tag {
-        font-size: 10px !important;
-        padding: 4px 8px !important;
-      }
-      
-      .quick-actions {
-        grid-template-columns: 1fr !important;
-      }
-    }
-
-    /* অরিয়েন্টেশন পরিবর্তনে সতর্কতা (ঐচ্ছিক) */
-    @media (orientation: landscape) and (max-width: 768px) {
-      .sidebar {
-        width: 240px !important;
-      }
-      
-      .main {
-        padding-top: 50px !important;
-      }
-    }
-
-    /* সাইডবার ওভারলে (জেএসে ব্যবহৃত) */
-    .sidebar-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(0,0,0,0.5);
-      backdrop-filter: blur(5px);
-      z-index: 1001;
-      display: none;
-      opacity: 0;
-      transition: opacity 0.3s ease;
-    }
-    
-    .sidebar-overlay.show {
-      display: block;
-      opacity: 1;
-    }
-    
-    /* টাচ স্ক্রলিং সহায়ক */
-    .table-responsive {
-      overflow-x: auto;
-      -webkit-overflow-scrolling: touch;
-    }
-    
-    /* ফোকাস স্টাইল (অ্যাক্সেসিবিলিটি) */
-    button:focus, a:focus, input:focus {
-      outline: 2px solid #667eea;
-      outline-offset: 2px;
-    }
-    
-    /* প্রিন্ট স্টাইল */
-    @media print {
-      .sidebar, .mobile-menu-btn, .rightTop, .logoutBtn {
-        display: none !important;
-      }
-      
-      .main {
-        margin-left: 0 !important;
-        padding: 20px !important;
-      }
-    }
-  </style>
 </head>
 <body>
   <!-- লোডিং ওভারলে -->
@@ -296,31 +22,29 @@
     </div>
   </div>
 
-  <!-- টোস্ট বার্তা -->
+  <!-- টোস্ট বার্তা প্রদর্শনের এলাকা -->
   <div class="toastWrap" id="toastWrap"></div>
 
-  <!-- লগইন পৃষ্ঠা (শুধু লগইন অপশন) -->
+  <!-- লগইন পৃষ্ঠা (ডিফল্ট মেম্বার ট্যাব সক্রিয়) -->
   <div id="loginPage" class="loginWrap">
     <div class="loginCard">
       <div class="loginGrid">
         <div class="loginLeft">
-          <!-- লোগো (যদি থাকে) -->
-          <!-- <img src="images/logo.png" alt="TAQWA PROPERTIES BD" class="company-logo"> -->
           <h1>TAQWA PROPERTIES BD</h1>
           <p>Professional Investment Management ERP System</p>
           <p class="slogan">Trust & Excellence</p>
         </div>
         <div class="loginRight">
           <div class="tabs">
-            <button id="tabAdmin" class="active">Admin Login</button>
-            <button id="tabMember">Member Login</button>
+            <button id="tabAdmin">Admin Login</button>
+            <button id="tabMember" class="active">Member Login</button>
           </div>
-          <!-- লগইন ফর্ম (পাসওয়ার্ড ম্যানেজারের জন্য) -->
+          <!-- লগইন ফর্ম -->
           <form id="loginForm" onsubmit="event.preventDefault();">
             <div class="row">
               <div>
-                <label id="loginIdLabel">Admin ID</label>
-                <input id="loginId" placeholder="Enter ID" autocomplete="username" />
+                <label id="loginIdLabel">Member ID</label>
+                <input id="loginId" placeholder="Enter Member ID" autocomplete="username" />
               </div>
               <div>
                 <label>Password</label>
@@ -334,13 +58,13 @@
     </div>
   </div>
 
-  <!-- অ্যাপ পৃষ্ঠা (লগইন成功后 দেখাবে) - শুরুতে লুকানো -->
+  <!-- অ্যাপ পৃষ্ঠা (লগইন সফল হলে দেখা যাবে) -->
   <div id="appPage" class="app" style="display: none;">
     <button class="mobile-menu-btn" id="mobileMenuBtn">☰ Menu</button>
     <div class="sidebar" id="sidebar">
       <div class="brand">
         <div>
-          <h2>TAQWA PROPERTIES BD</h2>
+          <h2>BD</h2>
           <div class="small">ERP System</div>
         </div>
         <div class="badge" id="systemMode">ADMIN</div>
@@ -374,81 +98,5 @@
 
   <!-- মডাল কন্টেইনার -->
   <div id="modalsContainer"></div>
-
-
-
-  <script>
-  // Mobile menu functionality (added separately to keep main script.js unchanged)
-  (function() {
-    function initMobileMenu() {
-      const menuBtn = document.getElementById('mobileMenuBtn');
-      const sidebar = document.getElementById('sidebar');
-      if (!menuBtn || !sidebar) return;
-
-      // Create overlay if not exists
-      let overlay = document.querySelector('.sidebar-overlay');
-      if (!overlay) {
-        overlay = document.createElement('div');
-        overlay.className = 'sidebar-overlay';
-        document.body.appendChild(overlay);
-      }
-
-      // Toggle menu function
-      function toggleMenu() {
-        if (sidebar.classList.contains('show')) {
-          sidebar.classList.remove('show');
-          overlay.classList.remove('show');
-          document.body.style.overflow = '';
-        } else {
-          sidebar.classList.add('show');
-          overlay.classList.add('show');
-          document.body.style.overflow = 'hidden';
-        }
-      }
-
-      // Event listeners
-      menuBtn.addEventListener('click', function(e) {
-        e.stopPropagation();
-        toggleMenu();
-      });
-
-      overlay.addEventListener('click', toggleMenu);
-
-      // Close menu when clicking any nav button (mobile only)
-      sidebar.querySelectorAll('button, .nav-item, .logoutBtn').forEach(item => {
-        item.addEventListener('click', function() {
-          if (window.innerWidth <= 768) {
-            sidebar.classList.remove('show');
-            overlay.classList.remove('show');
-            document.body.style.overflow = '';
-          }
-        });
-      });
-
-      // Handle window resize
-      window.addEventListener('resize', function() {
-        if (window.innerWidth > 768) {
-          sidebar.classList.remove('show');
-          overlay.classList.remove('show');
-          document.body.style.overflow = '';
-        }
-      });
-
-      // Handle escape key
-      document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape' && sidebar.classList.contains('show')) {
-          toggleMenu();
-        }
-      });
-    }
-
-    // Run after DOM is ready
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', initMobileMenu);
-    } else {
-      initMobileMenu();
-    }
-  })();
-</script>
 </body>
 </html>
